@@ -1,0 +1,114 @@
+name: dar_care
+
+description: "A new Flutter project."
+
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # UI & Icons
+  cupertino_icons: ^1.0.8
+  flutter_svg: ^2.2.3
+
+  # State Management
+  flutter_bloc: ^9.1.1
+
+  # Dependency Injection & Service Locator
+  get_it: ^9.1.1
+  injectable: ^2.7.0
+
+  # Networking
+  dio: ^5.9.0
+
+  # Navigation
+  go_router: ^17.0.0
+
+  # Data Classes & Serialization
+  freezed_annotation: ^3.1.0
+  json_annotation: ^4.9.0
+
+  # Caching
+  shared_preferences: ^2.5.3
+
+  # Localization
+  easy_localization: ^3.0.8
+
+  # Utility
+  equatable: ^2.0.7
+  lottie: ^3.3.2
+  smooth_page_indicator: ^1.2.1
+
+dev_dependencies:
+
+  flutter_test:
+
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+
+  # Code Generation
+  build_runner: ^2.10.4
+  injectable_generator: ^2.11.0
+  json_serializable: ^6.11.3
+
+flutter:
+
+  uses-material-design: true
+
+  assets:
+     - assets/images/png/
+     - assets/translations/
+     - assets/fonts/
+     - assets/json/
+
+  fonts:
+    - family: PlayfairDisplay
+      fonts:
+        # Regular (Normal) Weight = 400
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Italic.ttf
+          style: italic
+          weight: 400
+
+        # Medium Weight = 500
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-MediumItalic.ttf
+          style: italic
+          weight: 500
+
+        # SemiBold Weight = 600
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-SemiBoldItalic.ttf
+          style: italic
+          weight: 600
+
+        # Bold Weight = 700
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-BoldItalic.ttf
+          style: italic
+          weight: 700
+
+        # ExtraBold Weight = 800
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-ExtraBold.ttf
+          weight: 800
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-ExtraBoldItalic.ttf
+          style: italic
+          weight: 800
+
+        # Black (Heaviest) Weight = 900
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-Black.ttf
+          weight: 900
+        - asset: assets/fonts/Playfair_Display/static/PlayfairDisplay-BlackItalic.ttf
+          style: italic
+          weight: 900            
