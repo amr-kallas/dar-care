@@ -2,9 +2,13 @@ import 'package:dar_care/core/utils/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/theme/app_colors.dart';
+import '../config/splash_config.dart';
+import '../controllers/splash_animation_controller.dart';
 import '../widget/animated_logo.dart';
 import '../widget/sliding_text.dart';
 
+/// Splash screen displayed when the app launches
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -14,54 +18,34 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _logoAnimationController;
-  late Animation<double> _logoFadeAnimation;
-
-  late AnimationController _textAnimationController;
-  late Animation<Offset> _textSlidingAnimation;
+  late final SplashAnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
-    initAnimations();
-    _navigateToNextScreen();
+    _initializeAnimations();
+    _scheduleNavigation();
   }
 
   @override
   void dispose() {
-    _logoAnimationController.dispose();
-    _textAnimationController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
-  void initAnimations() {
-    _logoAnimationController = AnimationController(
+  /// Initialize all splash animations
+  void _initializeAnimations() {
+    _animationController = SplashAnimationController(
       vsync: this,
-      duration: const Duration(seconds: 1),
+      logoAnimationDuration: SplashConfig.logoAnimationDuration,
+      textAnimationDuration: SplashConfig.textAnimationDuration,
     );
-    _logoFadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(_logoAnimationController);
-
-    _textAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 1),
-    );
-    _textSlidingAnimation =
-        Tween<Offset>(begin: const Offset(0, 5), end: Offset.zero).animate(
-          CurvedAnimation(
-            parent: _textAnimationController,
-            curve: Curves.easeOut,
-          ),
-        );
-
-    _logoAnimationController.forward();
-    _textAnimationController.forward();
+    _animationController.startAnimations();
   }
 
-  void _navigateToNextScreen() {
-    Future.delayed(const Duration(seconds: 3), () {
+  /// Schedule navigation to the next screen
+  void _scheduleNavigation() {
+    Future.delayed(SplashConfig.splashDuration, () {
       if (mounted) {
         context.go(AppRouter.onboardingPath);
       }
@@ -71,13 +55,31 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            AnimatedLogo(animation: _logoFadeAnimation),
-            SlidingText(slidingAnimation: _textSlidingAnimation),
-          ],
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              AppColors.primaryDeepGreen,
+              AppColors.brightGreen,
+              AppColors.lightGreen,
+            ],
+            stops: [0.0, 0.5, 1.0],
+          ),
+        ),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              AnimatedLogo(
+                animation: _animationController.logoFadeAnimation,
+              ),
+              SlidingText(
+                slidingAnimation: _animationController.textSlidingAnimation,
+              ),
+            ],
+          ),
         ),
       ),
     );

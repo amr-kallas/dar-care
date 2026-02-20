@@ -1,5 +1,7 @@
+import '../../../../gen/assets.gen.dart';
+
 class OnboardingModel {
-  final String lottieAsset;
+  final LottieGenImage lottieAsset;
   final String title;
   final String subtitle;
 

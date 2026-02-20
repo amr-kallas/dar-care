@@ -1,149 +1,144 @@
 import 'package:flutter/material.dart';
 
+import 'app_colors.dart';
+
+
+
 abstract class AppTheme {
   /// --- Font Family ---
   static const String _fontFamily = 'PlayfairDisplay';
 
-  /// --- Core Palette ---
-  static const Color primaryDeepGreen = Color(0xFF025439);
-  static const Color accentPurple = Color(0xFF390255);
-  static const Color oliveBrown = Color(0xFF553902);
-
-  /// --- Supporting Palette ---
-  static const Color lightGreen = Color(0xFFA5D6A7);
-  static const Color offWhite = Color(0xFFF8F9FA);
-  static const Color lightGrey = Color(0xFFE9ECEF);
-  static const Color mediumGrey = Color(0xFF6C757D);
-  static const Color offBlack = Color(0xFF212529);
-
   /// --- LIGHT THEME DATA ---
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
-    primaryColor: primaryDeepGreen,
-    scaffoldBackgroundColor: offWhite,
+    primaryColor: AppColors.primaryDeepGreen,
+    scaffoldBackgroundColor: AppColors.offWhite,
     fontFamily: _fontFamily,
     colorScheme: const ColorScheme.light(
-      primary: primaryDeepGreen,
-      secondary: accentPurple,
-      tertiary: oliveBrown,
-      surface: offWhite,
+      primary: AppColors.primaryDeepGreen,
+      secondary: AppColors.accentPurple,
+      tertiary: AppColors.oliveBrown,
+      surface: AppColors.offWhite,
       onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onSurface: offBlack,
-      error: Colors.redAccent,
+      onSurface: AppColors.offBlack,
+      error: AppColors.errorRed,
     ),
     appBarTheme: const AppBarTheme(
       elevation: 0,
-      backgroundColor: offWhite,
-      iconTheme: IconThemeData(color: offBlack),
+      backgroundColor: AppColors.offWhite,
+      iconTheme: IconThemeData(color: AppColors.offBlack),
       titleTextStyle: TextStyle(
-        color: offBlack,
+        color: AppColors.offBlack,
         fontSize: 20,
         fontWeight: FontWeight.bold, // 700
         fontFamily: _fontFamily,
       ),
     ),
     textTheme: _lightTextTheme,
-    elevatedButtonTheme: _elevatedButtonTheme(primaryDeepGreen, Colors.white),
+    elevatedButtonTheme: _elevatedButtonTheme(AppColors.primaryDeepGreen, Colors.white),
     inputDecorationTheme: _inputDecorationTheme(
-      borderColor: lightGrey,
-      focusedBorderColor: primaryDeepGreen,
+      borderColor: AppColors.lightGrey,
+      focusedBorderColor: AppColors.primaryDeepGreen,
+      filled: true,
+      fillColor: Colors.white,
     ),
   );
 
   /// --- DARK THEME DATA ---
   static final ThemeData darkTheme = ThemeData(
     brightness: Brightness.dark,
-    primaryColor: lightGreen,
-    scaffoldBackgroundColor: offBlack,
+    primaryColor: AppColors.lightGreen,
+    scaffoldBackgroundColor: AppColors.deepDarkGreen,
     fontFamily: _fontFamily,
-    colorScheme: ColorScheme.dark(
-      primary: lightGreen,
-      secondary: accentPurple.withAlpha(204),
-      tertiary: oliveBrown.withAlpha(204),
-      surface: offBlack,
-      onPrimary: offBlack,
+    colorScheme: const ColorScheme.dark(
+      primary: AppColors.brightGreen,
+      secondary: AppColors.accentPurple,
+      surface: AppColors.deepDarkGreen,
+      onPrimary: Colors.white,
       onSecondary: Colors.white,
-      onSurface: offWhite,
-      error: Colors.red.shade400,
+      onSurface: Colors.white,
+      error: AppColors.errorRed,
     ),
     appBarTheme: const AppBarTheme(
       elevation: 0,
-      backgroundColor: offBlack,
-      iconTheme: IconThemeData(color: offWhite),
+      backgroundColor: AppColors.deepDarkGreen,
+      iconTheme: IconThemeData(color: Colors.white),
       titleTextStyle: TextStyle(
-        color: offWhite,
+        color: Colors.white,
         fontSize: 20,
-        fontWeight: FontWeight.bold, // 700
+        fontWeight: FontWeight.bold,
         fontFamily: _fontFamily,
       ),
     ),
     textTheme: _darkTextTheme,
-    elevatedButtonTheme: _elevatedButtonTheme(lightGreen, offBlack),
+    elevatedButtonTheme: _elevatedButtonTheme(AppColors.brightGreen, Colors.white),
     inputDecorationTheme: _inputDecorationTheme(
-      borderColor: mediumGrey,
-      focusedBorderColor: lightGreen,
+      borderColor: AppColors.borderDark,
+      focusedBorderColor: AppColors.brightGreen,
+      filled: true,
+      fillColor: AppColors.surfaceDark,
     ),
   );
 
   /// --- Text Themes ---
-  static final TextTheme _lightTextTheme = TextTheme(
-    displayLarge: const TextStyle(
+  static const TextTheme _lightTextTheme = TextTheme(
+    displayLarge: TextStyle(
       fontSize: 32,
       fontWeight: FontWeight.bold,
-      color: offBlack,
+      color: AppColors.offBlack,
     ),
     // 700
-    headlineMedium: const TextStyle(
+    headlineMedium: TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
-      color: offBlack,
+      color: AppColors.offBlack,
     ),
     // 700
-    titleLarge: const TextStyle(
+    titleLarge: TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w600,
-      color: offBlack,
+      color: AppColors.offBlack,
     ),
     // 600
-    bodyLarge: const TextStyle(
+    bodyLarge: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.normal,
-      color: offBlack,
+      color: AppColors.offBlack,
     ),
     // 400
-    bodyMedium: const TextStyle(
+    bodyMedium: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.normal,
-      color: mediumGrey,
+      color: AppColors.mediumGrey,
     ), // 400
   );
 
-  static final TextTheme _darkTextTheme = TextTheme(
-    displayLarge: const TextStyle(
+  static const TextTheme _darkTextTheme = TextTheme(
+    displayLarge: TextStyle(
       fontSize: 32,
       fontWeight: FontWeight.bold,
-      color: offWhite,
+      color: Colors.white,
     ),
-    headlineMedium: const TextStyle(
+    headlineMedium: TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
-      color: offWhite,
+      color: Colors.white,
     ),
-    titleLarge: const TextStyle(
+    titleLarge: TextStyle(
       fontSize: 20,
       fontWeight: FontWeight.w600,
-      color: offWhite,
+      color: Colors.white,
     ),
-    bodyLarge: const TextStyle(
+    bodyLarge: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.normal,
-      color: offWhite,
+      color: Colors.white70,
     ),
-    bodyMedium: const TextStyle(
+    bodyMedium: TextStyle(
       fontSize: 14,
       fontWeight: FontWeight.normal,
-      color: lightGrey,
+      color: AppColors.borderDark,
     ),
   );
 
@@ -169,20 +164,24 @@ abstract class AppTheme {
   static InputDecorationTheme _inputDecorationTheme({
     required Color borderColor,
     required Color focusedBorderColor,
+    bool filled = false,
+    Color? fillColor,
   }) => InputDecorationTheme(
+    filled: filled,
+    fillColor: fillColor,
     border: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: borderColor),
     ),
     enabledBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: borderColor),
     ),
     focusedBorder: OutlineInputBorder(
-      borderRadius: BorderRadius.circular(8),
+      borderRadius: BorderRadius.circular(12),
       borderSide: BorderSide(color: focusedBorderColor, width: 2.0),
     ),
-    labelStyle: const TextStyle(color: mediumGrey),
-    hintStyle: const TextStyle(color: mediumGrey),
+    labelStyle: const TextStyle(color: AppColors.mediumGrey),
+    hintStyle: const TextStyle(color: AppColors.mediumGrey),
   );
 }

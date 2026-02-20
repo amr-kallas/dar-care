@@ -1,9 +1,10 @@
-import 'dart:developer';
-
+import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/gen/assets.gen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../generated/local_keys.g.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../generated/locale_keys.g.dart';
 import '../../data/models/onboarding_model.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
@@ -21,18 +22,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   late final PageController _pageController;
 
   final List<OnboardingModel> _onboardingItems = [
-     OnboardingModel(
-      lottieAsset: 'assets/json/Home Service.json',
+    OnboardingModel(
+      lottieAsset: Assets.json.homeService,
       title: LocaleKeys.onboarding_title_1.tr(),
       subtitle: LocaleKeys.onboarding_subtitle_1.tr(),
     ),
     OnboardingModel(
-      lottieAsset: 'assets/json/Home & Boiler Care.json',
+      lottieAsset: Assets.json.homeBoilerCare,
       title: LocaleKeys.onboarding_title_2.tr(),
-      subtitle:  LocaleKeys.onboarding_subtitle_2.tr(),
+      subtitle: LocaleKeys.onboarding_subtitle_2.tr(),
     ),
     OnboardingModel(
-      lottieAsset: 'assets/json/24Emergency.json',
+      lottieAsset: Assets.json.a24Emergency,
       title: LocaleKeys.onboarding_title_3.tr(),
       subtitle: LocaleKeys.onboarding_subtitle_3.tr(),
     ),
@@ -52,8 +53,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _onNextPressed() {
     if (_pageController.page!.toInt() == _onboardingItems.length - 1) {
-      // Navigator.of(context).pushReplacementNamed('/login');
-      log("Go to Login Screen");
+      context.go(AppRouter.authGatePath);
     } else {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 400),
@@ -62,44 +62,46 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     }
   }
 
+  void _onSkipPressed() {
+    context.go(AppRouter.authGatePath);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => OnboardingCubit(),
       child: Scaffold(
-        body: SafeArea(
-          child: BlocBuilder<OnboardingCubit, OnboardingState>(
-            builder: (context, state) {
-              final pageIndex = (state is OnboardingInitial)
-                  ? state.pageIndex
-                  : 0;
-              final isLastPage = pageIndex == _onboardingItems.length - 1;
+        body: BlocBuilder<OnboardingCubit, OnboardingState>(
+          builder: (context, state) {
+            final pageIndex = (state is OnboardingInitial)
+                ? state.pageIndex
+                : 0;
+            final isLastPage = pageIndex == _onboardingItems.length - 1;
 
-              return Column(
-                children: [
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: _onboardingItems.length,
-                      onPageChanged: (index) {
-                        context.read<OnboardingCubit>().onPageChanged(index);
-                      },
-                      itemBuilder: (context, index) {
-                        return OnboardingContent(item: _onboardingItems[index]);
-                      },
-                    ),
-                  ),
-
-                  OnboardingFooter(
-                    pageController: _pageController,
-                    onNextPressed: _onNextPressed,
+            return Column(
+              children: [
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
                     itemCount: _onboardingItems.length,
-                    isLastPage: isLastPage,
+                    onPageChanged: (index) {
+                      context.read<OnboardingCubit>().onPageChanged(index);
+                    },
+                    itemBuilder: (context, index) {
+                      return OnboardingContent(item: _onboardingItems[index]);
+                    },
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+                OnboardingFooter(
+                  pageController: _pageController,
+                  onNextPressed: _onNextPressed,
+                  onSkipPressed: _onSkipPressed,
+                  itemCount: _onboardingItems.length,
+                  isLastPage: isLastPage,
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

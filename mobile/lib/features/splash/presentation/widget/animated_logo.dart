@@ -1,16 +1,25 @@
+import 'package:dar_care/gen/assets.gen.dart';
 import 'package:flutter/material.dart';
 
+import '../config/splash_config.dart';
+
+/// Animated logo widget with fade-in animation
 class AnimatedLogo extends StatelessWidget {
-  const AnimatedLogo({super.key, required this.animation});
+  const AnimatedLogo({
+    super.key,
+    required this.animation,
+  });
 
   final Animation<double> animation;
-  final String logoPath = 'assets/images/png/DareCareLogo.png';
 
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: animation,
-      child: Image.asset(logoPath, width: 200, height: 200),
+      child: Assets.images.png.dareCareLogo.image(
+        width: SplashConfig.logoSize,
+        height: SplashConfig.logoSize,
+      ),
     );
   }
 }
