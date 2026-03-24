@@ -25,6 +25,9 @@ abstract class  LocaleKeys {
   static const auth_professional_description = 'auth_professional_description';
   static const auth_professional_button = 'auth_professional_button';
   static const auth_join_as = 'auth_join_as';
+  static const auth_provider_signup_subtitle = 'auth_provider_signup_subtitle';
+  static const auth_provider_section_basic = 'auth_provider_section_basic';
+  static const auth_provider_section_professional = 'auth_provider_section_professional';
   static const label_email = 'label_email';
   static const label_password = 'label_password';
   static const label_full_name = 'label_full_name';
@@ -32,6 +35,12 @@ abstract class  LocaleKeys {
   static const hint_phone_number = 'hint_phone_number';
   static const label_remember_me = 'label_remember_me';
   static const label_agree_terms = 'label_agree_terms';
+  static const label_department = 'label_department';
+  static const hint_department = 'hint_department';
+  static const label_experience_years = 'label_experience_years';
+  static const hint_experience_years = 'hint_experience_years';
+  static const label_bio = 'label_bio';
+  static const hint_bio = 'hint_bio';
   static const button_sign_in = 'button_sign_in';
   static const button_sign_up = 'button_sign_up';
   static const button_send_reset_link = 'button_send_reset_link';
@@ -57,6 +66,11 @@ abstract class  LocaleKeys {
   static const validation_required_name = 'validation_required_name';
   static const validation_required_phone = 'validation_required_phone';
   static const validation_invalid_phone = 'validation_invalid_phone';
+  static const validation_required_otp = 'validation_required_otp';
+  static const validation_min_otp = 'validation_min_otp';
+  static const validation_required_department = 'validation_required_department';
+  static const validation_required_experience = 'validation_required_experience';
+  static const validation_invalid_experience = 'validation_invalid_experience';
   static const home_tab = 'home_tab';
   static const orders_tab = 'orders_tab';
   static const favorites_tab = 'favorites_tab';

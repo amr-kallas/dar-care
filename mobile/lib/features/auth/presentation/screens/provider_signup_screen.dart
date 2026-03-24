@@ -1,5 +1,6 @@
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/validation_messages.dart';
+import 'package:dar_care/features/auth/data/models/app_department.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -9,15 +10,17 @@ import '../../../../core/theme/app_colors.dart';
 import '../widgets/auth_app_logo.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_primary_button.dart';
+import '../widgets/auth_role_badge.dart';
+import '../widgets/auth_section_header.dart';
 import '../widgets/auth_social_login_section.dart';
 import '../widgets/auth_text_link_row.dart';
 
-/// Client (user) signup screen.
-/// Role is always 'user' — provider registration uses [ProviderSignupScreen].
-class SignupScreen extends StatelessWidget {
-  const SignupScreen({super.key});
+class ProviderSignupScreen extends StatelessWidget {
+  const ProviderSignupScreen({super.key});
 
+  // ── Form definition ───────────────────────────────────────────────────────
   FormGroup buildForm() => fb.group({
+        // Basic fields (mirror users table)
         'fullName': ['', Validators.required],
         'email': ['', Validators.required, Validators.email],
         'phoneNumber': [
@@ -26,6 +29,14 @@ class SignupScreen extends StatelessWidget {
           Validators.pattern(r'^[0-9]+$'),
         ],
         'password': ['', Validators.required, Validators.minLength(8)],
+        // Professional fields (providers table)
+        'department': [null, Validators.required],
+        'experienceYears': [
+          '',
+          Validators.required,
+          Validators.pattern(r'^[0-9]+$'),
+        ],
+        'bio': [''], // optional — no validators
         'agreeToTerms': [false, Validators.requiredTrue],
       });
 
@@ -53,15 +64,30 @@ class SignupScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const SizedBox(height: 10),
+
+                  // ── Brand logo ──
                   const AuthAppLogo(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+
+                  // ── Header ──
                   AuthHeader(
                     title: LocaleKeys.auth_journey_title.tr(),
-                    subtitle: LocaleKeys.auth_signup_subtitle.tr(),
+                    subtitle: LocaleKeys.auth_provider_signup_subtitle.tr(),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
 
-                  // ── Full name ──
+                  // ── Role badge ──
+                  AuthRoleBadge(role: LocaleKeys.auth_professional_title.tr()),
+                  const SizedBox(height: 28),
+
+                  // ══════════════════════════════════════════════════════════
+                  // SECTION 1 — Basic Information
+                  // ══════════════════════════════════════════════════════════
+                  AuthSectionHeader(
+                      title: LocaleKeys.auth_provider_section_basic.tr()),
+                  const SizedBox(height: 16),
+
+                  // Full name
                   ReactiveTextField<String>(
                     formControlName: 'fullName',
                     decoration: InputDecoration(
@@ -72,7 +98,7 @@ class SignupScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Email ──
+                  // Email
                   ReactiveTextField<String>(
                     formControlName: 'email',
                     keyboardType: TextInputType.emailAddress,
@@ -84,7 +110,7 @@ class SignupScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Phone ──
+                  // Phone
                   ReactiveTextField<String>(
                     formControlName: 'phoneNumber',
                     keyboardType: TextInputType.phone,
@@ -97,7 +123,7 @@ class SignupScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Password ──
+                  // Password
                   ReactiveTextField<String>(
                     formControlName: 'password',
                     obscureText: true,
@@ -107,9 +133,66 @@ class SignupScreen extends StatelessWidget {
                     ),
                     validationMessages: ValidationMessages.password,
                   ),
+                  const SizedBox(height: 28),
+
+                  // ══════════════════════════════════════════════════════════
+                  // SECTION 2 — Professional Details
+                  // ══════════════════════════════════════════════════════════
+                  AuthSectionHeader(
+                      title:
+                          LocaleKeys.auth_provider_section_professional.tr()),
                   const SizedBox(height: 16),
 
-                  // ── Terms ──
+                  // Department dropdown  (maps to providers.department_id)
+                  ReactiveDropdownField<AppDepartment>(
+                    formControlName: 'department',
+                    decoration: InputDecoration(
+                      labelText: LocaleKeys.label_department.tr(),
+                      prefixIcon: const Icon(Icons.build_outlined),
+                      hintText: LocaleKeys.hint_department.tr(),
+                    ),
+                    items: AppDepartment.all
+                        .map(
+                          (d) => DropdownMenuItem(
+                            value: d,
+                            child: Text(d.name),
+                          ),
+                        )
+                        .toList(),
+                    validationMessages: ValidationMessages.department,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Years of experience (maps to providers.experience_years)
+                  ReactiveTextField<String>(
+                    formControlName: 'experienceYears',
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      labelText: LocaleKeys.label_experience_years.tr(),
+                      prefixIcon: const Icon(Icons.workspace_premium_outlined),
+                      hintText: LocaleKeys.hint_experience_years.tr(),
+                    ),
+                    validationMessages: ValidationMessages.experienceYears,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Bio — optional, multiline
+                  ReactiveTextField<String>(
+                    formControlName: 'bio',
+                    maxLines: 3,
+                    decoration: InputDecoration(
+                      labelText: LocaleKeys.label_bio.tr(),
+                      hintText: LocaleKeys.hint_bio.tr(),
+                      prefixIcon: const Padding(
+                        padding: EdgeInsets.only(bottom: 40),
+                        child: Icon(Icons.notes_outlined),
+                      ),
+                      alignLabelWithHint: true,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Agree to terms
                   ReactiveCheckboxListTile(
                     formControlName: 'agreeToTerms',
                     title: Text(LocaleKeys.label_agree_terms.tr(),
@@ -122,14 +205,15 @@ class SignupScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  // ── Submit (role = 'user') ──
+                  // ── Submit ──
                   ReactiveFormConsumer(
                     builder: (context, form, child) => AuthPrimaryButton(
                       label: LocaleKeys.button_sign_up.tr(),
                       onPressed: form.valid
                           ? () {
-                              // TODO: dispatch user registration event
-                              // role is always 'user'
+                              // TODO: dispatch provider registration event
+                              // final data = form.value;
+                              // role = 'provider' is set server-side
                             }
                           : null,
                     ),
@@ -156,3 +240,4 @@ class SignupScreen extends StatelessWidget {
     );
   }
 }
+

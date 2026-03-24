@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import '../../../../core/utils/validation_messages.dart';
 
 class PinErrorText extends StatelessWidget {
-  const PinErrorText({
-    super.key,
-    required this.control,
-  });
+  const PinErrorText({super.key, required this.control});
 
   final AbstractControl<dynamic> control;
 
   String _getPinError() {
     if (control.touched && control.hasError('required')) {
-      return 'Please enter the verification code.';
+      return ValidationMessages.otp['required']!(control.getError('required')!);
     } else if (control.touched && control.hasError('minLength')) {
-      return 'The code must be 6 digits long.';
+      return ValidationMessages.otp['minLength']!(control.getError('minLength')!);
     }
     return '';
   }
@@ -22,9 +20,7 @@ class PinErrorText extends StatelessWidget {
   Widget build(BuildContext context) {
     final errorText = _getPinError();
 
-    if (errorText.isEmpty) {
-      return const SizedBox(height: 24);
-    }
+    if (errorText.isEmpty) return const SizedBox(height: 24);
 
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),

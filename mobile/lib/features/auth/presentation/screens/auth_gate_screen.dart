@@ -50,7 +50,7 @@ class AuthGateScreen extends StatelessWidget {
                 icon: Icons.person_outline,
                 buttonText: LocaleKeys.auth_user_button.tr(),
                 onPressed: () {
-                  context.push(AppRouter.signupPath, extra: {'role': 'user'});
+                  context.push(AppRouter.signupPath);
                 },
               ),
 
@@ -63,7 +63,7 @@ class AuthGateScreen extends StatelessWidget {
                 icon: Icons.handyman_outlined,
                 buttonText: LocaleKeys.auth_professional_button.tr(),
                 onPressed: () {
-                  context.push(AppRouter.signupPath, extra: {'role': 'professional'});
+                  context.push(AppRouter.providerSignupPath);
                 },
               ),
 
