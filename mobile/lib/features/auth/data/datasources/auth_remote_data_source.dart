@@ -85,8 +85,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Sign up failed: User is null');
       }
 
-      // Create user profile in the users table
-      await supabaseClient.from('users').insert({
+      // Create or update user profile in the users table
+      await supabaseClient.from('users').upsert({
         'id': authResponse.user!.id,
         'email': email,
         'full_name': fullName,
@@ -136,8 +136,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Sign up failed: User is null');
       }
 
-      // Create user profile in the users table
-      await supabaseClient.from('users').insert({
+      // Create or update user profile in the users table
+      await supabaseClient.from('users').upsert({
         'id': authResponse.user!.id,
         'email': email,
         'full_name': fullName,

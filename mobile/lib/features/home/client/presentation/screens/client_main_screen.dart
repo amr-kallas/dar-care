@@ -9,6 +9,10 @@ import 'package:go_router/go_router.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 import '../../../../../core/theme/app_colors.dart';
+import 'package:dar_care/features/home/client/presentation/cubit/home_cubit.dart';
+import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/features/orders/presentation/screens/orders_screen.dart';
+import 'package:dar_care/features/favorites/presentation/screens/favorites_screen.dart';
 import '../widgets/client_home_body.dart';
 
 class ClientMainScreen extends StatefulWidget {
@@ -22,9 +26,12 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
   int _currentIndex = 0;
 
   List<Widget> get _screens => [
-    const ClientHomeBody(),
-    Center(child: Text(LocaleKeys.orders_screen_placeholder.tr())),
-    Center(child: Text(LocaleKeys.favorites_screen_placeholder.tr())),
+    BlocProvider(
+      create: (context) => getIt<HomeCubit>()..loadHomeData(),
+      child: const ClientHomeBody(),
+    ),
+    const OrdersScreen(),
+    const FavoritesScreen(),
     Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

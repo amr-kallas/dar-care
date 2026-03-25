@@ -15,6 +15,9 @@ class SearchProviderCard extends StatelessWidget {
     required this.availabilityText,
     required this.isAvailable, // true = available, false = busy/fully booked
     this.isFullyBooked = false, // if true, shows Grey "Fully Booked" button
+    this.hourlyRate,
+    this.tag,
+    this.onTap,
   });
 
   final String name;
@@ -25,6 +28,9 @@ class SearchProviderCard extends StatelessWidget {
   final String availabilityText; // e.g., "Available Now" or "Tomorrow 9:00"
   final bool isAvailable;
   final bool isFullyBooked;
+  final String? hourlyRate;
+  final String? tag;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -192,6 +198,38 @@ class SearchProviderCard extends StatelessWidget {
               ),
             ],
           ),
+          if (hourlyRate != null || tag != null) ...[
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                if (tag != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: isDark ? AppColors.deepDarkGreen : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      tag!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.grey : Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                if (hourlyRate != null)
+                  Text(
+                    hourlyRate!,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+
           const SizedBox(height: 20),
 
           Row(

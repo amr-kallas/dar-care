@@ -1,14 +1,53 @@
+import 'package:dar_care/features/home/client/data/models/provider_model.dart';
+import 'package:dar_care/features/search/presentation/cubit/search_cubit.dart';
+import 'package:dar_care/features/search/presentation/cubit/search_state.dart';
 import 'package:dar_care/features/search/presentation/widgets/promo_banner.dart';
 import 'package:dar_care/features/search/presentation/widgets/search_provider_card.dart';
 import 'package:dar_care/features/search/presentation/widgets/filter_chip_widget.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart'; // Import Bloc
+
+import 'package:dar_care/core/di/injection.dart'; // Import Injection
 
 import '../../../../core/theme/app_colors.dart';
 
 class SearchResultsScreen extends StatelessWidget {
   const SearchResultsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+
+    // Provide search cubit
+    return BlocProvider(
+      create: (context) => getIt<SearchCubit>(),
+      child: const _SearchResultsContent(),
+    );
+  }
+}
+
+class _SearchResultsContent extends StatefulWidget {
+  const _SearchResultsContent();
+
+  @override
+  State<_SearchResultsContent> createState() => _SearchResultsContentState();
+}
+
+class _SearchResultsContentState extends State<_SearchResultsContent> {
+  final TextEditingController _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    // Potentially auto-focus or load initial results if search term passed
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +72,10 @@ class SearchResultsScreen extends StatelessWidget {
                           : Colors.grey.shade100,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
-                      Icons.arrow_forward,
-                    ), // RTL Back Icon usually forward
+                    child: IconButton(
+                        icon: const Icon(Icons.arrow_forward),
+                        onPressed: () => Navigator.of(context).pop(), // Functional back button
+                    ),
                   ),
                   Text(
                     LocaleKeys.search_results_title.tr(),
@@ -76,20 +116,19 @@ class SearchResultsScreen extends StatelessWidget {
                   Expanded(
                     child: TextField(
                       textAlign: TextAlign.right,
-                      controller: TextEditingController(
-                        text: LocaleKeys.service_cleaning.tr(),
-                      ),
+                      controller: _searchController,
                       decoration: InputDecoration(
-                        prefixIcon: const Icon(
-                          Icons.search,
-                        ), // Actually layout is LTR so prefix is left...
-                        // For RTL feel matching image:
-                        suffixIcon: const Icon(Icons.search),
-                        prefix: null,
+                        hintText: LocaleKeys.search_hint.tr(),
+                        suffixIcon: IconButton(
+                            icon: const Icon(Icons.search),
+                            onPressed: () {
+                              context.read<SearchCubit>().search(_searchController.text);
+                            },
+                        ),
                         filled: true,
                         fillColor: isDark
                             ? AppColors.surfaceDark
-                            : Colors.grey.shade100,
+                            : Colors.white,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide.none,
@@ -103,7 +142,7 @@ class SearchResultsScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            // Filters
+            // Chips
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -134,78 +173,58 @@ class SearchResultsScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Results Count
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    LocaleKeys.search_results_found.tr(
-                      namedArgs: {'count': '42'},
-                    ),
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
-                  ),
-                  Row(
-                    children: [
-                      Text(
-                        LocaleKeys.location_riyadh.tr(),
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        Icons.location_on,
-                        size: 14,
-                        color: Colors.grey,
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            // Promo Banner
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              child: PromoBanner(),
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
 
-            // List
+            // Results List
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                children: [
-                  SearchProviderCard(
-                    name: 'Ahmed Al-Saleh',
-                    profession: LocaleKeys.profession_pest_control.tr(),
-                    rating: '4.9',
-                    distance: '2.5 km',
-                    imageUrl: 'https://i.pravatar.cc/150?img=12',
-                    availabilityText: LocaleKeys.available_now.tr(),
-                    isAvailable: true,
-                  ),
-                  SearchProviderCard(
-                    name: 'Mona El-Sayed',
-                    profession: LocaleKeys.profession_cleaning.tr(),
-                    rating: '4.5',
-                    distance: '4.1 km',
-                    imageUrl: 'https://i.pravatar.cc/150?img=5',
-                    availabilityText: 'Tomorrow 9:00',
-                    isAvailable: true, // But scheduled
-                  ),
+              child: BlocBuilder<SearchCubit, SearchState>(
+                builder: (context, state) {
+                  if (state.status == SearchStatus.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                  const PromoBanner(),
+                  if (state.status == SearchStatus.failure) {
+                     return Center(child: Text('Error: ${state.errorMessage}'));
+                  }
 
-                  SearchProviderCard(
-                    name: 'Karim Fouad',
-                    profession: LocaleKeys.profession_carpet_cleaning.tr(),
-                    rating: '4.2',
-                    distance: '6.0 km',
-                    imageUrl: 'https://i.pravatar.cc/150?img=8',
-                    availabilityText: LocaleKeys.unavailable.tr(),
-                    isAvailable: false,
-                    isFullyBooked: true,
-                  ),
-                ],
+                  if (state.results.isEmpty && state.status == SearchStatus.success) {
+                    return const Center(child: Text('No results found'));
+                  }
+
+                  if (state.status == SearchStatus.initial) {
+                      return const Center(child: Text('Type to search providers'));
+                  }
+
+                  return ListView.separated(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    itemCount: state.results.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 16),
+                    itemBuilder: (context, index) {
+                      final provider = state.results[index];
+                      return SearchProviderCard(
+                        name: provider.fullName,
+                        profession: provider.profession,
+                        rating: provider.rating.toStringAsFixed(1),
+                        distance: LocaleKeys.distance_from_you.tr(
+                            namedArgs: {'distance': '2.0'} // TODO: Calculate distance
+                        ),
+                        imageUrl: provider.imageUrl ?? '',
+                        hourlyRate: provider.hourlyRate != null
+                             ? '\$${provider.hourlyRate}/hr'
+                             : LocaleKeys.price_on_request.tr(),
+                        availabilityText: LocaleKeys.available_now.tr(), // Mock
+                        isAvailable: true, // Mock
+                        onTap: () {},
+                      );
+                    },
+                  );
+                },
               ),
             ),
           ],

@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class LocaleKeys {
+abstract class  LocaleKeys {
   static const app_name = 'app_name';
   static const onboarding_title_1 = 'onboarding_title_1';
   static const onboarding_subtitle_1 = 'onboarding_subtitle_1';
@@ -27,8 +27,7 @@ abstract class LocaleKeys {
   static const auth_join_as = 'auth_join_as';
   static const auth_provider_signup_subtitle = 'auth_provider_signup_subtitle';
   static const auth_provider_section_basic = 'auth_provider_section_basic';
-  static const auth_provider_section_professional =
-      'auth_provider_section_professional';
+  static const auth_provider_section_professional = 'auth_provider_section_professional';
   static const label_email = 'label_email';
   static const label_password = 'label_password';
   static const label_full_name = 'label_full_name';
@@ -69,10 +68,8 @@ abstract class LocaleKeys {
   static const validation_invalid_phone = 'validation_invalid_phone';
   static const validation_required_otp = 'validation_required_otp';
   static const validation_min_otp = 'validation_min_otp';
-  static const validation_required_department =
-      'validation_required_department';
-  static const validation_required_experience =
-      'validation_required_experience';
+  static const validation_required_department = 'validation_required_department';
+  static const validation_required_experience = 'validation_required_experience';
   static const validation_invalid_experience = 'validation_invalid_experience';
   static const home_tab = 'home_tab';
   static const orders_tab = 'orders_tab';
@@ -116,4 +113,6 @@ abstract class LocaleKeys {
   static const button_book_now = 'button_book_now';
   static const button_view_profile = 'button_view_profile';
   static const button_chat = 'button_chat';
+  static const price_on_request = 'price_on_request';
+
 }
