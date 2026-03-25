@@ -2,6 +2,7 @@ import 'package:dar_care/core/utils/app_router.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:dar_care/core/services/supabase_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../config/splash_config.dart';
 import '../controllers/splash_animation_controller.dart';
@@ -47,7 +48,12 @@ class _SplashScreenState extends State<SplashScreen>
   void _scheduleNavigation() {
     Future.delayed(SplashConfig.splashDuration, () {
       if (mounted) {
-        context.go(AppRouter.onboardingPath);
+        final hasSession = SupabaseService.auth.currentSession != null;
+        if (hasSession) {
+          context.go(AppRouter.homePath);
+        } else {
+          context.go(AppRouter.onboardingPath);
+        }
       }
     });
   }

@@ -27,6 +27,12 @@ dependencies:
   # Networking
   dio: ^5.9.0
 
+  # Supabase
+  supabase_flutter: ^2.12.1
+
+  # Environment variables
+  flutter_dotenv: ^6.0.0
+
   # Navigation
   go_router: ^17.0.0
 
@@ -73,6 +79,7 @@ flutter:
   uses-material-design: true
 
   assets:
+     - .env
      - assets/images/png/
      - assets/translations/
      - assets/fonts/

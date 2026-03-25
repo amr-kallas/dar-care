@@ -1,4 +1,3 @@
-import 'package:dar_care/core/theme/app_theme.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

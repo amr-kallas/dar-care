@@ -5,6 +5,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/auth_cubit.dart';
+import '../cubit/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/auth_app_logo.dart';
 import '../widgets/auth_header.dart';
@@ -26,8 +29,18 @@ class LoginScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthSignInSuccess) {
+          context.go(AppRouter.homePath);
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
@@ -106,7 +119,12 @@ class LoginScreen extends StatelessWidget {
                     builder: (context, form, child) => AuthPrimaryButton(
                       label: LocaleKeys.button_sign_in.tr(),
                       onPressed: form.valid
-                          ? () => context.go(AppRouter.homePath)
+                          ? () {
+                              context.read<AuthCubit>().signIn(
+                                email: (form.control('email').value as String).trim(),
+                                password: (form.control('password').value as String).trim(),
+                              );
+                            }
                           : null,
                     ),
                   ),
@@ -120,7 +138,7 @@ class LoginScreen extends StatelessWidget {
                   AuthTextLinkRow(
                     prefixText: LocaleKeys.no_account.tr(),
                     linkText: LocaleKeys.sign_up_link.tr(),
-                    onTap: () => context.push(AppRouter.signupPath),
+                    onTap: () => context.push(AppRouter.authGatePath),
                   ),
                   const SizedBox(height: 24),
                 ],
@@ -129,6 +147,6 @@ class LoginScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ));
   }
 }

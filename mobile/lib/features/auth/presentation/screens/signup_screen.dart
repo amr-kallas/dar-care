@@ -5,6 +5,9 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../cubit/auth_cubit.dart';
+import '../cubit/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../widgets/auth_app_logo.dart';
 import '../widgets/auth_header.dart';
@@ -34,8 +37,22 @@ class SignupScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthSignUpSuccess) {
+          // Navigate to OTP via the new requirement
+          // Pass the phone number to OTP screen if desirable, or null.
+          final phone = context.read<AuthCubit>().state is AuthSignUpSuccess ?
+            (context.read<AuthCubit>().state as AuthSignUpSuccess).user.phone : null;
+          context.go(AppRouter.otpVerificationPath, extra: phone);
+        } else if (state is AuthError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message)),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
           icon: Icon(Icons.arrow_back,
@@ -128,8 +145,12 @@ class SignupScreen extends StatelessWidget {
                       label: LocaleKeys.button_sign_up.tr(),
                       onPressed: form.valid
                           ? () {
-                              // TODO: dispatch user registration event
-                              // role is always 'user'
+                              context.read<AuthCubit>().signUpClient(
+                                email: (form.control('email').value as String).trim(),
+                                password: (form.control('password').value as String).trim(),
+                                fullName: (form.control('fullName').value as String).trim(),
+                                phone: (form.control('phoneNumber').value as String).trim(),
+                              );
                             }
                           : null,
                     ),
@@ -153,6 +174,7 @@ class SignupScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+);
   }
 }
