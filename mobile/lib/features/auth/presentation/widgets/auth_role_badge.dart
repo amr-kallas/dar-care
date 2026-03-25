@@ -29,4 +29,3 @@ class AuthRoleBadge extends StatelessWidget {
     );
   }
 }
-

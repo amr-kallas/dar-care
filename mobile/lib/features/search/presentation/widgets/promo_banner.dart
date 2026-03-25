@@ -27,34 +27,60 @@ class PromoBanner extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-             width: 50, height: 50,
-             decoration: BoxDecoration(
-               color: AppColors.brightGreen,
-               shape: BoxShape.circle,
-               boxShadow: [
-                 BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10)
-               ]
-             ),
-             child: const Center(child: Text('%', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.black))),
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppColors.brightGreen,
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: const Center(
+              child: Text(
+                '%',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Container(
-                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                 decoration: BoxDecoration(
-                   color: Colors.white10,
-                   borderRadius: BorderRadius.circular(8),
-                 ),
-                 child: Text(LocaleKeys.promo_special_offer.tr(), style: const TextStyle(color: AppColors.brightGreen, fontSize: 10)),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.white10,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  LocaleKeys.promo_special_offer.tr(),
+                  style: const TextStyle(
+                    color: AppColors.brightGreen,
+                    fontSize: 10,
+                  ),
+                ),
               ),
               const SizedBox(height: 4),
               Text(
                 LocaleKeys.promo_discount_title.tr(),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
               ),
-               const SizedBox(height: 4),
-               Text(LocaleKeys.promo_code.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              const SizedBox(height: 4),
+              Text(
+                LocaleKeys.promo_code.tr(),
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
             ],
           ),
         ],

@@ -41,13 +41,15 @@ class SearchProviderCard extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: borderColor),
-         boxShadow: isDark ? [] : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Column(
         children: [
@@ -55,52 +57,82 @@ class SearchProviderCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Like Button
-               const Icon(Icons.favorite_border, color: Colors.grey),
-               
-               const Spacer(),
+              const Icon(Icons.favorite_border, color: Colors.grey),
 
-               Column(
-                 crossAxisAlignment: CrossAxisAlignment.end,
-                 children: [
-                   Text(
-                     name,
-                     style: theme.textTheme.titleMedium?.copyWith(
-                       fontWeight: FontWeight.bold,
-                       color: isDark ? Colors.white : Colors.black,
-                     ),
-                   ),
-                   const SizedBox(height: 4),
-                   Text(
-                     profession,
-                     style: const TextStyle(
-                       color: AppColors.brightGreen,
-                       fontWeight: FontWeight.w500,
-                       fontSize: 12,
-                     ),
-                   ),
-                   const SizedBox(height: 8),
-                   Row(
-                     mainAxisSize: MainAxisSize.min,
-                     children: [
-                        if (isAvailable) ...[
-                          Text(availabilityText, style: const TextStyle(color: Colors.grey, fontSize: 11)),
-                          const SizedBox(width: 4),
-                          const Icon(Icons.access_time_filled, size: 14, color: Colors.grey),
-                        ] else ...[
-                           Text(availabilityText, style: const TextStyle(color: AppColors.errorRed, fontSize: 11)),
-                           const SizedBox(width: 4),
-                           const Icon(Icons.block, size: 14, color: AppColors.errorRed),
-                        ],
-                        const SizedBox(width: 12),
-                        Text(distance, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+              const Spacer(),
+
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    name,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : Colors.black,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    profession,
+                    style: const TextStyle(
+                      color: AppColors.brightGreen,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isAvailable) ...[
+                        Text(
+                          availabilityText,
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 11,
+                          ),
+                        ),
                         const SizedBox(width: 4),
-                        const Icon(Icons.location_on, size: 14, color: Colors.grey),
-                     ],
-                   ),
-                 ],
-               ),
-               
-               const SizedBox(width: 12),
+                        const Icon(
+                          Icons.access_time_filled,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
+                      ] else ...[
+                        Text(
+                          availabilityText,
+                          style: const TextStyle(
+                            color: AppColors.errorRed,
+                            fontSize: 11,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.block,
+                          size: 14,
+                          color: AppColors.errorRed,
+                        ),
+                      ],
+                      const SizedBox(width: 12),
+                      Text(
+                        distance,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 11,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(width: 12),
 
               // Avatar with Rating
               Stack(
@@ -111,7 +143,9 @@ class SearchProviderCard extends StatelessWidget {
                     height: 60,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                      border: Border.all(
+                        color: Colors.grey.withValues(alpha: 0.2),
+                      ),
                       image: DecorationImage(
                         image: NetworkImage(imageUrl),
                         fit: BoxFit.cover,
@@ -124,7 +158,10 @@ class SearchProviderCard extends StatelessWidget {
                     right: 0,
                     child: Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFF2D9F6F),
                           borderRadius: BorderRadius.circular(8),
@@ -132,65 +169,86 @@ class SearchProviderCard extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star, color: Colors.white, size: 10),
+                            const Icon(
+                              Icons.star,
+                              color: Colors.white,
+                              size: 10,
+                            ),
                             const SizedBox(width: 2),
                             Text(
                               rating,
-                              style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
                       ),
                     ),
-                  )
+                  ),
                 ],
               ),
             ],
           ),
           const SizedBox(height: 20),
-          
+
           Row(
             children: [
-               Container(
-                 width: 48,
-                 height: 48,
-                 decoration: BoxDecoration(
-                   color: isDark ? AppColors.deepDarkGreen : Colors.grey.shade100,
-                   borderRadius: BorderRadius.circular(14),
-                 ),
-                 child: const Icon(Icons.chat_bubble_outline, color: Colors.grey),
-               ),
-               const SizedBox(width: 12),
-               Expanded(
-                 child: SizedBox(
-                   height: 48,
-                   child: ElevatedButton(
-                     onPressed: isFullyBooked ? null : () {},
-                     style: ElevatedButton.styleFrom(
-                       backgroundColor: isFullyBooked ? Colors.transparent : AppColors.brightGreen,
-                       disabledBackgroundColor: isDark ? AppColors.deepDarkGreen : Colors.grey.shade200,
-                       foregroundColor: isFullyBooked ? Colors.grey : Colors.white,
-                       elevation: 0,
-                       shape: RoundedRectangleBorder(
-                         borderRadius: BorderRadius.circular(24),
-                       ),
-                     ),
-                     child: Row(
-                       mainAxisAlignment: MainAxisAlignment.center,
-                       children: [
-                         if (!isFullyBooked) ...[
-                            const Icon(Icons.calendar_month, size: 18),
-                            const SizedBox(width: 8),
-                         ],
-                         Text(
-                           isFullyBooked ? LocaleKeys.fully_booked.tr() : LocaleKeys.button_book_now.tr(),
-                           style: const TextStyle(fontWeight: FontWeight.bold),
-                         ),
-                       ],
-                     ),
-                   ),
-                 ),
-               ),
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.deepDarkGreen
+                      : Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.chat_bubble_outline,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: isFullyBooked ? null : () {},
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: isFullyBooked
+                          ? Colors.transparent
+                          : AppColors.brightGreen,
+                      disabledBackgroundColor: isDark
+                          ? AppColors.deepDarkGreen
+                          : Colors.grey.shade200,
+                      foregroundColor: isFullyBooked
+                          ? Colors.grey
+                          : Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (!isFullyBooked) ...[
+                          const Icon(Icons.calendar_month, size: 18),
+                          const SizedBox(width: 8),
+                        ],
+                        Text(
+                          isFullyBooked
+                              ? LocaleKeys.fully_booked.tr()
+                              : LocaleKeys.button_book_now.tr(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ],

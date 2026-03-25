@@ -19,10 +19,10 @@ class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
 
   FormGroup buildForm() => fb.group({
-        'email': ['', Validators.required, Validators.email],
-        'password': ['', Validators.required],
-        'rememberMe': [false],
-      });
+    'email': ['', Validators.required, Validators.email],
+    'password': ['', Validators.required],
+    'rememberMe': [false],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,119 +34,128 @@ class LoginScreen extends StatelessWidget {
         if (state is AuthSignInSuccess) {
           context.go(AppRouter.homePath);
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
         }
       },
       child: Scaffold(
         appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: isDark ? Colors.white : Colors.black),
-          onPressed: () => context.pop(),
+          backgroundColor: Colors.transparent,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+            onPressed: () => context.pop(),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: ReactiveFormBuilder(
-            form: buildForm,
-            builder: (context, form, child) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const SizedBox(height: 20),
-                  const AuthAppLogo(),
-                  const SizedBox(height: 48),
-                  AuthHeader(
-                    title: LocaleKeys.auth_journey_title.tr(),
-                    subtitle: LocaleKeys.auth_login_subtitle.tr(),
-                  ),
-                  const SizedBox(height: 48),
-
-                  // ── Email ──
-                  ReactiveTextField<String>(
-                    formControlName: 'email',
-                    decoration: InputDecoration(
-                      labelText: LocaleKeys.label_email.tr(),
-                      prefixIcon: const Icon(Icons.email_outlined),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+            child: ReactiveFormBuilder(
+              form: buildForm,
+              builder: (context, form, child) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 20),
+                    const AuthAppLogo(),
+                    const SizedBox(height: 48),
+                    AuthHeader(
+                      title: LocaleKeys.auth_journey_title.tr(),
+                      subtitle: LocaleKeys.auth_login_subtitle.tr(),
                     ),
-                    validationMessages: ValidationMessages.email,
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 48),
 
-                  // ── Password ──
-                  ReactiveTextField<String>(
-                    formControlName: 'password',
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: LocaleKeys.label_password.tr(),
-                      prefixIcon: const Icon(Icons.lock_outline),
+                    // ── Email ──
+                    ReactiveTextField<String>(
+                      formControlName: 'email',
+                      decoration: InputDecoration(
+                        labelText: LocaleKeys.label_email.tr(),
+                        prefixIcon: const Icon(Icons.email_outlined),
+                      ),
+                      validationMessages: ValidationMessages.email,
                     ),
-                    validationMessages: ValidationMessages.password,
-                  ),
+                    const SizedBox(height: 16),
 
-                  // ── Forgot password ──
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      onPressed: () =>
-                          context.push(AppRouter.forgotPasswordPath),
-                      child: Text(
-                        LocaleKeys.forgot_password.tr(),
-                        style: const TextStyle(color: Colors.grey),
+                    // ── Password ──
+                    ReactiveTextField<String>(
+                      formControlName: 'password',
+                      obscureText: true,
+                      decoration: InputDecoration(
+                        labelText: LocaleKeys.label_password.tr(),
+                        prefixIcon: const Icon(Icons.lock_outline),
+                      ),
+                      validationMessages: ValidationMessages.password,
+                    ),
+
+                    // ── Forgot password ──
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () =>
+                            context.push(AppRouter.forgotPasswordPath),
+                        child: Text(
+                          LocaleKeys.forgot_password.tr(),
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                       ),
                     ),
-                  ),
 
-                  // ── Remember me ──
-                  ReactiveCheckboxListTile(
-                    formControlName: 'rememberMe',
-                    title: Text(LocaleKeys.label_remember_me.tr(),
-                        style: theme.textTheme.bodyMedium),
-                    checkColor:
-                        isDark ? AppColors.deepDarkGreen : Colors.white,
-                    activeColor: AppColors.brightGreen,
-                    controlAffinity: ListTileControlAffinity.leading,
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                  const SizedBox(height: 32),
-
-                  // ── Submit ──
-                  ReactiveFormConsumer(
-                    builder: (context, form, child) => AuthPrimaryButton(
-                      label: LocaleKeys.button_sign_in.tr(),
-                      onPressed: form.valid
-                          ? () {
-                              context.read<AuthCubit>().signIn(
-                                email: (form.control('email').value as String).trim(),
-                                password: (form.control('password').value as String).trim(),
-                              );
-                            }
-                          : null,
+                    // ── Remember me ──
+                    ReactiveCheckboxListTile(
+                      formControlName: 'rememberMe',
+                      title: Text(
+                        LocaleKeys.label_remember_me.tr(),
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      checkColor: isDark
+                          ? AppColors.deepDarkGreen
+                          : Colors.white,
+                      activeColor: AppColors.brightGreen,
+                      controlAffinity: ListTileControlAffinity.leading,
+                      contentPadding: EdgeInsets.zero,
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 32),
 
-                  // ── Social login ──
-                  const AuthSocialLoginSection(),
-                  const SizedBox(height: 32),
+                    // ── Submit ──
+                    ReactiveFormConsumer(
+                      builder: (context, form, child) => AuthPrimaryButton(
+                        label: LocaleKeys.button_sign_in.tr(),
+                        onPressed: form.valid
+                            ? () {
+                                context.read<AuthCubit>().signIn(
+                                  email: (form.control('email').value as String)
+                                      .trim(),
+                                  password:
+                                      (form.control('password').value as String)
+                                          .trim(),
+                                );
+                              }
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 24),
 
-                  // ── Sign-up link ──
-                  AuthTextLinkRow(
-                    prefixText: LocaleKeys.no_account.tr(),
-                    linkText: LocaleKeys.sign_up_link.tr(),
-                    onTap: () => context.push(AppRouter.authGatePath),
-                  ),
-                  const SizedBox(height: 24),
-                ],
-              );
-            },
+                    // ── Social login ──
+                    const AuthSocialLoginSection(),
+                    const SizedBox(height: 32),
+
+                    // ── Sign-up link ──
+                    AuthTextLinkRow(
+                      prefixText: LocaleKeys.no_account.tr(),
+                      linkText: LocaleKeys.sign_up_link.tr(),
+                      onTap: () => context.push(AppRouter.authGatePath),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                );
+              },
+            ),
           ),
         ),
       ),
-    ));
+    );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
+
+import 'package:dar_care/core/theme/app_colors.dart';
 
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
@@ -31,10 +32,9 @@ class SectionHeader extends StatelessWidget {
         ),
         Text(
           title,
-          style: Theme.of(context)
-              .textTheme
-              .titleLarge
-              ?.copyWith(fontWeight: FontWeight.bold),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
       ],
     );

@@ -13,7 +13,7 @@ class AuthGateScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     //final isDark = theme.brightness == Brightness.dark;
-    
+
     return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
@@ -35,12 +35,10 @@ class AuthGateScreen extends StatelessWidget {
               const SizedBox(height: 12),
               Text(
                 LocaleKeys.auth_gate_subtitle.tr(),
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  fontSize: 16,
-                ),
+                style: theme.textTheme.bodyLarge?.copyWith(fontSize: 16),
                 textAlign: TextAlign.center,
               ),
-              
+
               const SizedBox(height: 48),
 
               // User Card
@@ -73,7 +71,7 @@ class AuthGateScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                   Text(
+                  Text(
                     LocaleKeys.have_account.tr(),
                     style: theme.textTheme.bodyMedium,
                   ),

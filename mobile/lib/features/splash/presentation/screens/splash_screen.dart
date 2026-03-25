@@ -78,9 +78,7 @@ class _SplashScreenState extends State<SplashScreen>
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AnimatedLogo(
-                animation: _animationController.logoFadeAnimation,
-              ),
+              AnimatedLogo(animation: _animationController.logoFadeAnimation),
               SlidingText(
                 slidingAnimation: _animationController.textSlidingAnimation,
               ),

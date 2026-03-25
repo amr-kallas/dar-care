@@ -5,10 +5,7 @@ import '../config/splash_config.dart';
 
 /// Animated logo widget with fade-in animation
 class AnimatedLogo extends StatelessWidget {
-  const AnimatedLogo({
-    super.key,
-    required this.animation,
-  });
+  const AnimatedLogo({super.key, required this.animation});
 
   final Animation<double> animation;
 

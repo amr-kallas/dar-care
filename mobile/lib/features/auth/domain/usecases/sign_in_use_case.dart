@@ -13,11 +13,6 @@ class SignInUseCase {
     required String email,
     required String password,
   }) async {
-    return await repository.signIn(
-      email: email,
-      password: password,
-    );
+    return await repository.signIn(email: email, password: password);
   }
 }
-
-

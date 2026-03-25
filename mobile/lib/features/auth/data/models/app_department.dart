@@ -31,4 +31,3 @@ class AppDepartment {
     AppDepartment(id: 7, name: 'Painting'),
   ];
 }
-

@@ -35,4 +35,3 @@ class SupabaseService {
   /// Get database instance (RealtimeClient)
   static RealtimeClient get realtime => Supabase.instance.client.realtime;
 }
-

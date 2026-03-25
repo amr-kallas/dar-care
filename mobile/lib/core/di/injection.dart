@@ -7,5 +7,3 @@ final getIt = GetIt.instance;
 Future<void> configureDependencies() async {
   di.configureDependencies();
 }
-
-

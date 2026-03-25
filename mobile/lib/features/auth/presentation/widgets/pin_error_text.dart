@@ -11,7 +11,9 @@ class PinErrorText extends StatelessWidget {
     if (control.touched && control.hasError('required')) {
       return ValidationMessages.otp['required']!(control.getError('required')!);
     } else if (control.touched && control.hasError('minLength')) {
-      return ValidationMessages.otp['minLength']!(control.getError('minLength')!);
+      return ValidationMessages.otp['minLength']!(
+        control.getError('minLength')!,
+      );
     }
     return '';
   }

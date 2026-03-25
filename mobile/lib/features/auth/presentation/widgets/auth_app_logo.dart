@@ -21,4 +21,3 @@ class AuthAppLogo extends StatelessWidget {
     );
   }
 }
-

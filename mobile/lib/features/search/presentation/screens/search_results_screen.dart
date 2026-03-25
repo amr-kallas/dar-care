@@ -12,7 +12,6 @@ class SearchResultsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
@@ -29,19 +28,27 @@ class SearchResultsScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.grey.shade100,
+                      color: isDark
+                          ? AppColors.surfaceDark
+                          : Colors.grey.shade100,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.arrow_forward), // RTL Back Icon usually forward
+                    child: const Icon(
+                      Icons.arrow_forward,
+                    ), // RTL Back Icon usually forward
                   ),
                   Text(
                     LocaleKeys.search_results_title.tr(),
-                    style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                   Container(
+                  Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.grey.shade100,
+                      color: isDark
+                          ? AppColors.surfaceDark
+                          : Colors.grey.shade100,
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(Icons.notifications_none),
@@ -49,39 +56,47 @@ class SearchResultsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Search Bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 children: [
-                   Container(
+                  Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.surfaceDark : Colors.grey.shade200,
+                      color: isDark
+                          ? AppColors.surfaceDark
+                          : Colors.grey.shade200,
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(Icons.tune, color: Colors.grey),
-                   ),
-                   const SizedBox(width: 12),
-                   Expanded(
-                     child: TextField(
-                       textAlign: TextAlign.right,
-                       controller: TextEditingController(text: LocaleKeys.service_cleaning.tr()),
-                       decoration: InputDecoration(
-                         prefixIcon: const Icon(Icons.search), // Actually layout is LTR so prefix is left...
-                         // For RTL feel matching image:
-                         suffixIcon: const Icon(Icons.search), 
-                         prefix: null,
-                         filled: true,
-                         fillColor: isDark ? AppColors.surfaceDark : Colors.grey.shade100,
-                         border: OutlineInputBorder(
-                           borderRadius: BorderRadius.circular(16),
-                           borderSide: BorderSide.none,
-                         ),
-                       ),
-                     ),
-                   ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      textAlign: TextAlign.right,
+                      controller: TextEditingController(
+                        text: LocaleKeys.service_cleaning.tr(),
+                      ),
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(
+                          Icons.search,
+                        ), // Actually layout is LTR so prefix is left...
+                        // For RTL feel matching image:
+                        suffixIcon: const Icon(Icons.search),
+                        prefix: null,
+                        filled: true,
+                        fillColor: isDark
+                            ? AppColors.surfaceDark
+                            : Colors.grey.shade100,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -116,23 +131,38 @@ class SearchResultsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Results Count
-             Padding(
+            Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(LocaleKeys.search_results_found.tr(namedArgs: {'count': '42'}), style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                  Text(
+                    LocaleKeys.search_results_found.tr(
+                      namedArgs: {'count': '42'},
+                    ),
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
                   Row(
                     children: [
-                       Text(LocaleKeys.location_riyadh.tr(), style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                       const SizedBox(width: 4),
-                       const Icon(Icons.location_on, size: 14, color: Colors.grey),
+                      Text(
+                        LocaleKeys.location_riyadh.tr(),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.location_on,
+                        size: 14,
+                        color: Colors.grey,
+                      ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -144,12 +174,12 @@ class SearchResultsScreen extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 children: [
-                   SearchProviderCard(
+                  SearchProviderCard(
                     name: 'Ahmed Al-Saleh',
                     profession: LocaleKeys.profession_pest_control.tr(),
                     rating: '4.9',
                     distance: '2.5 km',
-                    imageUrl: 'https://i.pravatar.cc/150?img=12', 
+                    imageUrl: 'https://i.pravatar.cc/150?img=12',
                     availabilityText: LocaleKeys.available_now.tr(),
                     isAvailable: true,
                   ),
@@ -158,19 +188,19 @@ class SearchResultsScreen extends StatelessWidget {
                     profession: LocaleKeys.profession_cleaning.tr(),
                     rating: '4.5',
                     distance: '4.1 km',
-                    imageUrl: 'https://i.pravatar.cc/150?img=5', 
+                    imageUrl: 'https://i.pravatar.cc/150?img=5',
                     availabilityText: 'Tomorrow 9:00',
                     isAvailable: true, // But scheduled
                   ),
-                  
+
                   const PromoBanner(),
-                  
-                   SearchProviderCard(
+
+                  SearchProviderCard(
                     name: 'Karim Fouad',
                     profession: LocaleKeys.profession_carpet_cleaning.tr(),
                     rating: '4.2',
                     distance: '6.0 km',
-                    imageUrl: 'https://i.pravatar.cc/150?img=8', 
+                    imageUrl: 'https://i.pravatar.cc/150?img=8',
                     availabilityText: LocaleKeys.unavailable.tr(),
                     isAvailable: false,
                     isFullyBooked: true,
@@ -184,4 +214,3 @@ class SearchResultsScreen extends StatelessWidget {
     );
   }
 }
-

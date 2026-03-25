@@ -24,7 +24,9 @@ class RoleCard extends StatelessWidget {
 
     final cardColor = isDark ? AppColors.surfaceDark : Colors.white;
     final borderColor = isDark ? AppColors.borderDark : Colors.grey.shade300;
-    final iconBgColor = isDark ? const Color(0xFF1A3830) : const Color(0xFFF5F5F5);
+    final iconBgColor = isDark
+        ? const Color(0xFF1A3830)
+        : const Color(0xFFF5F5F5);
     final iconColor = isDark ? Colors.white54 : Colors.grey.shade600;
     final titleColor = isDark ? Colors.white : Colors.black87;
     final descColor = isDark ? Colors.white70 : Colors.black54;
@@ -33,17 +35,16 @@ class RoleCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(
-          color: borderColor,
-          width: 1,
-        ),
-        boxShadow: isDark ? [] : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
+        border: Border.all(color: borderColor, width: 1),
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Column(
         children: [
@@ -53,13 +54,11 @@ class RoleCard extends StatelessWidget {
             width: double.infinity,
             decoration: BoxDecoration(
               color: iconBgColor,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(24),
+              ),
             ),
-            child: Icon(
-              icon,
-              size: 64,
-              color: iconColor,
-            ),
+            child: Icon(icon, size: 64, color: iconColor),
           ),
 
           Padding(
@@ -77,11 +76,7 @@ class RoleCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   description,
-                  style: TextStyle(
-                    color: descColor,
-                    fontSize: 14,
-                    height: 1.5,
-                  ),
+                  style: TextStyle(color: descColor, fontSize: 14, height: 1.5),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),

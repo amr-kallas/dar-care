@@ -50,6 +50,6 @@ class AuthUser {
   }
 
   @override
-  String toString() => 'AuthUser(id: $id, email: $email, role: ${role.displayName})';
+  String toString() =>
+      'AuthUser(id: $id, email: $email, role: ${role.displayName})';
 }
-

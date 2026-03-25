@@ -38,4 +38,3 @@ class SupabaseConfig {
     return appEnv == 'development';
   }
 }
-

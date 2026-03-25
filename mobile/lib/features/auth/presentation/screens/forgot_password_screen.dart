@@ -14,8 +14,8 @@ class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
 
   FormGroup buildForm() => fb.group({
-        'email': ['', Validators.required, Validators.email],
-      });
+    'email': ['', Validators.required, Validators.email],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +25,10 @@ class ForgotPasswordScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: isDark ? Colors.white : Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark ? Colors.white : Colors.black,
+          ),
           onPressed: () => context.pop(),
         ),
       ),
@@ -74,8 +76,9 @@ class ForgotPasswordScreen extends StatelessWidget {
                               final email =
                                   form.control('email').value as String?;
                               context.push(
-                                  AppRouter.otpVerificationPath,
-                                  extra: email);
+                                AppRouter.otpVerificationPath,
+                                extra: email,
+                              );
                             }
                           : null,
                     ),

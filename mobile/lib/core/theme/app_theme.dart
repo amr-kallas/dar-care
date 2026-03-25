@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-
-
 abstract class AppTheme {
   /// --- Font Family ---
   static const String _fontFamily = 'PlayfairDisplay';
@@ -36,7 +34,10 @@ abstract class AppTheme {
       ),
     ),
     textTheme: _lightTextTheme,
-    elevatedButtonTheme: _elevatedButtonTheme(AppColors.primaryDeepGreen, Colors.white),
+    elevatedButtonTheme: _elevatedButtonTheme(
+      AppColors.primaryDeepGreen,
+      Colors.white,
+    ),
     inputDecorationTheme: _inputDecorationTheme(
       borderColor: AppColors.lightGrey,
       focusedBorderColor: AppColors.primaryDeepGreen,
@@ -72,7 +73,10 @@ abstract class AppTheme {
       ),
     ),
     textTheme: _darkTextTheme,
-    elevatedButtonTheme: _elevatedButtonTheme(AppColors.brightGreen, Colors.white),
+    elevatedButtonTheme: _elevatedButtonTheme(
+      AppColors.brightGreen,
+      Colors.white,
+    ),
     inputDecorationTheme: _inputDecorationTheme(
       borderColor: AppColors.borderDark,
       focusedBorderColor: AppColors.brightGreen,

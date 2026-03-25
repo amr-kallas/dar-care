@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
+
+import 'package:dar_care/core/theme/app_colors.dart';
 
 class ServiceItem extends StatelessWidget {
   const ServiceItem({
@@ -33,7 +34,9 @@ class ServiceItem extends StatelessWidget {
                   ? (isDark ? AppColors.surfaceDark : Colors.grey.shade100)
                   : (isDark ? AppColors.surfaceDark : Colors.green.shade50),
               borderRadius: BorderRadius.circular(18),
-              border: isMore && isDark ? Border.all(color: Colors.white10) : null,
+              border: isMore && isDark
+                  ? Border.all(color: Colors.white10)
+                  : null,
             ),
             child: Icon(
               icon,

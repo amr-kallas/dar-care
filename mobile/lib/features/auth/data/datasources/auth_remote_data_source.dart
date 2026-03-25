@@ -256,10 +256,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (phone != null) updateData['phone'] = phone;
       if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
 
-      await supabaseClient
-          .from('users')
-          .update(updateData)
-          .eq('id', userId);
+      await supabaseClient.from('users').update(updateData).eq('id', userId);
     } catch (e) {
       log('Update user profile error: $e');
       rethrow;

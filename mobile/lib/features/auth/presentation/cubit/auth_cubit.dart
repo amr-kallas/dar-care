@@ -4,6 +4,7 @@ import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_in_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart';
+import 'package:dar_care/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth_state.dart';
 
 /// Authentication Cubit for managing auth state
@@ -12,11 +13,13 @@ class AuthCubit extends Cubit<AuthState> {
   final SignUpUseCase signUpUseCase;
   final SignInUseCase signInUseCase;
   final SignOutUseCase signOutUseCase;
+  final GetCurrentUserUseCase getCurrentUserUseCase;
 
   AuthCubit({
     required this.signUpUseCase,
     required this.signInUseCase,
     required this.signOutUseCase,
+    required this.getCurrentUserUseCase,
   }) : super(const AuthInitial());
 
   /// Sign up a standard client user
@@ -68,16 +71,10 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Sign in a user
-  Future<void> signIn({
-    required String email,
-    required String password,
-  }) async {
+  Future<void> signIn({required String email, required String password}) async {
     try {
       emit(const AuthLoading());
-      final user = await signInUseCase(
-        email: email,
-        password: password,
-      );
+      final user = await signInUseCase(email: email, password: password);
       emit(AuthSignInSuccess(user));
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -96,17 +93,25 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   /// Check if user is authenticated on app start
-  void checkAuthStatus() {
+  Future<void> checkAuthStatus() async {
     try {
       final session = SupabaseService.auth.currentSession;
       if (session != null) {
-        // Technically we can't create `AuthUser` here easily without user details,
-        // but for routing purposes, this state can also be handled as a separate variable
-        // However wait, `AuthAuthenticated` requires an AuthUser!
-        // To do this right, we might need a GetCurrentUserUseCase.
-        // Let's emit a state indicating auth check is done, or just leave it.
+        emit(const AuthLoading());
+        final user = await getCurrentUserUseCase();
+        if (user != null) {
+          emit(AuthAuthenticated(user));
+        } else {
+          // Session exists but user not found in DB? Weird edge case.
+          // Maybe force sign out or emit Unauthenticated.
+          await signOut(); // Clear invalid session
+          emit(const AuthUnauthenticated());
+        }
+      } else {
+        emit(const AuthUnauthenticated());
       }
-    } catch (_) {}
-    emit(const AuthInitial());
+    } catch (e) {
+      emit(AuthError(e.toString()));
+    }
   }
 }

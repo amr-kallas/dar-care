@@ -1,9 +1,11 @@
 import 'package:dar_care/core/utils/app_router.dart';
-import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:solar_icon_pack/solar_icon_pack.dart';
+
+import 'package:dar_care/core/theme/app_colors.dart';
+import '../../../../../generated/locale_keys.g.dart';
 import 'provider_card.dart';
 import 'section_header.dart';
 import 'service_item.dart';
@@ -30,20 +32,22 @@ class ClientHomeBody extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isDark ? AppColors.surfaceDark : Colors.white,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: isDark ? Colors.transparent : Colors.grey.shade200),
+                    border: Border.all(
+                      color: isDark ? Colors.transparent : Colors.grey.shade200,
+                    ),
                   ),
                   child: const Stack(
-                      children: [
-                         Icon(Icons.notifications_none_rounded),
-                         Positioned(
-                           right: 0,
-                           top: 0,
-                           child: CircleAvatar(
-                             radius: 4,
-                             backgroundColor: AppColors.errorRed,
-                           ),
-                         )
-                      ],
+                    children: [
+                      Icon(SolarLinearIcons.bell),
+                      Positioned(
+                        right: 0,
+                        top: 0,
+                        child: CircleAvatar(
+                          radius: 4,
+                          backgroundColor: AppColors.errorRed,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 const Spacer(),
@@ -52,63 +56,86 @@ class ClientHomeBody extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                         Text(LocaleKeys.good_morning.tr(), style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                         const SizedBox(width: 4),
-                         const Icon(Icons.wb_sunny_rounded, size: 14, color: AppColors.warningOrange),
+                        Text(
+                          LocaleKeys.good_morning.tr(),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        const Icon(
+                          SolarBoldIcons.sun,
+                          size: 14,
+                          color: AppColors.warningOrange,
+                        ),
                       ],
                     ),
                     Text(
                       LocaleKeys.welcome_back.tr(namedArgs: {'name': 'Ahmed'}),
-                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(width: 12),
                 const CircleAvatar(
                   radius: 24,
-                  backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=3'), 
+                  backgroundImage: NetworkImage(
+                    'https://i.pravatar.cc/150?img=3',
+                  ),
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             // Search Bar
             GestureDetector(
               onTap: () => context.push(AppRouter.searchResultsPath),
               child: Row(
                 children: [
-                   Container(
+                  Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.brightGreen,
                       borderRadius: BorderRadius.circular(14),
                     ),
-                    child: const Icon(Icons.tune, color: Colors.white),
-                   ),
-                   const SizedBox(width: 12),
-                   Expanded(
-                     child: AbsorbPointer( // Prevent TextField focus
-                       child: TextField(
-                         textAlign: TextAlign.right, // Arabic RTL alignment usually
-                         decoration: InputDecoration(
-                           hintText: LocaleKeys.search_hint.tr(),
-                           hintStyle: const TextStyle(color: Colors.grey),
-                           suffixIcon: const Icon(Icons.search),
-                           filled: true,
-                           fillColor: isDark ? AppColors.surfaceDark : Colors.white,
-                           border: OutlineInputBorder(
-                             borderRadius: BorderRadius.circular(16),
-                             borderSide: BorderSide.none,
-                           ),
-                           enabledBorder: OutlineInputBorder(
-                             borderRadius: BorderRadius.circular(16),
-                             borderSide: isDark ? BorderSide.none : BorderSide(color: Colors.grey.shade200),
-                           ),
-                         ),
-                       ),
-                     ),
-                   ),
+                    child: const Icon(
+                      SolarLinearIcons.tuning,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: AbsorbPointer(
+                      // Prevent TextField focus
+                      child: TextField(
+                        textAlign:
+                            TextAlign.right, // Arabic RTL alignment usually
+                        decoration: InputDecoration(
+                          hintText: LocaleKeys.search_hint.tr(),
+                          hintStyle: const TextStyle(color: Colors.grey),
+                          suffixIcon: const Icon(SolarLinearIcons.magnifer),
+                          filled: true,
+                          fillColor: isDark
+                              ? AppColors.surfaceDark
+                              : Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: isDark
+                                ? BorderSide.none
+                                : BorderSide(color: Colors.grey.shade200),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -122,7 +149,7 @@ class ClientHomeBody extends StatelessWidget {
               onTap: () {},
             ),
             const SizedBox(height: 16),
-            
+
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -132,42 +159,42 @@ class ClientHomeBody extends StatelessWidget {
               crossAxisSpacing: 12,
               children: [
                 ServiceItem(
-                  icon: Icons.plumbing,
+                  icon: SolarLinearIcons.waterdrop,
                   label: LocaleKeys.service_plumbing.tr(),
                   onTap: () {},
                 ),
                 ServiceItem(
-                  icon: Icons.ac_unit,
+                  icon: SolarLinearIcons.snowflake,
                   label: LocaleKeys.service_ac.tr(),
                   onTap: () {},
                 ),
                 ServiceItem(
-                  icon: Icons.electrical_services,
+                  icon: SolarLinearIcons.bolt,
                   label: LocaleKeys.service_electric.tr(),
                   onTap: () {},
                 ),
                 ServiceItem(
-                  icon: Icons.cleaning_services,
+                  icon: SolarLinearIcons.broom,
                   label: LocaleKeys.service_cleaning.tr(),
                   onTap: () {},
                 ),
                 ServiceItem(
-                  icon: Icons.carpenter,
+                  icon: SolarLinearIcons.sledgehammer,
                   label: LocaleKeys.service_carpentry.tr(),
                   onTap: () {},
                 ),
                 ServiceItem(
-                  icon: Icons.pest_control,
+                  icon: SolarLinearIcons.bug,
                   label: LocaleKeys.service_pest_control.tr(),
                   onTap: () {},
                 ),
                 ServiceItem(
-                  icon: Icons.format_paint,
+                  icon: SolarLinearIcons.paintRoller,
                   label: LocaleKeys.service_painting.tr(),
                   onTap: () {},
                 ),
                 ServiceItem(
-                  icon: Icons.grid_view,
+                  icon: SolarLinearIcons.widget2,
                   label: LocaleKeys.service_more.tr(),
                   isMore: true,
                   onTap: () {},
@@ -186,7 +213,7 @@ class ClientHomeBody extends StatelessWidget {
             const SizedBox(height: 16),
 
             SizedBox(
-              height: 220, 
+              height: 220,
               child: ListView(
                 scrollDirection: Axis.horizontal,
                 clipBehavior: Clip.none,
@@ -195,26 +222,29 @@ class ClientHomeBody extends StatelessWidget {
                     name: 'Mohammed Ali',
                     profession: LocaleKeys.profession_plumber.tr(),
                     rating: 4.8,
-                    distance: LocaleKeys.distance_from_you.tr(namedArgs: {'distance': '1.2'}),
+                    distance: LocaleKeys.distance_from_you.tr(
+                      namedArgs: {'distance': '1.2'},
+                    ),
                     imageUrl: '',
                     onTap: () {},
                   ),
-                   ProviderCard(
+                  ProviderCard(
                     name: 'Sami Ahmed',
                     profession: LocaleKeys.profession_electrician.tr(),
                     rating: 4.5,
-                    distance: LocaleKeys.distance_from_you.tr(namedArgs: {'distance': '2.5'}),
+                    distance: LocaleKeys.distance_from_you.tr(
+                      namedArgs: {'distance': '2.5'},
+                    ),
                     imageUrl: '',
                     onTap: () {},
                   ),
                 ],
               ),
             ),
-             const SizedBox(height: 80), // Bottom spacer
+            const SizedBox(height: 80), // Bottom spacer
           ],
         ),
       ),
     );
   }
 }
-

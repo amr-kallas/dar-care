@@ -60,7 +60,8 @@ class AuthUserModel extends AuthUser {
       avatarUrl: userMetadata['avatar_url'] as String?,
       emailVerified: supabaseUser.emailConfirmedAt != null,
       createdAt: supabaseUser.createdAt != null
-          ? DateTime.tryParse(supabaseUser.createdAt as String) ?? DateTime.now()
+          ? DateTime.tryParse(supabaseUser.createdAt as String) ??
+                DateTime.now()
           : DateTime.now(),
     );
   }

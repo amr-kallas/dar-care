@@ -35,4 +35,3 @@ class AuthTextLinkRow extends StatelessWidget {
     );
   }
 }
-

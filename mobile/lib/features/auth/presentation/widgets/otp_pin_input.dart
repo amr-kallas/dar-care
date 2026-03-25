@@ -7,11 +7,7 @@ import 'pin_error_text.dart';
 /// A self-contained OTP pin input backed by a reactive form control named [formControlName].
 /// Includes a themed [Pinput] and a [PinErrorText] below it.
 class OtpPinInput extends StatelessWidget {
-  const OtpPinInput({
-    super.key,
-    this.formControlName = 'pin',
-    this.length = 6,
-  });
+  const OtpPinInput({super.key, this.formControlName = 'pin', this.length = 6});
 
   final String formControlName;
   final int length;
@@ -78,4 +74,3 @@ class OtpPinInput extends StatelessWidget {
     );
   }
 }
-

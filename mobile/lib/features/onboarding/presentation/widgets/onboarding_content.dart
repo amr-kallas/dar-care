@@ -100,8 +100,9 @@ class OnboardingContent extends StatelessWidget {
                             fontSize: 15,
                             height: 1.5,
                             letterSpacing: 0.2,
-                            color:
-                                isDark ? Colors.white70 : AppColors.mediumGrey,
+                            color: isDark
+                                ? Colors.white70
+                                : AppColors.mediumGrey,
                           ),
                           textAlign: TextAlign.center,
                           maxLines: 4,

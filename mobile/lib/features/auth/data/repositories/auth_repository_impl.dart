@@ -51,10 +51,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    return await remoteDataSource.signIn(
-      email: email,
-      password: password,
-    );
+    return await remoteDataSource.signIn(email: email, password: password);
   }
 
   @override
@@ -97,4 +94,3 @@ class AuthRepositoryImpl implements AuthRepository {
     return remoteDataSource.authStateChanges();
   }
 }
-

@@ -10,16 +10,13 @@ import '../widgets/auth_primary_button.dart';
 import '../widgets/otp_pin_input.dart';
 
 class OtpVerificationScreen extends StatelessWidget {
-  const OtpVerificationScreen({
-    super.key,
-    this.phoneNumber = '+1 123 456 789',
-  });
+  const OtpVerificationScreen({super.key, this.phoneNumber = '+1 123 456 789'});
 
   final String? phoneNumber;
 
   FormGroup buildForm() => fb.group({
-        'pin': ['', Validators.required, Validators.minLength(6)],
-      });
+    'pin': ['', Validators.required, Validators.minLength(6)],
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,8 +26,10 @@ class OtpVerificationScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back,
-              color: isDark ? Colors.white : Colors.black),
+          icon: Icon(
+            Icons.arrow_back,
+            color: isDark ? Colors.white : Colors.black,
+          ),
           onPressed: () => context.pop(),
         ),
       ),
@@ -54,8 +53,9 @@ class OtpVerificationScreen extends StatelessWidget {
                   // ── Header ──
                   AuthHeader(
                     title: LocaleKeys.otp_verification_title.tr(),
-                    subtitle: LocaleKeys.otp_verification_description
-                        .tr(namedArgs: {'phoneNumber': phoneNumber ?? ''}),
+                    subtitle: LocaleKeys.otp_verification_description.tr(
+                      namedArgs: {'phoneNumber': phoneNumber ?? ''},
+                    ),
                   ),
                   const SizedBox(height: 48),
 
@@ -67,9 +67,11 @@ class OtpVerificationScreen extends StatelessWidget {
                   ReactiveFormConsumer(
                     builder: (context, form, child) => AuthPrimaryButton(
                       label: LocaleKeys.button_sign_in.tr(),
-                      onPressed: form.valid ? () {
-                         context.go(AppRouter.homePath);
-                      } : null,
+                      onPressed: form.valid
+                          ? () {
+                              context.go(AppRouter.homePath);
+                            }
+                          : null,
                     ),
                   ),
                   const SizedBox(height: 24),

@@ -1,8 +1,10 @@
-import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:solar_icon_pack/solar_icon_pack.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import 'package:dar_care/core/theme/app_colors.dart';
+
+import '../../../../../generated/locale_keys.g.dart';
 
 class ProviderCard extends StatelessWidget {
   const ProviderCard({
@@ -26,7 +28,7 @@ class ProviderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    
+
     // Card Colors
     final cardColor = isDark ? AppColors.surfaceDark : Colors.white;
     final borderColor = isDark ? AppColors.borderDark : Colors.grey.shade200;
@@ -39,17 +41,20 @@ class ProviderCard extends StatelessWidget {
         color: cardColor,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: borderColor),
-        boxShadow: isDark ? [] : [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: isDark
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min, // Use min to fit content, but outer container constraints might force it.
+        mainAxisSize: MainAxisSize
+            .min, // Use min to fit content, but outer container constraints might force it.
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,13 +63,21 @@ class ProviderCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: isDark ? AppColors.deepDarkGreen : const Color(0xFFFFF9C4),
+                  color: isDark
+                      ? AppColors.deepDarkGreen
+                      : const Color(0xFFFFF9C4),
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.ratingYellow.withValues(alpha: 0.3)),
+                  border: Border.all(
+                    color: AppColors.ratingYellow.withValues(alpha: 0.3),
+                  ),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.star, size: 14, color: AppColors.ratingYellow),
+                    const Icon(
+                      SolarBoldIcons.star,
+                      size: 14,
+                      color: AppColors.ratingYellow,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       rating.toString(),
@@ -86,8 +99,8 @@ class ProviderCard extends StatelessWidget {
                   color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(12),
                   image: const DecorationImage(
-                      image: NetworkImage('https://i.pravatar.cc/150?img=11'), 
-                      fit: BoxFit.cover,
+                    image: NetworkImage('https://i.pravatar.cc/150?img=11'),
+                    fit: BoxFit.cover,
                   ),
                 ),
               ),
@@ -117,50 +130,67 @@ class ProviderCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4), // Reduced spacing
-           Row(
-             mainAxisAlignment: MainAxisAlignment.end,
-             children: [
-               Text(
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Text(
                 distance,
                 style: theme.textTheme.bodySmall?.copyWith(fontSize: 11),
               ),
               const SizedBox(width: 4),
-              const Icon(Icons.location_on_outlined, size: 14, color: Colors.grey),
-             ],
-           ),
-          
+              const Icon(
+                SolarLinearIcons.mapPoint,
+                size: 14,
+                color: Colors.grey,
+              ),
+            ],
+          ),
+
           const Spacer(), // Use Spacer to push button to bottom if there's extra space, or just SizedBox(height: 12)
-          
+
           Row(
             children: [
-               Container(
-                 width: 36, 
-                 height: 36,
-                 decoration: BoxDecoration(
-                   color: isDark ? AppColors.deepDarkGreen : Colors.grey.shade100,
-                   shape: BoxShape.circle,
-                 ),
-                 child: const Icon(Icons.favorite_border, color: Colors.white70, size: 18),
-               ),
-               const SizedBox(width: 10),
-               Expanded(
-                 child: SizedBox(
-                   height: 40, // Explicit height for button
-                   child: ElevatedButton(
-                     onPressed: onTap,
-                     style: ElevatedButton.styleFrom(
-                       backgroundColor: AppColors.brightGreen,
-                       foregroundColor: Colors.white,
-                       elevation: 0,
-                       shape: RoundedRectangleBorder(
-                         borderRadius: BorderRadius.circular(20),
-                       ),
-                       padding: EdgeInsets.zero, // Remove padding to fit text in smaller height
-                     ),
-                     child: Text(LocaleKeys.button_book_now.tr(), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-                   ),
-                 ),
-               ),
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: isDark
+                      ? AppColors.deepDarkGreen
+                      : Colors.grey.shade100,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  SolarLinearIcons.heart,
+                  color: Colors.white70,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: SizedBox(
+                  height: 40, // Explicit height for button
+                  child: ElevatedButton(
+                    onPressed: onTap,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brightGreen,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: EdgeInsets
+                          .zero, // Remove padding to fit text in smaller height
+                    ),
+                    child: Text(
+                      LocaleKeys.button_book_now.tr(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ],

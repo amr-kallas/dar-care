@@ -79,10 +79,11 @@ class _AnimatedNextButtonState extends State<AnimatedNextButton>
             borderRadius: BorderRadius.circular(32),
             boxShadow: [
               BoxShadow(
-                color: (widget.isLastPage
-                        ? AppColors.accentPurple
-                        : AppColors.primaryDeepGreen)
-                    .withValues(alpha: 0.3),
+                color:
+                    (widget.isLastPage
+                            ? AppColors.accentPurple
+                            : AppColors.primaryDeepGreen)
+                        .withValues(alpha: 0.3),
                 blurRadius: 12,
                 spreadRadius: 0,
                 offset: const Offset(0, 4),

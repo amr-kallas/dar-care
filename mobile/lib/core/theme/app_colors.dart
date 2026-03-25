@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 
 /// Centralized color constants for the app

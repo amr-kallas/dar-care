@@ -44,4 +44,3 @@ class AuthSectionHeader extends StatelessWidget {
     );
   }
 }
-

@@ -6,14 +6,14 @@ class SplashAnimationController {
     required TickerProvider vsync,
     required Duration logoAnimationDuration,
     required Duration textAnimationDuration,
-  })  : _logoAnimationController = AnimationController(
-          vsync: vsync,
-          duration: logoAnimationDuration,
-        ),
-        _textAnimationController = AnimationController(
-          vsync: vsync,
-          duration: textAnimationDuration,
-        );
+  }) : _logoAnimationController = AnimationController(
+         vsync: vsync,
+         duration: logoAnimationDuration,
+       ),
+       _textAnimationController = AnimationController(
+         vsync: vsync,
+         duration: textAnimationDuration,
+       );
 
   final AnimationController _logoAnimationController;
   final AnimationController _textAnimationController;
@@ -23,15 +23,13 @@ class SplashAnimationController {
     end: 1.0,
   ).animate(_logoAnimationController);
 
-  late final Animation<Offset> textSlidingAnimation = Tween<Offset>(
-    begin: const Offset(0, 5),
-    end: Offset.zero,
-  ).animate(
-    CurvedAnimation(
-      parent: _textAnimationController,
-      curve: Curves.easeOut,
-    ),
-  );
+  late final Animation<Offset> textSlidingAnimation =
+      Tween<Offset>(begin: const Offset(0, 5), end: Offset.zero).animate(
+        CurvedAnimation(
+          parent: _textAnimationController,
+          curve: Curves.easeOut,
+        ),
+      );
 
   /// Start all animations
   void startAnimations() {
