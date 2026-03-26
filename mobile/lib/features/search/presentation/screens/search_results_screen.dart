@@ -1,4 +1,3 @@
-import 'package:dar_care/features/home/client/data/models/provider_model.dart';
 import 'package:dar_care/features/search/presentation/cubit/search_cubit.dart';
 import 'package:dar_care/features/search/presentation/cubit/search_state.dart';
 import 'package:dar_care/features/search/presentation/widgets/promo_banner.dart';

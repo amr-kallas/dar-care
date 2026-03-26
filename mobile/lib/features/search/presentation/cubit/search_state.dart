@@ -1,5 +1,6 @@
-import 'package:dar_care/features/home/client/data/models/provider_model.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../../home/data/models/provider_model.dart';
 
 part 'search_state.freezed.dart';
 

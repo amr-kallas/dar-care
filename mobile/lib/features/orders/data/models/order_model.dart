@@ -12,7 +12,7 @@ class OrderModel {
     return OrderModel(
       id: json['id'] as int,
       status: json['status'] as String,
-      serviceDate: DateTime.parse(json['service_date'] as String),
+      serviceDate: DateTime.parse((json['scheduled_at'] ?? json['service_date']) as String),
     );
   }
 }

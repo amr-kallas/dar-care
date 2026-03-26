@@ -9,7 +9,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
-import 'package:dar_care/features/home/home_screen.dart';
+import 'package:dar_care/features/home/presentation/home_screen.dart';
 import 'package:dar_care/features/search/presentation/screens/search_results_screen.dart';
 
 abstract class AppRouter {

@@ -114,5 +114,20 @@ abstract class  LocaleKeys {
   static const button_view_profile = 'button_view_profile';
   static const button_chat = 'button_chat';
   static const price_on_request = 'price_on_request';
+  static const profile_title = 'profile_title';
+  static const gold_member = 'gold_member';
+  static const completed_orders = 'completed_orders';
+  static const addresses = 'addresses';
+  static const my_rating = 'my_rating';
+  static const account_tab = 'account_tab';
+  static const edit_profile = 'edit_profile';
+  static const manage_addresses = 'manage_addresses';
+  static const settings_tab = 'settings_tab';
+  static const language = 'language';
+  static const notifications = 'notifications';
+  static const support_tab = 'support_tab';
+  static const help_center = 'help_center';
+  static const privacy_policy = 'privacy_policy';
+  static const logout = 'logout';
 
 }

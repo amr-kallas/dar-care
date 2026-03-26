@@ -1,5 +1,4 @@
-import 'package:dar_care/generated/locale_keys.g.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:dar_care/features/profile/presentation/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart';
@@ -9,10 +8,10 @@ import 'package:go_router/go_router.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 import '../../../../../core/theme/app_colors.dart';
-import 'package:dar_care/features/home/client/presentation/cubit/home_cubit.dart';
 import 'package:dar_care/core/di/injection.dart';
 import 'package:dar_care/features/orders/presentation/screens/orders_screen.dart';
 import 'package:dar_care/features/favorites/presentation/screens/favorites_screen.dart';
+import '../cubit/home_cubit.dart';
 import '../widgets/client_home_body.dart';
 
 class ClientMainScreen extends StatefulWidget {
@@ -32,26 +31,7 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
     ),
     const OrdersScreen(),
     const FavoritesScreen(),
-    Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(LocaleKeys.profile_screen_placeholder.tr()),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            icon: const Icon(SolarLinearIcons.logout, color: Colors.white),
-            label: const Text('Logout', style: TextStyle(color: Colors.white)),
-            onPressed: () {
-              context.read<AuthCubit>().signOut();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    ),
+    ProfileScreen()
   ];
 
   @override

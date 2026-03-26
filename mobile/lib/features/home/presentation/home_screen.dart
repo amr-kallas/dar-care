@@ -1,12 +1,13 @@
 import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth_state.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
+import 'package:dar_care/features/home/presentation/provider/screens/provider_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dar_care/features/home/client/presentation/screens/client_main_screen.dart';
-import 'package:dar_care/features/home/provider/presentation/screens/provider_main_screen.dart';
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:go_router/go_router.dart';
+
+import 'client/screens/client_main_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});

@@ -109,5 +109,20 @@
   "button_book_now": "احجز الآن",
   "button_view_profile": "عرض الملف الشخصي",
   "button_chat": "محادثة",
-  "price_on_request": "السعر عند الطلب"
+  "price_on_request": "السعر عند الطلب",
+  "profile_title": "الملف الشخصي",
+  "gold_member": "عضو ذهبي",
+  "completed_orders": "طلب مكتمل",
+  "addresses": "عناوين",
+  "my_rating": "تقييمي",
+  "account_tab": "الحساب",
+  "edit_profile": "تعديل الملف الشخصي",
+  "manage_addresses": "إدارة العناوين",
+  "settings_tab": "الإعدادات",
+  "language": "اللغة",
+  "notifications": "الإشعارات",
+  "support_tab": "الدعم",
+  "help_center": "مركز المساعدة",
+  "privacy_policy": "سياسة الخصوصية",
+  "logout": "تسجيل خروج"
 }

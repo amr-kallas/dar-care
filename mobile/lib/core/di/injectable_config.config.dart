@@ -40,12 +40,12 @@ import 'package:dar_care/features/favorites/domain/repositories/favorites_reposi
     as _i607;
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart'
     as _i919;
-import 'package:dar_care/features/home/client/data/repositories/home_repository_impl.dart'
-    as _i799;
-import 'package:dar_care/features/home/client/domain/repositories/home_repository.dart'
-    as _i8;
-import 'package:dar_care/features/home/client/presentation/cubit/home_cubit.dart'
-    as _i608;
+import 'package:dar_care/features/home/data/repositories/home_repository_impl.dart'
+    as _i668;
+import 'package:dar_care/features/home/domain/repositories/home_repository.dart'
+    as _i59;
+import 'package:dar_care/features/home/presentation/client/cubit/home_cubit.dart'
+    as _i253;
 import 'package:dar_care/features/orders/data/repositories/orders_repository_impl.dart'
     as _i862;
 import 'package:dar_care/features/orders/domain/repositories/orders_repository.dart'
@@ -86,11 +86,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i183.DepartmentCubit>(
       () => _i183.DepartmentCubit(gh<_i687.GetDepartmentsUseCase>()),
     );
+    gh.lazySingleton<_i59.HomeRepository>(
+      () => _i668.HomeRepositoryImpl(gh<_i454.SupabaseClient>()),
+    );
     gh.lazySingleton<_i484.SearchRepository>(
       () => _i997.SearchRepositoryImpl(gh<_i454.SupabaseClient>()),
-    );
-    gh.lazySingleton<_i8.HomeRepository>(
-      () => _i799.HomeRepositoryImpl(gh<_i454.SupabaseClient>()),
     );
     gh.lazySingleton<_i607.FavoritesRepository>(
       () => _i369.FavoritesRepositoryImpl(gh<_i454.SupabaseClient>()),
@@ -106,11 +106,11 @@ extension GetItInjectableX on _i174.GetIt {
         remoteDataSource: gh<_i107.AuthRemoteDataSource>(),
       ),
     );
-    gh.factory<_i608.HomeCubit>(
-      () => _i608.HomeCubit(gh<_i8.HomeRepository>()),
-    );
     gh.factory<_i777.SearchCubit>(
       () => _i777.SearchCubit(gh<_i484.SearchRepository>()),
+    );
+    gh.factory<_i253.HomeCubit>(
+      () => _i253.HomeCubit(gh<_i59.HomeRepository>()),
     );
     gh.factory<_i679.SignInUseCase>(
       () => _i679.SignInUseCase(repository: gh<_i287.AuthRepository>()),

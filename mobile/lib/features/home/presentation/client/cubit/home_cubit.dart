@@ -1,7 +1,8 @@
-import 'package:dar_care/features/home/client/domain/repositories/home_repository.dart';
-import 'package:dar_care/features/home/client/presentation/cubit/home_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+
+import '../../../domain/repositories/home_repository.dart';
+import 'home_state.dart';
 
 @injectable
 class HomeCubit extends Cubit<HomeState> {

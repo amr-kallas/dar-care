@@ -109,5 +109,20 @@
   "button_book_now": "Book Now",
   "button_view_profile": "View Profile",
   "button_chat": "Chat",
-  "price_on_request": "Price on Request"
+  "price_on_request": "Price on Request",
+  "profile_title": "Profile",
+  "gold_member": "Gold Member",
+  "completed_orders": "Completed Order",
+  "addresses": "Addresses",
+  "my_rating": "My Rating",
+  "account_tab": "Account",
+  "edit_profile": "Edit Profile",
+  "manage_addresses": "Manage Addresses",
+  "settings_tab": "Settings",
+  "language": "Language",
+  "notifications": "Notifications",
+  "support_tab": "Support",
+  "help_center": "Help Center",
+  "privacy_policy": "Privacy Policy",
+  "logout": "Log Out"
 }
