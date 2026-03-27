@@ -31,7 +31,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String fullName,
     required String phone,
-    required int departmentId,
+    required String departmentId,
     required int experienceYears,
     String? bio,
   }) async {

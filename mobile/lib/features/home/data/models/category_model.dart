@@ -2,7 +2,7 @@ import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'package:flutter/material.dart';
 
 class CategoryModel {
-  final int id;
+  final String id;
   final String name;
   final String? description;
 
@@ -14,7 +14,7 @@ class CategoryModel {
 
   factory CategoryModel.fromJson(Map<String, dynamic> json) {
     return CategoryModel(
-      id: json['id'] as int,
+      id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String?,
     );

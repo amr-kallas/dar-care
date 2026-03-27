@@ -1,7 +1,7 @@
 // Placeholder for OrderModel
 // Will need to create a proper model
 class OrderModel {
-  final int id;
+  final String id;
   final String status;
   final DateTime serviceDate;
   // ... other fields
@@ -10,7 +10,7 @@ class OrderModel {
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'] as int,
+      id: json['id'] as String,
       status: json['status'] as String,
       serviceDate: DateTime.parse((json['scheduled_at'] ?? json['service_date']) as String),
     );

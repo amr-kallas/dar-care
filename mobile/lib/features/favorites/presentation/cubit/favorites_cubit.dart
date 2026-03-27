@@ -26,7 +26,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
   }
 
-  Future<void> removeFavorite(int providerId) async {
+  Future<void> removeFavorite(String providerId) async {
     // Optimistic update
     final initialFavorites = state.favorites;
     emit(state.copyWith(

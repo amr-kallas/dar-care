@@ -183,7 +183,7 @@ class ProviderSignupScreen extends StatelessWidget {
                               ),
                             );
                           } else if (state is DepartmentLoaded) {
-                            return ReactiveDropdownField<AppDepartment>(
+                            return ReactiveDropdownField<AppDepartment?>(
                               formControlName: 'department',
                               decoration: InputDecoration(
                                 labelText: LocaleKeys.label_department.tr(),
@@ -192,7 +192,7 @@ class ProviderSignupScreen extends StatelessWidget {
                               ),
                               items: state.departments
                                   .map(
-                                    (d) => DropdownMenuItem(
+                                    (d) => DropdownMenuItem<AppDepartment?>(
                                       value: d,
                                       child: Text(d.name),
                                     ),

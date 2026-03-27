@@ -1,5 +1,7 @@
+import 'dart:core';
+
 class ProviderModel {
-  final int id;
+  final String id;
   final String userId;
   final String fullName;
   final String profession;
@@ -27,18 +29,33 @@ class ProviderModel {
 
   factory ProviderModel.fromJson(Map<String, dynamic> json) {
     // Handling nested JSON from Supabase joins
-    final userData = json['users'] as Map<String, dynamic>? ?? {};
-    final departmentData = json['departments'] as Map<String, dynamic>? ?? {};
+    final dynamic rawUser = json['users'] ?? json['user'];
+    Map<String, dynamic> userData = {};
+    if (rawUser is List && rawUser.isNotEmpty) {
+      userData = Map<String, dynamic>.from(rawUser.first as Map? ?? {});
+    } else if (rawUser is Map) {
+      userData = Map<String, dynamic>.from(rawUser);
+    }
+
+    print('ProviderModel Parsing: id=${json['id']} rawUser=$rawUser, parsedUserData=$userData');
+
+    final dynamic rawDept = json['departments'] ?? json['department'];
+    Map<String, dynamic> departmentData = {};
+    if (rawDept is List && rawDept.isNotEmpty) {
+      departmentData = Map<String, dynamic>.from(rawDept.first as Map? ?? {});
+    } else if (rawDept is Map) {
+      departmentData = Map<String, dynamic>.from(rawDept);
+    }
 
     return ProviderModel(
-      id: json['id'] as int,
+      id: json['id'] as String,
       userId: json['user_id'] as String,
-      fullName: userData['full_name'] as String? ?? 'Unknown Provider',
+      fullName: userData['full_name'] as String? ?? userData['name'] as String? ?? 'Unknown Provider',
       profession: departmentData['name'] as String? ?? 'Service Provider',
-      rating: (json['avg_rating'] as num?)?.toDouble() ?? 0.0,
+      rating: ((json['avg_rating'] as num?) ?? 0.0).toDouble(),
       imageUrl: json['image_url'] as String? ?? userData['avatar_url'] as String?,
       hourlyRate: (json['hourly_rate'] as num?)?.toDouble(),
-      experienceYears: json['experience_years'] as int?,
+      experienceYears: json['experience_years'] as int? ?? json['experience'] as int?,
       bio: json['bio'] as String?,
       // Assuming lat/long might be in addresses later, for now null
     );

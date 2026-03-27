@@ -4,7 +4,7 @@ class AppDepartment {
   const AppDepartment({required this.id, required this.name});
 
   /// Matches `departments.id`
-  final int id;
+  final String id;
 
   /// Display name shown in the dropdown
   final String name;
@@ -22,11 +22,11 @@ class AppDepartment {
   /// Create from JSON (from Supabase)
   factory AppDepartment.fromJson(Map<String, dynamic> json) {
     return AppDepartment(
-      id: json['id'] as int,
+      id: json['id'] as String,
       name: json['name'] as String,
     );
   }
 
   /// Empty department for initialization
-  static const empty = AppDepartment(id: 0, name: '');
+  static const empty = AppDepartment(id: '', name: '');
 }

@@ -6,6 +6,8 @@ import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:dar_care/core/theme/app_colors.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth_state.dart';
 
 import '../../../../../generated/locale_keys.g.dart';
 import '../cubit/home_cubit.dart';
@@ -87,13 +89,28 @@ class ClientHomeBody extends StatelessWidget {
                             ),
                           ],
                         ),
-                        Text(
-                          LocaleKeys.welcome_back.tr(
-                            namedArgs: {'name': 'Ahmed'},
-                          ),
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
+                        BlocBuilder<AuthCubit, AuthState>(
+                          builder: (context, authState) {
+                            String name = 'Unknown';
+                            if (authState is AuthAuthenticated && authState.user.fullName != null) {
+                              name = authState.user.fullName!;
+                            } else if (authState is AuthSignInSuccess && authState.user.fullName != null) {
+                              name = authState.user.fullName!;
+                            } else if (authState is AuthSignUpSuccess && authState.user.fullName != null) {
+                              name = authState.user.fullName!;
+                            }
+                            // Extract just the first name if available
+                            name = name.split(' ').first;
+
+                            return Text(
+                              LocaleKeys.welcome_back.tr(
+                                namedArgs: {'name': name},
+                              ),
+                              style: theme.textTheme.titleLarge?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          },
                         ),
                       ],
                     ),

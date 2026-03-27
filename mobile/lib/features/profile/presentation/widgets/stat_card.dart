@@ -21,10 +21,10 @@ class StatCard extends StatelessWidget {
       width: 110,
       height: 110,
       decoration: BoxDecoration(
-        color: isDark ? AppColors.surfaceDark : AppColors.lightGreen,
+        color: isDark ? AppColors.surfaceDark : AppColors.offWhite,
         shape: BoxShape.circle,
         border: Border.all(
-          color: isDark ? AppColors.borderDark : AppColors.cardBorderLight,
+          color: isDark ? AppColors.borderDark : AppColors.brightGreen,
           width: 1,
         ),
       ),

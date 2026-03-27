@@ -9,7 +9,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
 
   FavoritesRepositoryImpl(this._supabase);
 
-  Future<int> _getClientId() async {
+  Future<String> _getClientId() async {
     final clientRes = await _supabase
         .from('clients')
         .select('id')
@@ -67,7 +67,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
   }
 
   @override
-  Future<void> addFavorite(int providerId) async {
+  Future<void> addFavorite(String providerId) async {
     try {
       final clientId = await _getClientId();
       await _supabase.from('favorites').insert({
@@ -80,7 +80,7 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
   }
 
   @override
-  Future<void> removeFavorite(int providerId) async {
+  Future<void> removeFavorite(String providerId) async {
     try {
       final clientId = await _getClientId();
       await _supabase
