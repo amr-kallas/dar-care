@@ -1,4 +1,5 @@
 import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +28,7 @@ class ClientHomeBody extends StatelessWidget {
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
         if (state.status == HomeStatus.loading) {
-          return const Center(child: CircularProgressIndicator());
+          return const AppLoadingIndicator();
         }
 
         if (state.status == HomeStatus.failure) {
@@ -92,11 +93,14 @@ class ClientHomeBody extends StatelessWidget {
                         BlocBuilder<AuthCubit, AuthState>(
                           builder: (context, authState) {
                             String name = 'Unknown';
-                            if (authState is AuthAuthenticated && authState.user.fullName != null) {
+                            if (authState is AuthAuthenticated &&
+                                authState.user.fullName != null) {
                               name = authState.user.fullName!;
-                            } else if (authState is AuthSignInSuccess && authState.user.fullName != null) {
+                            } else if (authState is AuthSignInSuccess &&
+                                authState.user.fullName != null) {
                               name = authState.user.fullName!;
-                            } else if (authState is AuthSignUpSuccess && authState.user.fullName != null) {
+                            } else if (authState is AuthSignUpSuccess &&
+                                authState.user.fullName != null) {
                               name = authState.user.fullName!;
                             }
                             // Extract just the first name if available

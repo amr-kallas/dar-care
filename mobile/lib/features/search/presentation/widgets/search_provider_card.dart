@@ -140,24 +140,10 @@ class SearchProviderCard extends StatelessWidget {
 
               const SizedBox(width: 12),
 
-              // Avatar with Rating
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Container(
-                    width: 60,
-                    height: 60,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: Colors.grey.withValues(alpha: 0.2),
-                      ),
-                      image: DecorationImage(
-                        image: NetworkImage(imageUrl),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
+                  _ProviderAvatar(imageUrl: imageUrl),
                   Positioned(
                     bottom: -8,
                     left: 0,
@@ -205,9 +191,14 @@ class SearchProviderCard extends StatelessWidget {
               children: [
                 if (tag != null)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
-                      color: isDark ? AppColors.deepDarkGreen : Colors.grey.shade100,
+                      color: isDark
+                          ? AppColors.deepDarkGreen
+                          : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Text(
@@ -253,7 +244,7 @@ class SearchProviderCard extends StatelessWidget {
                 child: SizedBox(
                   height: 48,
                   child: ElevatedButton(
-                    onPressed: isFullyBooked ? null : () {},
+                    onPressed: isFullyBooked ? null : onTap,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: isFullyBooked
                           ? Colors.transparent
@@ -290,6 +281,36 @@ class SearchProviderCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProviderAvatar extends StatelessWidget {
+  const _ProviderAvatar({required this.imageUrl});
+
+  final String imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = imageUrl.trim().isNotEmpty;
+
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+      ),
+      child: ClipOval(
+        child: hasImage
+            ? Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) =>
+                    const Icon(Icons.person, color: Colors.grey, size: 28),
+              )
+            : const Icon(Icons.person, color: Colors.grey, size: 28),
       ),
     );
   }

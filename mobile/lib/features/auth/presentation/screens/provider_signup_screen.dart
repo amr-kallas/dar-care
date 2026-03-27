@@ -20,6 +20,7 @@ import '../widgets/auth_role_badge.dart';
 import '../widgets/auth_section_header.dart';
 import '../widgets/auth_social_login_section.dart';
 import '../widgets/auth_text_link_row.dart';
+import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 
 class ProviderSignupScreen extends StatelessWidget {
   const ProviderSignupScreen({super.key});
@@ -168,7 +169,8 @@ class ProviderSignupScreen extends StatelessWidget {
                       // SECTION 2 — Professional Details
                       // ══════════════════════════════════════════════════════════
                       AuthSectionHeader(
-                        title: LocaleKeys.auth_provider_section_professional.tr(),
+                        title: LocaleKeys.auth_provider_section_professional
+                            .tr(),
                       ),
                       const SizedBox(height: 16),
 
@@ -176,11 +178,10 @@ class ProviderSignupScreen extends StatelessWidget {
                       BlocBuilder<DepartmentCubit, DepartmentState>(
                         builder: (context, state) {
                           if (state is DepartmentLoading) {
-                            return const Center(
-                              child: Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(),
-                              ),
+                            return const AppLoadingIndicator(
+                              padding: EdgeInsets.all(8),
+                              size: 24,
+                              strokeWidth: 3,
                             );
                           } else if (state is DepartmentLoaded) {
                             return ReactiveDropdownField<AppDepartment?>(
@@ -268,13 +269,16 @@ class ProviderSignupScreen extends StatelessWidget {
                                       form.control('department').value
                                           as AppDepartment;
                                   context.read<AuthCubit>().signUpProvider(
-                                    email: (form.control('email').value as String)
-                                        .trim(),
+                                    email:
+                                        (form.control('email').value as String)
+                                            .trim(),
                                     password:
-                                        (form.control('password').value as String)
+                                        (form.control('password').value
+                                                as String)
                                             .trim(),
                                     fullName:
-                                        (form.control('fullName').value as String)
+                                        (form.control('fullName').value
+                                                as String)
                                             .trim(),
                                     phone:
                                         (form.control('phoneNumber').value

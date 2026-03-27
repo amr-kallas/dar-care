@@ -6,6 +6,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -21,7 +22,7 @@ class FavoritesScreen extends StatelessWidget {
         body: BlocBuilder<FavoritesCubit, FavoritesState>(
           builder: (context, state) {
             if (state.status == FavoritesStatus.loading) {
-              return const Center(child: CircularProgressIndicator());
+              return const AppLoadingIndicator();
             }
 
             if (state.status == FavoritesStatus.failure) {
@@ -43,16 +44,16 @@ class FavoritesScreen extends StatelessWidget {
                   profession: provider.profession,
                   rating: provider.rating.toStringAsFixed(1),
                   distance: LocaleKeys.distance_from_you.tr(
-                      namedArgs: {'distance': '2.0'}
+                    namedArgs: {'distance': '2.0'},
                   ),
                   imageUrl: provider.imageUrl ?? '',
                   hourlyRate: provider.hourlyRate != null
-                       ? '\$${provider.hourlyRate}/hr'
-                       : LocaleKeys.price_on_request.tr(),
+                      ? '\$${provider.hourlyRate}/hr'
+                      : LocaleKeys.price_on_request.tr(),
                   availabilityText: LocaleKeys.available_now.tr(),
                   isAvailable: true,
                   onTap: () {
-                     // Navigate to provider details
+                    // Navigate to provider details
                   },
                 );
               },
@@ -63,4 +64,3 @@ class FavoritesScreen extends StatelessWidget {
     );
   }
 }
-

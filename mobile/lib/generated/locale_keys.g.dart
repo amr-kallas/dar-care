@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class  LocaleKeys {
+abstract class LocaleKeys {
   static const app_name = 'app_name';
   static const onboarding_title_1 = 'onboarding_title_1';
   static const onboarding_subtitle_1 = 'onboarding_subtitle_1';
@@ -27,7 +27,8 @@ abstract class  LocaleKeys {
   static const auth_join_as = 'auth_join_as';
   static const auth_provider_signup_subtitle = 'auth_provider_signup_subtitle';
   static const auth_provider_section_basic = 'auth_provider_section_basic';
-  static const auth_provider_section_professional = 'auth_provider_section_professional';
+  static const auth_provider_section_professional =
+      'auth_provider_section_professional';
   static const label_email = 'label_email';
   static const label_password = 'label_password';
   static const label_full_name = 'label_full_name';
@@ -68,8 +69,10 @@ abstract class  LocaleKeys {
   static const validation_invalid_phone = 'validation_invalid_phone';
   static const validation_required_otp = 'validation_required_otp';
   static const validation_min_otp = 'validation_min_otp';
-  static const validation_required_department = 'validation_required_department';
-  static const validation_required_experience = 'validation_required_experience';
+  static const validation_required_department =
+      'validation_required_department';
+  static const validation_required_experience =
+      'validation_required_experience';
   static const validation_invalid_experience = 'validation_invalid_experience';
   static const home_tab = 'home_tab';
   static const orders_tab = 'orders_tab';
@@ -129,5 +132,25 @@ abstract class  LocaleKeys {
   static const help_center = 'help_center';
   static const privacy_policy = 'privacy_policy';
   static const logout = 'logout';
-
+  static const orders_empty_title = 'orders_empty_title';
+  static const orders_empty_subtitle = 'orders_empty_subtitle';
+  static const orders_error_title = 'orders_error_title';
+  static const orders_error_generic = 'orders_error_generic';
+  static const orders_retry_button = 'orders_retry_button';
+  static const orders_item_title = 'orders_item_title';
+  static const orders_scheduled_at = 'orders_scheduled_at';
+  static const order_status_pending = 'order_status_pending';
+  static const order_status_confirmed = 'order_status_confirmed';
+  static const order_status_completed = 'order_status_completed';
+  static const order_status_cancelled = 'order_status_cancelled';
+  static const orders_history_title = 'orders_history_title';
+  static const orders_filter_all = 'orders_filter_all';
+  static const orders_filter_pending = 'orders_filter_pending';
+  static const orders_filter_completed = 'orders_filter_completed';
+  static const orders_filter_cancelled = 'orders_filter_cancelled';
+  static const orders_item_subtitle = 'orders_item_subtitle';
+  static const orders_address_label = 'orders_address_label';
+  static const orders_no_address = 'orders_no_address';
+  static const orders_action_repeat = 'orders_action_repeat';
+  static const orders_action_view_details = 'orders_action_view_details';
 }

@@ -6,24 +6,29 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class OrdersCubit extends Cubit<OrdersState> {
-  final OrdersRepository _repository;
-
   OrdersCubit(this._repository) : super(const OrdersState());
 
+  final OrdersRepository _repository;
+
   Future<void> loadOrders() async {
-    emit(state.copyWith(status: OrdersStatus.loading));
+    emit(state.copyWith(status: OrdersStatus.loading, errorMessage: null));
 
     try {
       final orders = await _repository.getClientOrders();
-      emit(state.copyWith(
-        status: OrdersStatus.success,
-        orders: orders,
-      ));
+      emit(
+        state.copyWith(
+          status: OrdersStatus.success,
+          orders: orders,
+          errorMessage: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: OrdersStatus.failure,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: OrdersStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 
@@ -32,25 +37,29 @@ class OrdersCubit extends Cubit<OrdersState> {
     required DateTime serviceDate,
     required String address,
     required String notes,
+    String? serviceId,
+    String? addressId,
   }) async {
-    emit(state.copyWith(status: OrdersStatus.loading));
+    emit(state.copyWith(status: OrdersStatus.loading, errorMessage: null));
 
     try {
       await _repository.createOrder(
-          provider: provider,
-          serviceDate: serviceDate,
-          address: address,
-          notes: notes,
+        provider: provider,
+        serviceDate: serviceDate,
+        address: address,
+        notes: notes,
+        serviceId: serviceId,
+        addressId: addressId,
       );
 
-      // Reload orders to show new one
       await loadOrders();
     } catch (e) {
-      emit(state.copyWith(
-        status: OrdersStatus.failure,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: OrdersStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 }
-

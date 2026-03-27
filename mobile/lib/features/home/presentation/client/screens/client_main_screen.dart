@@ -24,14 +24,14 @@ class ClientMainScreen extends StatefulWidget {
 class _ClientMainScreenState extends State<ClientMainScreen> {
   int _currentIndex = 0;
 
-  List<Widget> get _screens => [
+  late final List<Widget> _screens = [
     BlocProvider(
       create: (context) => getIt<HomeCubit>()..loadHomeData(),
       child: const ClientHomeBody(),
     ),
     const OrdersScreen(),
     const FavoritesScreen(),
-    ProfileScreen()
+    ProfileScreen(),
   ];
 
   @override
@@ -51,7 +51,7 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
       },
       child: Scaffold(
         extendBody: true,
-        body: _screens[_currentIndex],
+        body: IndexedStack(index: _currentIndex, children: _screens),
         bottomNavigationBar: CurvedNavigationBar(
           index: _currentIndex,
           backgroundColor: Colors.transparent,

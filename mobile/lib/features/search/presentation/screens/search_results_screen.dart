@@ -1,51 +1,65 @@
+import 'package:dar_care/core/di/injection.dart';
 import 'package:dar_care/features/search/presentation/cubit/search_cubit.dart';
 import 'package:dar_care/features/search/presentation/cubit/search_state.dart';
+import 'package:dar_care/features/search/presentation/widgets/filter_chip_widget.dart';
 import 'package:dar_care/features/search/presentation/widgets/promo_banner.dart';
 import 'package:dar_care/features/search/presentation/widgets/search_provider_card.dart';
-import 'package:dar_care/features/search/presentation/widgets/filter_chip_widget.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart'; // Import Bloc
-
-import 'package:dar_care/core/di/injection.dart'; // Import Injection
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_loading_indicator.dart';
 
 class SearchResultsScreen extends StatelessWidget {
-  const SearchResultsScreen({super.key});
+  const SearchResultsScreen({super.key, this.initialQuery});
+
+  final String? initialQuery;
 
   @override
   Widget build(BuildContext context) {
+    final query = initialQuery?.trim() ?? '';
 
-    // Provide search cubit
     return BlocProvider(
-      create: (context) => getIt<SearchCubit>(),
-      child: const _SearchResultsContent(),
+      create: (context) {
+        final cubit = getIt<SearchCubit>();
+        if (query.isNotEmpty) {
+          cubit.search(query);
+        }
+        return cubit;
+      },
+      child: _SearchResultsContent(initialQuery: query),
     );
   }
 }
 
 class _SearchResultsContent extends StatefulWidget {
-  const _SearchResultsContent();
+  const _SearchResultsContent({required this.initialQuery});
+
+  final String initialQuery;
 
   @override
   State<_SearchResultsContent> createState() => _SearchResultsContentState();
 }
 
 class _SearchResultsContentState extends State<_SearchResultsContent> {
-  final TextEditingController _searchController = TextEditingController();
+  late final TextEditingController _searchController;
 
   @override
   void initState() {
     super.initState();
-    // Potentially auto-focus or load initial results if search term passed
+    _searchController = TextEditingController(text: widget.initialQuery);
   }
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _submitSearch() {
+    context.read<SearchCubit>().search(_searchController.text);
   }
 
   @override
@@ -57,14 +71,12 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: isDark
                           ? AppColors.surfaceDark
@@ -72,8 +84,8 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                        icon: const Icon(Icons.arrow_forward),
-                        onPressed: () => Navigator.of(context).pop(), // Functional back button
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.arrow_back),
                     ),
                   ),
                   Text(
@@ -95,8 +107,6 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
                 ],
               ),
             ),
-
-            // Search Bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
@@ -114,15 +124,14 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextField(
-                      textAlign: TextAlign.right,
                       controller: _searchController,
+                      textInputAction: TextInputAction.search,
+                      onSubmitted: (_) => _submitSearch(),
                       decoration: InputDecoration(
                         hintText: LocaleKeys.search_hint.tr(),
                         suffixIcon: IconButton(
-                            icon: const Icon(Icons.search),
-                            onPressed: () {
-                              context.read<SearchCubit>().search(_searchController.text);
-                            },
+                          icon: const Icon(Icons.search),
+                          onPressed: _submitSearch,
                         ),
                         filled: true,
                         fillColor: isDark
@@ -138,15 +147,11 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
                 ],
               ),
             ),
-
             const SizedBox(height: 24),
-
-            // Chips
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   FilterChipWidget(
                     label: LocaleKeys.filter_highest_rated.tr(),
@@ -169,56 +174,66 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
                 ],
               ),
             ),
-
             const SizedBox(height: 16),
-
-            // Promo Banner
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 24),
               child: PromoBanner(),
             ),
-
             const SizedBox(height: 24),
-
-            // Results List
             Expanded(
               child: BlocBuilder<SearchCubit, SearchState>(
                 builder: (context, state) {
                   if (state.status == SearchStatus.loading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const AppLoadingIndicator();
                   }
 
                   if (state.status == SearchStatus.failure) {
-                     return Center(child: Text('Error: ${state.errorMessage}'));
-                  }
-
-                  if (state.results.isEmpty && state.status == SearchStatus.success) {
-                    return const Center(child: Text('No results found'));
+                    return _FailureState(
+                      message: state.errorMessage ?? 'Failed to load results.',
+                      onRetry: _submitSearch,
+                    );
                   }
 
                   if (state.status == SearchStatus.initial) {
-                      return const Center(child: Text('Type to search providers'));
+                    return Center(
+                      child: Text(
+                        LocaleKeys.search_hint.tr(),
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+
+                  if (state.results.isEmpty) {
+                    return const Center(
+                      child: Text(
+                        'No providers found for this search.',
+                        textAlign: TextAlign.center,
+                      ),
+                    );
                   }
 
                   return ListView.separated(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
                     itemCount: state.results.length,
-                    separatorBuilder: (context, index) => const SizedBox(height: 16),
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 16),
                     itemBuilder: (context, index) {
                       final provider = state.results[index];
+                      final hourlyRateText = provider.hourlyRate != null
+                          ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
+                          : LocaleKeys.price_on_request.tr();
+
                       return SearchProviderCard(
                         name: provider.fullName,
                         profession: provider.profession,
                         rating: provider.rating.toStringAsFixed(1),
                         distance: LocaleKeys.distance_from_you.tr(
-                            namedArgs: {'distance': '2.0'} // TODO: Calculate distance
+                          namedArgs: {'distance': '2.0'},
                         ),
                         imageUrl: provider.imageUrl ?? '',
-                        hourlyRate: provider.hourlyRate != null
-                             ? '\$${provider.hourlyRate}/hr'
-                             : LocaleKeys.price_on_request.tr(),
-                        availabilityText: LocaleKeys.available_now.tr(), // Mock
-                        isAvailable: true, // Mock
+                        hourlyRate: hourlyRateText,
+                        availabilityText: LocaleKeys.available_now.tr(),
+                        isAvailable: true,
                         onTap: () {},
                       );
                     },
@@ -226,6 +241,36 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
                 },
               ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _FailureState extends StatelessWidget {
+  const _FailureState({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: AppColors.errorRed,
+              size: 30,
+            ),
+            const SizedBox(height: 12),
+            Text(message, textAlign: TextAlign.center),
+            const SizedBox(height: 16),
+            ElevatedButton(onPressed: onRetry, child: const Text('Try again')),
           ],
         ),
       ),

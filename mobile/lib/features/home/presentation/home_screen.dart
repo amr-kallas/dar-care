@@ -8,6 +8,7 @@ import 'package:dar_care/core/utils/app_router.dart';
 import 'package:go_router/go_router.dart';
 
 import 'client/screens/client_main_screen.dart';
+import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -59,7 +60,7 @@ class HomeScreen extends StatelessWidget {
         }
 
         // Fallback or loading state
-        return const Scaffold(body: Center(child: CircularProgressIndicator()));
+        return const Scaffold(body: AppLoadingIndicator());
       },
     );
   }

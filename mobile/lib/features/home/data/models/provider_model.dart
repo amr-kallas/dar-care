@@ -37,8 +37,6 @@ class ProviderModel {
       userData = Map<String, dynamic>.from(rawUser);
     }
 
-    print('ProviderModel Parsing: id=${json['id']} rawUser=$rawUser, parsedUserData=$userData');
-
     final dynamic rawDept = json['departments'] ?? json['department'];
     Map<String, dynamic> departmentData = {};
     if (rawDept is List && rawDept.isNotEmpty) {
@@ -48,14 +46,19 @@ class ProviderModel {
     }
 
     return ProviderModel(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      fullName: userData['full_name'] as String? ?? userData['name'] as String? ?? 'Unknown Provider',
+      id: (json['id'] ?? '').toString(),
+      userId: (json['user_id'] ?? '').toString(),
+      fullName:
+          userData['full_name'] as String? ??
+          userData['name'] as String? ??
+          'Unknown Provider',
       profession: departmentData['name'] as String? ?? 'Service Provider',
       rating: ((json['avg_rating'] as num?) ?? 0.0).toDouble(),
-      imageUrl: json['image_url'] as String? ?? userData['avatar_url'] as String?,
+      imageUrl:
+          json['image_url'] as String? ?? userData['avatar_url'] as String?,
       hourlyRate: (json['hourly_rate'] as num?)?.toDouble(),
-      experienceYears: json['experience_years'] as int? ?? json['experience'] as int?,
+      experienceYears:
+          json['experience_years'] as int? ?? json['experience'] as int?,
       bio: json['bio'] as String?,
       // Assuming lat/long might be in addresses later, for now null
     );

@@ -5,30 +5,47 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class SearchCubit extends Cubit<SearchState> {
-  final SearchRepository _repository;
-
   SearchCubit(this._repository) : super(const SearchState());
 
+  final SearchRepository _repository;
+  int _latestRequestId = 0;
+
   Future<void> search(String query) async {
-    if (query.isEmpty) {
-      emit(const SearchState()); // Reset
+    final normalizedQuery = query.trim();
+
+    if (normalizedQuery.isEmpty) {
+      emit(const SearchState());
       return;
     }
 
-    emit(state.copyWith(status: SearchStatus.loading));
+    final requestId = ++_latestRequestId;
+    emit(state.copyWith(status: SearchStatus.loading, errorMessage: null));
 
     try {
-      final results = await _repository.searchProviders(query);
-      emit(state.copyWith(
-        status: SearchStatus.success,
-        results: results,
-      ));
+      final results = await _repository.searchProviders(normalizedQuery);
+      if (requestId != _latestRequestId) {
+        return;
+      }
+
+      emit(
+        state.copyWith(
+          status: SearchStatus.success,
+          results: results,
+          errorMessage: null,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: SearchStatus.failure,
-        errorMessage: e.toString(),
-      ));
+      if (requestId != _latestRequestId) {
+        return;
+      }
+
+      emit(
+        state.copyWith(
+          status: SearchStatus.failure,
+          errorMessage: e.toString(),
+          results: const [],
+        ),
+      );
     }
   }
 }
-

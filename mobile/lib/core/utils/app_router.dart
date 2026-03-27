@@ -78,7 +78,13 @@ abstract class AppRouter {
       GoRoute(
         path: searchResultsPath,
         name: 'search-results',
-        builder: (context, state) => const SearchResultsScreen(),
+        builder: (context, state) {
+          final extraQuery = state.extra is String
+              ? state.extra as String
+              : null;
+          final query = extraQuery ?? state.uri.queryParameters['q'];
+          return SearchResultsScreen(initialQuery: query);
+        },
       ),
     ],
   );
