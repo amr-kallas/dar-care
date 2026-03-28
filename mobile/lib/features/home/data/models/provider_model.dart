@@ -1,31 +1,64 @@
 import 'dart:core';
 
+import 'package:dar_care/core/utils/localized_db_text.dart';
+
 class ProviderModel {
   final String id;
   final String userId;
   final String fullName;
-  final String profession;
+  final LocalizedDbText professionText;
   final double rating;
   final String? imageUrl;
   final double? latitude;
   final double? longitude;
   final double? hourlyRate;
   final int? experienceYears;
-  final String? bio;
+  final LocalizedDbText bioText;
 
   const ProviderModel({
     required this.id,
     required this.userId,
     required this.fullName,
-    required this.profession,
+    required this.professionText,
     required this.rating,
     this.imageUrl,
     this.latitude,
     this.longitude,
     this.hourlyRate,
     this.experienceYears,
-    this.bio,
+    this.bioText = const LocalizedDbText(),
   });
+
+  /// Backward-compatible default profession value.
+  String get profession => professionText.defaultValue;
+
+  /// Backward-compatible default bio value.
+  String? get bio => bioText.isEmpty ? null : bioText.defaultValue;
+
+  String professionForLanguage(String languageCode) {
+    return professionText.resolve(
+      languageCode: languageCode,
+      fallbackLanguageCode: 'en',
+    );
+  }
+
+  String? bioForLanguage(String languageCode) {
+    if (bioText.isEmpty) {
+      return null;
+    }
+    return bioText.resolve(languageCode: languageCode, fallbackLanguageCode: 'en');
+  }
+
+  bool matchesKeyword(String keyword) {
+    final normalized = keyword.trim().toLowerCase();
+    if (normalized.isEmpty) {
+      return false;
+    }
+
+    return fullName.toLowerCase().contains(normalized) ||
+        professionText.containsKeyword(normalized) ||
+        bioText.containsKeyword(normalized);
+  }
 
   factory ProviderModel.fromJson(Map<String, dynamic> json) {
     // Handling nested JSON from Supabase joins
@@ -58,14 +91,16 @@ class ProviderModel {
           userData['full_name'] as String? ??
           userData['name'] as String? ??
           'Unknown Provider',
-      profession: departmentData['name'] as String? ?? 'Service Provider',
+      professionText: LocalizedDbText.fromSupabase(
+        departmentData['name'] ?? 'Service Provider',
+      ),
       rating: ((json['avg_rating'] as num?) ?? 0.0).toDouble(),
       imageUrl:
           json['image_url'] as String? ?? userData['avatar_url'] as String?,
       hourlyRate: (rawHourlyRate as num?)?.toDouble(),
       experienceYears:
           json['experience_years'] as int? ?? json['experience'] as int?,
-      bio: json['bio'] as String?,
+      bioText: LocalizedDbText.fromSupabase(json['bio']),
       // Assuming lat/long might be in addresses later, for now null
     );
   }

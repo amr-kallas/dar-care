@@ -27,18 +27,11 @@ class SearchRepositoryImpl implements SearchRepository {
           .map(ProviderModel.fromJson)
           .toList(growable: false);
 
-      final keyword = normalizedQuery.toLowerCase();
       return providers
-          .where((provider) => _matches(provider, keyword))
+          .where((provider) => provider.matchesKeyword(normalizedQuery))
           .toList(growable: false);
     } catch (e) {
       throw Exception('Search request failed: $e');
     }
-  }
-
-  bool _matches(ProviderModel provider, String keyword) {
-    return provider.fullName.toLowerCase().contains(keyword) ||
-        provider.profession.toLowerCase().contains(keyword) ||
-        (provider.bio?.toLowerCase().contains(keyword) ?? false);
   }
 }

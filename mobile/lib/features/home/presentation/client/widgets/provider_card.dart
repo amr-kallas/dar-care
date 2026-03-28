@@ -1,3 +1,4 @@
+import 'package:dar_care/gen/assets.gen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
@@ -28,6 +29,7 @@ class ProviderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final hasProviderImage = imageUrl.trim().isNotEmpty;
 
     // Card Colors
     final cardColor = isDark ? AppColors.surfaceDark : Colors.white;
@@ -98,10 +100,22 @@ class ProviderCard extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.grey.shade300,
                   borderRadius: BorderRadius.circular(12),
-                  image: const DecorationImage(
-                    image: NetworkImage('https://i.pravatar.cc/150?img=11'),
-                    fit: BoxFit.cover,
-                  ),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: hasProviderImage
+                      ? Image.network(
+                          imageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Assets.images.png.defaultAvatar.image(
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        )
+                      : Assets.images.png.defaultAvatar.image(
+                          fit: BoxFit.cover,
+                        ),
                 ),
               ),
             ],

@@ -1,5 +1,6 @@
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
+import 'package:dar_care/gen/assets.gen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -24,6 +25,7 @@ class ClientHomeBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final languageCode = context.locale.languageCode;
 
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
@@ -119,11 +121,9 @@ class ClientHomeBody extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(width: 12),
-                    const CircleAvatar(
+                    CircleAvatar(
                       radius: 24,
-                      backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/150?img=3',
-                      ),
+                      backgroundImage: Assets.images.png.defaultAvatar.provider(),
                     ),
                   ],
                 ),
@@ -204,7 +204,7 @@ class ClientHomeBody extends StatelessWidget {
                     return ServiceItem(
                       icon: category
                           .icon, // Assuming CategoryModel has an icon getter
-                      label: category.name,
+                      label: category.localizedName(languageCode),
                       onTap: () {
                         // Navigate to category details or filter
                       },
@@ -238,7 +238,9 @@ class ClientHomeBody extends StatelessWidget {
                         final provider = state.topProviders[index];
                         return ProviderCard(
                           name: provider.fullName,
-                          profession: provider.profession,
+                          profession: provider.professionForLanguage(
+                            languageCode,
+                          ),
                           rating: provider.rating,
                           distance: LocaleKeys.distance_from_you.tr(
                             namedArgs: {

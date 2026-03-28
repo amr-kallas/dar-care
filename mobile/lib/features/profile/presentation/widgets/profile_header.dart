@@ -1,4 +1,5 @@
 import 'dart:ui' as ui;
+import 'package:dar_care/gen/assets.gen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
@@ -31,11 +32,9 @@ class ProfileHeader extends StatelessWidget {
                   end: Alignment.bottomCenter,
                 ),
               ),
-              child: const CircleAvatar(
+              child: CircleAvatar(
                 radius: 46,
-                backgroundImage: NetworkImage(
-                  'https://i.pravatar.cc/150?img=11',
-                ), // Placeholder image
+                backgroundImage: Assets.images.png.defaultAvatar.provider(),
               ),
             ),
             Positioned(

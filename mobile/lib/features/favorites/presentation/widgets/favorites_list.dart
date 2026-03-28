@@ -18,6 +18,8 @@ class FavoritesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final languageCode = context.locale.languageCode;
+
     return RefreshIndicator(
       onRefresh: onRefresh,
       child: ListView.separated(
@@ -29,7 +31,7 @@ class FavoritesList extends StatelessWidget {
           final provider = favorites[index];
           return SearchProviderCard(
             name: provider.fullName,
-            profession: provider.profession,
+            profession: provider.professionForLanguage(languageCode),
             rating: provider.rating.toStringAsFixed(1),
             distance: LocaleKeys.distance_from_you.tr(
               namedArgs: {'distance': '2.0'},

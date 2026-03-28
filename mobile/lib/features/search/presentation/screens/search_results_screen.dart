@@ -75,6 +75,7 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final languageCode = context.locale.languageCode;
 
     return BlocListener<FavoritesCubit, FavoritesState>(
       listenWhen: (previous, current) =>
@@ -254,7 +255,9 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
 
                         return SearchProviderCard(
                           name: provider.fullName,
-                          profession: provider.profession,
+                          profession: provider.professionForLanguage(
+                            languageCode,
+                          ),
                           rating: provider.rating.toStringAsFixed(1),
                           distance: LocaleKeys.distance_from_you.tr(
                             namedArgs: {'distance': '2.0'},

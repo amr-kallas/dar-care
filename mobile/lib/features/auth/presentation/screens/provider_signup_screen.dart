@@ -184,6 +184,7 @@ class ProviderSignupScreen extends StatelessWidget {
                               strokeWidth: 3,
                             );
                           } else if (state is DepartmentLoaded) {
+                            final languageCode = context.locale.languageCode;
                             return ReactiveDropdownField<AppDepartment?>(
                               formControlName: 'department',
                               decoration: InputDecoration(
@@ -195,7 +196,9 @@ class ProviderSignupScreen extends StatelessWidget {
                                   .map(
                                     (d) => DropdownMenuItem<AppDepartment?>(
                                       value: d,
-                                      child: Text(d.name),
+                                      child: Text(
+                                        d.nameForLanguage(languageCode),
+                                      ),
                                     ),
                                   )
                                   .toList(),

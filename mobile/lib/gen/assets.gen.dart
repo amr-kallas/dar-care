@@ -62,8 +62,12 @@ class $AssetsImagesPngGen {
   AssetGenImage get dareCareLogo =>
       const AssetGenImage('assets/images/png/DareCareLogo.png');
 
+  /// File path: assets/images/png/default_avatar.png
+  AssetGenImage get defaultAvatar =>
+      const AssetGenImage('assets/images/png/default_avatar.png');
+
   /// List of all assets
-  List<AssetGenImage> get values => [dareCareLogo];
+  List<AssetGenImage> get values => [dareCareLogo, defaultAvatar];
 }
 
 class Assets {

@@ -1,3 +1,4 @@
+import 'package:dar_care/gen/assets.gen.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -320,9 +321,9 @@ class _ProviderAvatar extends StatelessWidget {
                 imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>
-                    const Icon(SolarLinearIcons.user, color: Colors.grey, size: 28),
+                    Assets.images.png.defaultAvatar.image(fit: BoxFit.cover),
               )
-            : const Icon(SolarLinearIcons.user, color: Colors.grey, size: 28),
+            : Assets.images.png.defaultAvatar.image(fit: BoxFit.cover),
       ),
     );
   }

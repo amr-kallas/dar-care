@@ -1,13 +1,26 @@
+import 'package:dar_care/core/utils/localized_db_text.dart';
+
 /// Represents a service department that a provider can belong to.
 /// Maps to the `departments` table in the database.
 class AppDepartment {
-  const AppDepartment({required this.id, required this.name});
+  const AppDepartment({required this.id, required this.nameText});
 
   /// Matches `departments.id`
   final String id;
 
-  /// Display name shown in the dropdown
-  final String name;
+  /// Flexible name payload coming from Supabase (`{"ar","en"}` or plain text).
+  final LocalizedDbText nameText;
+
+  /// Backward-compatible default display value.
+  String get name => nameText.defaultValue;
+
+  /// Locale-aware name lookup with fallback support.
+  String nameForLanguage(String languageCode) {
+    return nameText.resolve(
+      languageCode: languageCode,
+      fallbackLanguageCode: 'en',
+    );
+  }
 
   @override
   String toString() => name;
@@ -23,10 +36,13 @@ class AppDepartment {
   factory AppDepartment.fromJson(Map<String, dynamic> json) {
     return AppDepartment(
       id: json['id'] as String,
-      name: json['name'] as String,
+      nameText: LocalizedDbText.fromSupabase(json['name']),
     );
   }
 
   /// Empty department for initialization
-  static const empty = AppDepartment(id: '', name: '');
+  static const empty = AppDepartment(
+    id: '',
+    nameText: LocalizedDbText(plainText: ''),
+  );
 }
