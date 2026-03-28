@@ -1,6 +1,7 @@
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:solar_icon_pack/solar_icon_pack.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
@@ -18,6 +19,8 @@ class SearchProviderCard extends StatelessWidget {
     this.hourlyRate,
     this.tag,
     this.onTap,
+    this.isFavorite = false,
+    this.onFavoriteTap,
   });
 
   final String name;
@@ -31,6 +34,8 @@ class SearchProviderCard extends StatelessWidget {
   final String? hourlyRate;
   final String? tag;
   final VoidCallback? onTap;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteTap;
 
   @override
   Widget build(BuildContext context) {
@@ -62,8 +67,15 @@ class SearchProviderCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Like Button
-              const Icon(Icons.favorite_border, color: Colors.grey),
+              // Favorite toggle button
+              IconButton(
+                onPressed: onFavoriteTap,
+                splashRadius: 20,
+                icon: Icon(
+                  isFavorite ? SolarBoldIcons.heart : SolarLinearIcons.heart,
+                  color: isFavorite ? AppColors.errorRed : Colors.grey,
+                ),
+              ),
 
               const Spacer(),
 
@@ -100,7 +112,7 @@ class SearchProviderCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         const Icon(
-                          Icons.access_time_filled,
+                          SolarLinearIcons.clockCircle,
                           size: 14,
                           color: Colors.grey,
                         ),
@@ -114,7 +126,7 @@ class SearchProviderCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 4),
                         const Icon(
-                          Icons.block,
+                          SolarLinearIcons.stopCircle,
                           size: 14,
                           color: AppColors.errorRed,
                         ),
@@ -129,7 +141,7 @@ class SearchProviderCard extends StatelessWidget {
                       ),
                       const SizedBox(width: 4),
                       const Icon(
-                        Icons.location_on,
+                        SolarLinearIcons.mapPoint,
                         size: 14,
                         color: Colors.grey,
                       ),
@@ -162,7 +174,7 @@ class SearchProviderCard extends StatelessWidget {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             const Icon(
-                              Icons.star,
+                              SolarBoldIcons.star,
                               color: Colors.white,
                               size: 10,
                             ),
@@ -235,7 +247,7 @@ class SearchProviderCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: const Icon(
-                  Icons.chat_bubble_outline,
+                  SolarLinearIcons.chatRoundLine,
                   color: Colors.grey,
                 ),
               ),
@@ -264,7 +276,7 @@ class SearchProviderCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         if (!isFullyBooked) ...[
-                          const Icon(Icons.calendar_month, size: 18),
+                          const Icon(SolarLinearIcons.calendar, size: 18),
                           const SizedBox(width: 8),
                         ],
                         Text(
@@ -308,9 +320,9 @@ class _ProviderAvatar extends StatelessWidget {
                 imageUrl,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) =>
-                    const Icon(Icons.person, color: Colors.grey, size: 28),
+                    const Icon(SolarLinearIcons.user, color: Colors.grey, size: 28),
               )
-            : const Icon(Icons.person, color: Colors.grey, size: 28),
+            : const Icon(SolarLinearIcons.user, color: Colors.grey, size: 28),
       ),
     );
   }

@@ -69,7 +69,7 @@ class OtpVerificationScreen extends StatelessWidget {
                       label: LocaleKeys.button_sign_in.tr(),
                       onPressed: form.valid
                           ? () {
-                              context.go(AppRouter.homePath);
+                              context.go(AppRouter.locationSetupPath);
                             }
                           : null,
                     ),

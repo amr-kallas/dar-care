@@ -9,60 +9,149 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
 
   FavoritesRepositoryImpl(this._supabase);
 
+  String _requireUserId() {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('You must be signed in to manage favorites.');
+    }
+    return userId;
+  }
+
   Future<String> _getClientId() async {
+    final userId = _requireUserId();
+
     final clientRes = await _supabase
         .from('clients')
         .select('id')
-        .eq('user_id', _supabase.auth.currentUser!.id)
-        .single();
-    return clientRes['id'];
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (clientRes == null || clientRes['id'] == null) {
+      throw StateError('Client profile not found for the current user.');
+    }
+
+    return clientRes['id'].toString();
+  }
+
+  bool _shouldUseFallback(PostgrestException error) {
+    final message = error.message.toLowerCase();
+    return error.code == '42703' ||
+        message.contains('relationship') ||
+        message.contains('schema cache') ||
+        message.contains('does not exist');
+  }
+
+  Future<List<ProviderModel>> _getFavoritesWithFallback(String clientId) async {
+    final favoritesRes = await _supabase
+        .from('favorites')
+        .select('provider_id')
+        .eq('client_id', clientId);
+
+    final providerIds = (favoritesRes as List<dynamic>)
+        .map((item) => item['provider_id']?.toString())
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    if (providerIds.isEmpty) {
+      return const [];
+    }
+
+    final providersResponse = await _supabase
+        .from('providers')
+        .select(
+          'id,user_id,avg_rating,experience_years,bio,image_url,department_id',
+        )
+        .inFilter('id', providerIds);
+
+    final providers = (providersResponse as List<dynamic>)
+        .map((item) => Map<String, dynamic>.from(item as Map))
+        .toList();
+
+    final userIds = providers
+        .map((provider) => provider['user_id']?.toString())
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    final departmentIds = providers
+        .map((provider) => provider['department_id']?.toString())
+        .whereType<String>()
+        .toSet()
+        .toList();
+
+    final usersResponse = userIds.isEmpty
+        ? const <dynamic>[]
+        : await _supabase
+              .from('users')
+              .select('id,full_name')
+              .inFilter('id', userIds);
+
+    final departmentsResponse = departmentIds.isEmpty
+        ? const <dynamic>[]
+        : await _supabase
+              .from('departments')
+              .select('id,name')
+              .inFilter('id', departmentIds);
+
+    final usersById = <String, Map<String, dynamic>>{
+      for (final user in usersResponse)
+        user['id'].toString(): Map<String, dynamic>.from(user as Map),
+    };
+
+    final departmentsById = <String, Map<String, dynamic>>{
+      for (final department in departmentsResponse)
+        department['id'].toString(): Map<String, dynamic>.from(
+          department as Map,
+        ),
+    };
+
+    return providers.map((provider) {
+      final merged = Map<String, dynamic>.from(provider);
+      merged['users'] = usersById[provider['user_id']?.toString()] ?? const {};
+      merged['departments'] =
+          departmentsById[provider['department_id']?.toString()] ?? const {};
+      return ProviderModel.fromJson(merged);
+    }).toList();
   }
 
   @override
   Future<List<ProviderModel>> getFavorites() async {
-    try {
-      final clientId = await _getClientId();
+    final clientId = await _getClientId();
 
-      try {
-        final response = await _supabase.from('favorites').select('''
+    try {
+      final response = await _supabase
+          .from('favorites')
+          .select('''
           provider_id,
           providers!inner(
             id,
             user_id,
             avg_rating,
-            hourly_rate,
             experience_years,
             bio,
-            users!inner(full_name, avatar_url),
-            departments!inner(name)
+            image_url,
+            department_id,
+            users!inner(id, full_name),
+            departments!inner(id, name)
           )
-        ''').eq('client_id', clientId);
+        ''')
+          .eq('client_id', clientId);
 
-        return (response as List<dynamic>)
-            .map((json) => ProviderModel.fromJson(json['providers']))
-            .toList();
-      } catch (e) {
-        // Fallback for missing relationships or schema cache issues
-        final favoritesRes = await _supabase.from('favorites').select('provider_id').eq('client_id', clientId);
-        if ((favoritesRes as List<dynamic>).isEmpty) return [];
-
-        final providerIds = favoritesRes.map((f) => f['provider_id']).toList();
-
-        final providersResponse = await _supabase.from('providers').select().inFilter('id', providerIds);
-        final usersResponse = await _supabase.from('users').select();
-        final deptsResponse = await _supabase.from('departments').select();
-
-        return (providersResponse as List<dynamic>).map((p) {
-          final user = (usersResponse as List<dynamic>).firstWhere((u) => u['id'] == p['user_id'], orElse: () => {});
-          final dept = (deptsResponse as List<dynamic>).firstWhere((d) => d['id'] == p['department_id'], orElse: () => {});
-          p['users'] = user;
-          p['departments'] = dept;
-          return ProviderModel.fromJson(p);
-        }).toList();
+      return (response as List<dynamic>)
+          .map((item) => item['providers'])
+          .whereType<Map<String, dynamic>>()
+          .map(ProviderModel.fromJson)
+          .toList();
+    } on PostgrestException catch (error) {
+      if (_shouldUseFallback(error)) {
+        try {
+          return await _getFavoritesWithFallback(clientId);
+        } on PostgrestException catch (fallbackError) {
+          throw Exception('Failed to load favorites: ${fallbackError.message}');
+        }
       }
-    } catch (e) {
-      // Fallback: Return empty instead of crashing the UI
-      return [];
+      throw Exception('Failed to load favorites: ${error.message}');
     }
   }
 
@@ -74,8 +163,12 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
         'client_id': clientId,
         'provider_id': providerId,
       });
-    } catch (e) {
-      throw Exception('Failed to add favorite: $e');
+    } on PostgrestException catch (error) {
+      // Ignore duplicate records if a unique constraint already protects rows.
+      if (error.code == '23505') {
+        return;
+      }
+      throw Exception('Failed to add favorite: ${error.message}');
     }
   }
 
@@ -88,9 +181,8 @@ class FavoritesRepositoryImpl implements FavoritesRepository {
           .delete()
           .eq('client_id', clientId)
           .eq('provider_id', providerId);
-    } catch (e) {
-      throw Exception('Failed to remove favorite: $e');
+    } on PostgrestException catch (error) {
+      throw Exception('Failed to remove favorite: ${error.message}');
     }
   }
 }
-

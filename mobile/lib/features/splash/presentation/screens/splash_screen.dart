@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen>
       if (mounted) {
         final hasSession = SupabaseService.auth.currentSession != null;
         if (hasSession) {
-          context.go(AppRouter.homePath);
+          context.go(AppRouter.locationSetupPath);
         } else {
           context.go(AppRouter.onboardingPath);
         }

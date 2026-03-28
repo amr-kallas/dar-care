@@ -1,4 +1,6 @@
 import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
+import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
 import 'package:dar_care/features/search/presentation/cubit/search_cubit.dart';
 import 'package:dar_care/features/search/presentation/cubit/search_state.dart';
 import 'package:dar_care/features/search/presentation/widgets/filter_chip_widget.dart';
@@ -21,14 +23,21 @@ class SearchResultsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final query = initialQuery?.trim() ?? '';
 
-    return BlocProvider(
-      create: (context) {
-        final cubit = getIt<SearchCubit>();
-        if (query.isNotEmpty) {
-          cubit.search(query);
-        }
-        return cubit;
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) {
+            final cubit = getIt<SearchCubit>();
+            if (query.isNotEmpty) {
+              cubit.search(query);
+            }
+            return cubit;
+          },
+        ),
+        BlocProvider(
+          create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
+        ),
+      ],
       child: _SearchResultsContent(initialQuery: query),
     );
   }
@@ -67,181 +76,208 @@ class _SearchResultsContentState extends State<_SearchResultsContent> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.surfaceDark
-                          : Colors.grey.shade100,
-                      shape: BoxShape.circle,
-                    ),
-                    child: IconButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      icon: const Icon(Icons.arrow_back),
-                    ),
-                  ),
-                  Text(
-                    LocaleKeys.search_results_title.tr(),
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.surfaceDark
-                          : Colors.grey.shade100,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.notifications_none),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppColors.surfaceDark
-                          : Colors.grey.shade200,
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(Icons.tune, color: Colors.grey),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      textInputAction: TextInputAction.search,
-                      onSubmitted: (_) => _submitSearch(),
-                      decoration: InputDecoration(
-                        hintText: LocaleKeys.search_hint.tr(),
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: _submitSearch,
-                        ),
-                        filled: true,
-                        fillColor: isDark
+    return BlocListener<FavoritesCubit, FavoritesState>(
+      listenWhen: (previous, current) =>
+          previous.errorMessage != current.errorMessage &&
+          current.errorMessage != null,
+      listener: (context, state) {
+        final message = state.errorMessage;
+        if (message == null) return;
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(content: Text(message)));
+      },
+      child: Scaffold(
+        body: SafeArea(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        color: isDark
                             ? AppColors.surfaceDark
-                            : Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide.none,
+                            : Colors.grey.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back),
+                      ),
+                    ),
+                    Text(
+                      LocaleKeys.search_results_title.tr(),
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.surfaceDark
+                            : Colors.grey.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.notifications_none),
+                    ),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark
+                            ? AppColors.surfaceDark
+                            : Colors.grey.shade200,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Icon(Icons.tune, color: Colors.grey),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        textInputAction: TextInputAction.search,
+                        onSubmitted: (_) => _submitSearch(),
+                        decoration: InputDecoration(
+                          hintText: LocaleKeys.search_hint.tr(),
+                          suffixIcon: IconButton(
+                            icon: const Icon(Icons.search),
+                            onPressed: _submitSearch,
+                          ),
+                          filled: true,
+                          fillColor: isDark
+                              ? AppColors.surfaceDark
+                              : Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide.none,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 24),
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Row(
-                children: [
-                  FilterChipWidget(
-                    label: LocaleKeys.filter_highest_rated.tr(),
-                    isSelected: true,
-                    onTap: () {},
-                  ),
-                  const SizedBox(width: 12),
-                  FilterChipWidget(
-                    label: LocaleKeys.filter_map.tr(),
-                    isSelected: false,
-                    onTap: () {},
-                  ),
-                  const SizedBox(width: 12),
-                  FilterChipWidget(
-                    label: LocaleKeys.filter_list.tr(),
-                    isSelected: true,
-                    isPrimary: true,
-                    onTap: () {},
-                  ),
-                ],
+              const SizedBox(height: 24),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  children: [
+                    FilterChipWidget(
+                      label: LocaleKeys.filter_highest_rated.tr(),
+                      isSelected: true,
+                      onTap: () {},
+                    ),
+                    const SizedBox(width: 12),
+                    FilterChipWidget(
+                      label: LocaleKeys.filter_map.tr(),
+                      isSelected: false,
+                      onTap: () {},
+                    ),
+                    const SizedBox(width: 12),
+                    FilterChipWidget(
+                      label: LocaleKeys.filter_list.tr(),
+                      isSelected: true,
+                      isPrimary: true,
+                      onTap: () {},
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24),
-              child: PromoBanner(),
-            ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: BlocBuilder<SearchCubit, SearchState>(
-                builder: (context, state) {
-                  if (state.status == SearchStatus.loading) {
-                    return const AppLoadingIndicator();
-                  }
+              const SizedBox(height: 16),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 24),
+                child: PromoBanner(),
+              ),
+              const SizedBox(height: 24),
+              Expanded(
+                child: BlocBuilder<SearchCubit, SearchState>(
+                  builder: (context, state) {
+                    if (state.status == SearchStatus.loading) {
+                      return const AppLoadingIndicator();
+                    }
 
-                  if (state.status == SearchStatus.failure) {
-                    return _FailureState(
-                      message: state.errorMessage ?? 'Failed to load results.',
-                      onRetry: _submitSearch,
-                    );
-                  }
-
-                  if (state.status == SearchStatus.initial) {
-                    return Center(
-                      child: Text(
-                        LocaleKeys.search_hint.tr(),
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-
-                  if (state.results.isEmpty) {
-                    return const Center(
-                      child: Text(
-                        'No providers found for this search.',
-                        textAlign: TextAlign.center,
-                      ),
-                    );
-                  }
-
-                  return ListView.separated(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    itemCount: state.results.length,
-                    separatorBuilder: (context, index) =>
-                        const SizedBox(height: 16),
-                    itemBuilder: (context, index) {
-                      final provider = state.results[index];
-                      final hourlyRateText = provider.hourlyRate != null
-                          ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
-                          : LocaleKeys.price_on_request.tr();
-
-                      return SearchProviderCard(
-                        name: provider.fullName,
-                        profession: provider.profession,
-                        rating: provider.rating.toStringAsFixed(1),
-                        distance: LocaleKeys.distance_from_you.tr(
-                          namedArgs: {'distance': '2.0'},
-                        ),
-                        imageUrl: provider.imageUrl ?? '',
-                        hourlyRate: hourlyRateText,
-                        availabilityText: LocaleKeys.available_now.tr(),
-                        isAvailable: true,
-                        onTap: () {},
+                    if (state.status == SearchStatus.failure) {
+                      return _FailureState(
+                        message:
+                            state.errorMessage ?? 'Failed to load results.',
+                        onRetry: _submitSearch,
                       );
-                    },
-                  );
-                },
+                    }
+
+                    if (state.status == SearchStatus.initial) {
+                      return Center(
+                        child: Text(
+                          LocaleKeys.search_hint.tr(),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+
+                    if (state.results.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'No providers found for this search.',
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    }
+
+                    final favoriteIds = context.select(
+                      (FavoritesCubit cubit) =>
+                          cubit.state.favorites.map((item) => item.id).toSet(),
+                    );
+
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      itemCount: state.results.length,
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final provider = state.results[index];
+                        final hourlyRateText = provider.hourlyRate != null
+                            ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
+                            : LocaleKeys.price_on_request.tr();
+
+                        return SearchProviderCard(
+                          name: provider.fullName,
+                          profession: provider.profession,
+                          rating: provider.rating.toStringAsFixed(1),
+                          distance: LocaleKeys.distance_from_you.tr(
+                            namedArgs: {'distance': '2.0'},
+                          ),
+                          imageUrl: provider.imageUrl ?? '',
+                          hourlyRate: hourlyRateText,
+                          availabilityText: LocaleKeys.available_now.tr(),
+                          isAvailable: true,
+                          isFavorite: favoriteIds.contains(provider.id),
+                          onFavoriteTap: () {
+                            context.read<FavoritesCubit>().toggleFavorite(
+                              provider,
+                            );
+                          },
+                          onTap: () {},
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -4,6 +4,7 @@ import 'package:dar_care/features/auth/presentation/screens/login_screen.dart';
 import 'package:dar_care/features/auth/presentation/screens/otp_verification_screen.dart';
 import 'package:dar_care/features/auth/presentation/screens/provider_signup_screen.dart';
 import 'package:dar_care/features/auth/presentation/screens/signup_screen.dart';
+import 'package:dar_care/features/location_setup/presentation/screens/location_setup_screen.dart';
 import 'package:dar_care/features/splash/presentation/screens/splash_screen.dart';
 import 'package:go_router/go_router.dart';
 
@@ -21,6 +22,7 @@ abstract class AppRouter {
   static const String providerSignupPath = '/provider-signup';
   static const String forgotPasswordPath = '/forgot-password';
   static const String otpVerificationPath = '/otp-verification';
+  static const String locationSetupPath = '/location-setup';
   static const String homePath = '/home';
   static const String searchResultsPath = '/search-results';
 
@@ -69,6 +71,11 @@ abstract class AppRouter {
           final String? phoneNumber = state.extra as String?;
           return OtpVerificationScreen(phoneNumber: phoneNumber);
         },
+      ),
+      GoRoute(
+        path: locationSetupPath,
+        name: 'location-setup',
+        builder: (context, state) => const LocationSetupScreen(),
       ),
       GoRoute(
         path: homePath,

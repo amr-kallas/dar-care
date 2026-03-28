@@ -17,6 +17,11 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter_svg: ^2.2.3
 
+  # Map
+  flutter_map: ^8.2.2
+  latlong2: ^0.9.1
+  geolocator: ^14.0.2
+
   # State Management
   flutter_bloc: ^9.1.1
 

@@ -45,6 +45,12 @@ class ProviderModel {
       departmentData = Map<String, dynamic>.from(rawDept);
     }
 
+    final dynamic rawHourlyRate =
+        json['hourly_rate'] ??
+        json['hourlyRate'] ??
+        json['hourly_price'] ??
+        json['price_per_hour'];
+
     return ProviderModel(
       id: (json['id'] ?? '').toString(),
       userId: (json['user_id'] ?? '').toString(),
@@ -56,7 +62,7 @@ class ProviderModel {
       rating: ((json['avg_rating'] as num?) ?? 0.0).toDouble(),
       imageUrl:
           json['image_url'] as String? ?? userData['avatar_url'] as String?,
-      hourlyRate: (json['hourly_rate'] as num?)?.toDouble(),
+      hourlyRate: (rawHourlyRate as num?)?.toDouble(),
       experienceYears:
           json['experience_years'] as int? ?? json['experience'] as int?,
       bio: json['bio'] as String?,

@@ -32,7 +32,7 @@ class LoginScreen extends StatelessWidget {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthSignInSuccess) {
-          context.go(AppRouter.homePath);
+          context.go(AppRouter.locationSetupPath);
         } else if (state is AuthError) {
           ScaffoldMessenger.of(
             context,
