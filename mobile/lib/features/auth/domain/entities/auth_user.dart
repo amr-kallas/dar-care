@@ -1,7 +1,8 @@
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
+import 'package:equatable/equatable.dart';
 
 /// Domain entity representing an authenticated user
-class AuthUser {
+class AuthUser extends Equatable {
   final String id;
   final String email;
   final String? fullName;
@@ -12,7 +13,7 @@ class AuthUser {
   final bool emailVerified;
   final DateTime createdAt;
 
-  AuthUser({
+  const AuthUser({
     required this.id,
     required this.email,
     this.fullName,
@@ -48,6 +49,19 @@ class AuthUser {
       createdAt: createdAt ?? this.createdAt,
     );
   }
+
+  @override
+  List<Object?> get props => [
+    id,
+    email,
+    fullName,
+    phone,
+    address,
+    role,
+    avatarUrl,
+    emailVerified,
+    createdAt,
+  ];
 
   @override
   String toString() =>

@@ -1,14 +1,17 @@
-import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth_state.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 import 'package:dar_care/features/home/presentation/provider/screens/provider_main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:go_router/go_router.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 
 import 'client/screens/client_main_screen.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
+import 'package:dar_care/core/widgets/app_snackbar.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,9 +23,7 @@ class HomeScreen extends StatelessWidget {
         if (state is AuthUnauthenticated) {
           context.go(AppRouter.loginPath);
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          AppSnackbar.showError(context, state.messageKey.tr());
         }
       },
       builder: (context, state) {
@@ -47,11 +48,11 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Something went wrong'),
+                  Text(LocaleKeys.auth_error_generic.tr()),
                   ElevatedButton(
                     onPressed: () =>
                         context.read<AuthCubit>().checkAuthStatus(),
-                    child: const Text('Retry'),
+                    child: Text(LocaleKeys.orders_retry_button.tr()),
                   ),
                 ],
               ),

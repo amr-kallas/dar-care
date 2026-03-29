@@ -30,8 +30,8 @@ class SearchRepositoryImpl implements SearchRepository {
       return providers
           .where((provider) => provider.matchesKeyword(normalizedQuery))
           .toList(growable: false);
-    } catch (e) {
-      throw Exception('Search request failed: $e');
+    } catch (_) {
+      rethrow;
     }
   }
 }

@@ -1,13 +1,13 @@
-import 'package:injectable/injectable.dart';
 import 'package:dar_care/features/auth/domain/entities/auth_user.dart';
 import 'package:dar_care/features/auth/domain/repositories/auth_repository.dart';
+import 'package:injectable/injectable.dart';
 
 /// Use case for user sign up
 @injectable
 class SignUpUseCase {
-  final AuthRepository repository;
+  final AuthRepository _repository;
 
-  SignUpUseCase({required this.repository});
+  SignUpUseCase(this._repository);
 
   Future<AuthUser> signUpClient({
     required String email,
@@ -15,15 +15,13 @@ class SignUpUseCase {
     required String fullName,
     required String cityId,
     String? phone,
-  }) async {
-    return await repository.signUpClient(
-      email: email,
-      password: password,
-      fullName: fullName,
-      cityId: cityId,
-      phone: phone,
-    );
-  }
+  }) => _repository.signUpClient(
+    email: email,
+    password: password,
+    fullName: fullName,
+    cityId: cityId,
+    phone: phone,
+  );
 
   Future<AuthUser> signUpProvider({
     required String email,
@@ -34,16 +32,14 @@ class SignUpUseCase {
     required String departmentId,
     required int experienceYears,
     String? bio,
-  }) async {
-    return await repository.signUpProvider(
-      email: email,
-      password: password,
-      fullName: fullName,
-      phone: phone,
-      cityId: cityId,
-      departmentId: departmentId,
-      experienceYears: experienceYears,
-      bio: bio,
-    );
-  }
+  }) => _repository.signUpProvider(
+    email: email,
+    password: password,
+    fullName: fullName,
+    phone: phone,
+    cityId: cityId,
+    departmentId: departmentId,
+    experienceYears: experienceYears,
+    bio: bio,
+  );
 }

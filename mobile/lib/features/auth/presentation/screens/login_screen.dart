@@ -1,19 +1,20 @@
 import 'package:dar_care/core/utils/app_router.dart';
-import 'package:dar_care/core/utils/validation_messages.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
-import '../../../../core/theme/app_colors.dart';
+import 'package:dar_care/core/widgets/app_snackbar.dart';
+import '../cubit/auth/auth_cubit.dart';
+import '../cubit/auth/auth_state.dart';
 import '../widgets/auth_app_logo.dart';
+import '../widgets/auth_back_scaffold.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_social_login_section.dart';
 import '../widgets/auth_text_link_row.dart';
+import '../widgets/login_form_fields_section.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -32,128 +33,67 @@ class LoginScreen extends StatelessWidget {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthSignInSuccess) {
+          AppSnackbar.showSuccess(context, LocaleKeys.auth_success_sign_in.tr());
           context.go(AppRouter.locationSetupPath);
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          AppSnackbar.showError(context, state.messageKey.tr());
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: isDark ? Colors.white : Colors.black,
-            ),
-            onPressed: () => context.pop(),
-          ),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
-            child: ReactiveFormBuilder(
-              form: buildForm,
-              builder: (context, form, child) {
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 20),
-                    const AuthAppLogo(),
-                    const SizedBox(height: 48),
-                    AuthHeader(
-                      title: LocaleKeys.auth_journey_title.tr(),
-                      subtitle: LocaleKeys.auth_login_subtitle.tr(),
-                    ),
-                    const SizedBox(height: 48),
+      child: AuthBackScaffold(
+        child: ReactiveFormBuilder(
+          form: buildForm,
+          builder: (context, form, child) {
+            final authState = context.watch<AuthCubit>().state;
+            final isSubmitting = authState is AuthLoading &&
+                authState.operation == AuthOperation.signIn;
 
-                    // ── Email ──
-                    ReactiveTextField<String>(
-                      formControlName: 'email',
-                      decoration: InputDecoration(
-                        labelText: LocaleKeys.label_email.tr(),
-                        prefixIcon: const Icon(Icons.email_outlined),
-                      ),
-                      validationMessages: ValidationMessages.email,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── Password ──
-                    ReactiveTextField<String>(
-                      formControlName: 'password',
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: LocaleKeys.label_password.tr(),
-                        prefixIcon: const Icon(Icons.lock_outline),
-                      ),
-                      validationMessages: ValidationMessages.password,
-                    ),
-
-                    // ── Forgot password ──
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () =>
-                            context.push(AppRouter.forgotPasswordPath),
-                        child: Text(
-                          LocaleKeys.forgot_password.tr(),
-                          style: const TextStyle(color: Colors.grey),
-                        ),
-                      ),
-                    ),
-
-                    // ── Remember me ──
-                    ReactiveCheckboxListTile(
-                      formControlName: 'rememberMe',
-                      title: Text(
-                        LocaleKeys.label_remember_me.tr(),
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      checkColor: isDark
-                          ? AppColors.deepDarkGreen
-                          : Colors.white,
-                      activeColor: AppColors.brightGreen,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    const SizedBox(height: 32),
-
-                    // ── Submit ──
-                    ReactiveFormConsumer(
-                      builder: (context, form, child) => AuthPrimaryButton(
-                        label: LocaleKeys.button_sign_in.tr(),
-                        onPressed: form.valid
-                            ? () {
-                                context.read<AuthCubit>().signIn(
-                                  email: (form.control('email').value as String)
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 20),
+                const AuthAppLogo(),
+                const SizedBox(height: 48),
+                AuthHeader(
+                  title: LocaleKeys.auth_journey_title.tr(),
+                  subtitle: LocaleKeys.auth_login_subtitle.tr(),
+                ),
+                const SizedBox(height: 48),
+                LoginFormFieldsSection(
+                  theme: theme,
+                  isDark: isDark,
+                  onForgotPassword: () =>
+                      context.push(AppRouter.forgotPasswordPath),
+                ),
+                const SizedBox(height: 32),
+                ReactiveFormConsumer(
+                  builder: (context, form, child) => AuthPrimaryButton(
+                    label: LocaleKeys.button_sign_in.tr(),
+                    isLoading: isSubmitting,
+                    onPressed: form.valid && !isSubmitting
+                        ? () {
+                            context.read<AuthCubit>().signIn(
+                              email: (form.control('email').value as String)
+                                  .trim(),
+                              password:
+                                  (form.control('password').value as String)
                                       .trim(),
-                                  password:
-                                      (form.control('password').value as String)
-                                          .trim(),
-                                );
-                              }
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-
-                    // ── Social login ──
-                    const AuthSocialLoginSection(),
-                    const SizedBox(height: 32),
-
-                    // ── Sign-up link ──
-                    AuthTextLinkRow(
-                      prefixText: LocaleKeys.no_account.tr(),
-                      linkText: LocaleKeys.sign_up_link.tr(),
-                      onTap: () => context.push(AppRouter.authGatePath),
-                    ),
-                    const SizedBox(height: 24),
-                  ],
-                );
-              },
-            ),
-          ),
+                            );
+                          }
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const AuthSocialLoginSection(),
+                const SizedBox(height: 32),
+                AuthTextLinkRow(
+                  prefixText: LocaleKeys.no_account.tr(),
+                  linkText: LocaleKeys.sign_up_link.tr(),
+                  onTap: () => context.push(AppRouter.authGatePath),
+                ),
+                const SizedBox(height: 24),
+              ],
+            );
+          },
         ),
       ),
     );

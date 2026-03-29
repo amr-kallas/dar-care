@@ -1,9 +1,10 @@
 import 'dart:developer';
 
-import 'package:injectable/injectable.dart';
+import 'package:dar_care/core/errors/app_exceptions.dart';
 import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/features/auth/data/models/auth_user_model.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
+import 'package:injectable/injectable.dart';
 
 /// Abstract data source for authentication
 abstract class AuthRemoteDataSource {
@@ -86,7 +87,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (authResponse.user == null) {
-        throw Exception('Sign up failed: User is null');
+        throw const AuthAppException('Sign up failed. Please try again.');
       }
 
       // Create or update user profile in the users table
@@ -112,9 +113,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       return AuthUserModel.fromSupabaseUser(authResponse.user!);
-    } catch (e) {
-      log('Sign up error: $e');
-      rethrow;
+    } catch (error, stackTrace) {
+      throw _mapAuthException(
+        error,
+        stackTrace,
+        fallbackMessage: 'Failed to create account. Please try again.',
+      );
     }
   }
 
@@ -146,7 +150,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (authResponse.user == null) {
-        throw Exception('Sign up failed: User is null');
+        throw const AuthAppException('Sign up failed. Please try again.');
       }
 
       // Create or update user profile in the users table
@@ -178,9 +182,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       return AuthUserModel.fromSupabaseUser(authResponse.user!);
-    } catch (e) {
-      log('Sign up error: $e');
-      rethrow;
+    } catch (error, stackTrace) {
+      throw _mapAuthException(
+        error,
+        stackTrace,
+        fallbackMessage: 'Failed to create provider account. Please try again.',
+      );
     }
   }
 
@@ -196,7 +203,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
 
       if (authResponse.user == null) {
-        throw Exception('Sign in failed: User is null');
+        throw const AuthAppException('Sign in failed. Please try again.');
       }
 
       // Fetch user profile from users table
@@ -207,9 +214,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .single();
 
       return AuthUserModel.fromJson(userProfile);
-    } catch (e) {
-      log('Sign in error: $e');
-      rethrow;
+    } catch (error, stackTrace) {
+      throw _mapAuthException(
+        error,
+        stackTrace,
+        fallbackMessage: 'Invalid credentials or server error.',
+      );
     }
   }
 
@@ -217,9 +227,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> signOut() async {
     try {
       await supabaseAuth.signOut();
-    } catch (e) {
-      log('Sign out error: $e');
-      rethrow;
+    } catch (error, stackTrace) {
+      throw _mapAuthException(
+        error,
+        stackTrace,
+        fallbackMessage: 'Failed to sign out. Please try again.',
+      );
     }
   }
 
@@ -239,9 +252,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (userProfile == null) return null;
 
       return AuthUserModel.fromJson(userProfile);
-    } catch (e) {
-      log('Get current user error: $e');
-      return null;
+    } catch (error, stackTrace) {
+      throw DataAppException(
+        'Failed to load current user.',
+        cause: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -249,9 +265,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<bool> isAuthenticated() async {
     try {
       return supabaseAuth.currentUser != null;
-    } catch (e) {
-      log('Is authenticated error: $e');
-      return false;
+    } catch (error, stackTrace) {
+      throw DataAppException(
+        'Failed to validate session.',
+        cause: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -259,9 +278,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<void> resetPassword({required String email}) async {
     try {
       await supabaseAuth.resetPasswordForEmail(email);
-    } catch (e) {
-      log('Reset password error: $e');
-      rethrow;
+    } catch (error, stackTrace) {
+      throw _mapAuthException(
+        error,
+        stackTrace,
+        fallbackMessage: 'Failed to send reset link. Please try again.',
+      );
     }
   }
 
@@ -279,9 +301,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
 
       await supabaseClient.from('users').update(updateData).eq('id', userId);
-    } catch (e) {
-      log('Update user profile error: $e');
-      rethrow;
+    } catch (error, stackTrace) {
+      throw DataAppException(
+        'Failed to update profile.',
+        cause: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -341,10 +366,26 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
         if (userProfile == null) return null;
         return AuthUserModel.fromJson(userProfile);
-      } catch (e) {
-        log('Auth state change error: $e');
+      } catch (error, stackTrace) {
+        log('Auth state change error: $error', stackTrace: stackTrace);
         return null;
       }
     });
+  }
+
+  AuthAppException _mapAuthException(
+    Object error,
+    StackTrace stackTrace, {
+    required String fallbackMessage,
+  }) {
+    if (error is AppException && error is AuthAppException) {
+      return error;
+    }
+
+    return AuthAppException(
+      fallbackMessage,
+      cause: error,
+      stackTrace: stackTrace,
+    );
   }
 }

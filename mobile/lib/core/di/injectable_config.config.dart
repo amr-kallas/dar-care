@@ -30,9 +30,9 @@ import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart'
     as _i818;
 import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart'
     as _i547;
-import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart'
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart'
     as _i184;
-import 'package:dar_care/features/auth/presentation/cubit/department_cubit.dart'
+import 'package:dar_care/features/auth/presentation/cubit/department/department_cubit.dart'
     as _i183;
 import 'package:dar_care/features/favorites/data/repositories/favorites_repository_impl.dart'
     as _i369;
@@ -112,17 +112,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i253.HomeCubit>(
       () => _i253.HomeCubit(gh<_i59.HomeRepository>()),
     );
-    gh.factory<_i679.SignInUseCase>(
-      () => _i679.SignInUseCase(repository: gh<_i287.AuthRepository>()),
-    );
-    gh.factory<_i818.SignOutUseCase>(
-      () => _i818.SignOutUseCase(repository: gh<_i287.AuthRepository>()),
-    );
-    gh.factory<_i547.SignUpUseCase>(
-      () => _i547.SignUpUseCase(repository: gh<_i287.AuthRepository>()),
-    );
     gh.factory<_i481.GetCurrentUserUseCase>(
       () => _i481.GetCurrentUserUseCase(gh<_i287.AuthRepository>()),
+    );
+    gh.factory<_i679.SignInUseCase>(
+      () => _i679.SignInUseCase(gh<_i287.AuthRepository>()),
+    );
+    gh.factory<_i818.SignOutUseCase>(
+      () => _i818.SignOutUseCase(gh<_i287.AuthRepository>()),
+    );
+    gh.factory<_i547.SignUpUseCase>(
+      () => _i547.SignUpUseCase(gh<_i287.AuthRepository>()),
     );
     gh.factory<_i184.AuthCubit>(
       () => _i184.AuthCubit(

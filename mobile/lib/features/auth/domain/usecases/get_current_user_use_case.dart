@@ -8,8 +8,5 @@ class GetCurrentUserUseCase {
 
   GetCurrentUserUseCase(this._repository);
 
-  Future<AuthUser?> call() async {
-    return await _repository.getCurrentUser();
-  }
+  Future<AuthUser?> call() => _repository.getCurrentUser();
 }
-

@@ -1,90 +1,98 @@
 import 'package:dar_care/core/utils/app_router.dart';
-import 'package:dar_care/core/utils/validation_messages.dart';
+import 'package:dar_care/core/widgets/app_loading_indicator.dart';
+import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/features/auth/data/models/app_city.dart';
 import 'package:dar_care/features/auth/data/repositories/city_repository.dart';
+import 'package:dar_care/features/auth/presentation/models/auth_registration_data.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reactive_forms/reactive_forms.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:dar_care/core/widgets/app_loading_indicator.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
-import '../../../../core/theme/app_colors.dart';
+
+import '../cubit/auth/auth_cubit.dart';
+import '../cubit/auth/auth_state.dart';
 import '../widgets/auth_app_logo.dart';
+import '../widgets/auth_back_scaffold.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_social_login_section.dart';
+import '../widgets/auth_terms_checkbox.dart';
 import '../widgets/auth_text_link_row.dart';
+import '../widgets/signup_basic_fields_section.dart';
 
 /// Client (user) signup screen.
 /// Role is always 'user' — provider registration uses [ProviderSignupScreen].
-class SignupScreen extends StatefulWidget {
-  const SignupScreen({super.key});
+class SignupScreen extends StatelessWidget {
+  const SignupScreen({super.key, this.registrationData});
 
-  @override
-  State<SignupScreen> createState() => _SignupScreenState();
-}
-
-class _SignupScreenState extends State<SignupScreen> {
-  final CityRepository _cityRepository = CityRepository();
-  late final Future<List<AppCity>> _citiesFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _citiesFuture = _cityRepository.getCities();
-  }
+  final AuthRegistrationData? registrationData;
 
   FormGroup buildForm() => fb.group({
-    'fullName': ['', Validators.required],
-    'email': ['', Validators.required, Validators.email],
-    'phoneNumber': ['', Validators.required, Validators.pattern(r'^[0-9]+$')],
-    'city': fb.control<AppCity?>(null, [Validators.required]),
-    'password': ['', Validators.required, Validators.minLength(8)],
-    'agreeToTerms': [false, Validators.requiredTrue],
-  });
+        'fullName': ['', Validators.required],
+        'email': ['', Validators.required, Validators.email],
+        'phoneNumber': ['', Validators.required, Validators.pattern(r'^[0-9]+$')],
+        'city': fb.control<AppCity?>(null, [Validators.required]),
+        'password': ['', Validators.required, Validators.minLength(8)],
+        'agreeToTerms': [false, Validators.requiredTrue],
+      });
+
+  Future<List<AppCity>> _loadCities() async {
+    if (registrationData != null) {
+      return registrationData!.cities;
+    }
+    return CityRepository().getCities();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    return BlocListener<AuthCubit, AuthState>(
-      listener: (context, state) {
-        if (state is AuthSignUpSuccess) {
-          // Navigate to OTP via the new requirement
-          // Pass the phone number to OTP screen if desirable, or null.
-          final phone = context.read<AuthCubit>().state is AuthSignUpSuccess
-              ? (context.read<AuthCubit>().state as AuthSignUpSuccess)
-                    .user
-                    .phone
-              : null;
-          context.go(AppRouter.otpVerificationPath, extra: phone);
-        } else if (state is AuthError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+    return FutureBuilder<List<AppCity>>(
+      future: _loadCities(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const AuthBackScaffold(
+            child: AppLoadingIndicator(),
+          );
         }
-      },
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          leading: IconButton(
-            icon: Icon(
-              Icons.arrow_back,
-              color: isDark ? Colors.white : Colors.black,
+
+        if (snapshot.hasError) {
+          return AuthBackScaffold(
+            child: Center(
+              child: Text(
+                LocaleKeys.auth_error_cities_failed.tr(),
+                style: const TextStyle(color: Colors.red),
+                textAlign: TextAlign.center,
+              ),
             ),
-            onPressed: () => context.pop(),
-          ),
-        ),
-        body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24.0),
+          );
+        }
+
+        final cities = snapshot.data ?? <AppCity>[];
+
+        return BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthSignUpSuccess) {
+              AppSnackbar.showSuccess(
+                context,
+                LocaleKeys.auth_success_sign_up.tr(),
+              );
+              context.go(AppRouter.otpVerificationPath, extra: state.user.phone);
+            } else if (state is AuthError) {
+              AppSnackbar.showError(context, state.messageKey.tr());
+            }
+          },
+          child: AuthBackScaffold(
             child: ReactiveFormBuilder(
               form: buildForm,
               builder: (context, form, child) {
+                final authState = context.watch<AuthCubit>().state;
+                final isSubmitting = authState is AuthLoading &&
+                    authState.operation == AuthOperation.signUp;
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -96,119 +104,15 @@ class _SignupScreenState extends State<SignupScreen> {
                       subtitle: LocaleKeys.auth_signup_subtitle.tr(),
                     ),
                     const SizedBox(height: 32),
-
-                    // ── Full name ──
-                    ReactiveTextField<String>(
-                      formControlName: 'fullName',
-                      decoration: InputDecoration(
-                        labelText: LocaleKeys.label_full_name.tr(),
-                        prefixIcon: const Icon(Icons.person_outline),
-                      ),
-                      validationMessages: ValidationMessages.fullName,
-                    ),
+                    SignupBasicFieldsSection(cities: cities),
                     const SizedBox(height: 16),
-
-                    // ── Email ──
-                    ReactiveTextField<String>(
-                      formControlName: 'email',
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: InputDecoration(
-                        labelText: LocaleKeys.label_email.tr(),
-                        prefixIcon: const Icon(Icons.email_outlined),
-                      ),
-                      validationMessages: ValidationMessages.email,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── Phone ──
-                    ReactiveTextField<String>(
-                      formControlName: 'phoneNumber',
-                      keyboardType: TextInputType.phone,
-                      decoration: InputDecoration(
-                        labelText: LocaleKeys.label_phone_number.tr(),
-                        prefixIcon: const Icon(Icons.phone_outlined),
-                        hintText: LocaleKeys.hint_phone_number.tr(),
-                      ),
-                      validationMessages: ValidationMessages.phoneNumber,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── City ──
-                    FutureBuilder<List<AppCity>>(
-                      future: _citiesFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const AppLoadingIndicator(
-                            padding: EdgeInsets.all(8),
-                            size: 24,
-                            strokeWidth: 3,
-                          );
-                        }
-
-                        if (snapshot.hasError) {
-                          return Text(
-                            'Error loading cities: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.red),
-                          );
-                        }
-
-                        final cities = snapshot.data ?? <AppCity>[];
-                        final languageCode = context.locale.languageCode;
-
-                        return ReactiveDropdownField<AppCity?>(
-                          formControlName: 'city',
-                          decoration: InputDecoration(
-                            labelText: LocaleKeys.label_city.tr(),
-                            prefixIcon: const Icon(Icons.location_city_outlined),
-                            hintText: LocaleKeys.hint_city.tr(),
-                          ),
-                          items: cities
-                              .map(
-                                (city) => DropdownMenuItem<AppCity?>(
-                                  value: city,
-                                  child: Text(city.nameForLanguage(languageCode)),
-                                ),
-                              )
-                              .toList(),
-                          validationMessages: ValidationMessages.city,
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── Password ──
-                    ReactiveTextField<String>(
-                      formControlName: 'password',
-                      obscureText: true,
-                      decoration: InputDecoration(
-                        labelText: LocaleKeys.label_password.tr(),
-                        prefixIcon: const Icon(Icons.lock_outline),
-                      ),
-                      validationMessages: ValidationMessages.password,
-                    ),
-                    const SizedBox(height: 16),
-
-                    // ── Terms ──
-                    ReactiveCheckboxListTile(
-                      formControlName: 'agreeToTerms',
-                      title: Text(
-                        LocaleKeys.label_agree_terms.tr(),
-                        style: theme.textTheme.bodyMedium,
-                      ),
-                      checkColor: isDark
-                          ? AppColors.deepDarkGreen
-                          : Colors.white,
-                      activeColor: AppColors.brightGreen,
-                      controlAffinity: ListTileControlAffinity.leading,
-                      contentPadding: EdgeInsets.zero,
-                    ),
+                    AuthTermsCheckbox(theme: theme, isDark: isDark),
                     const SizedBox(height: 32),
-
-                    // ── Submit (role = 'user') ──
                     ReactiveFormConsumer(
                       builder: (context, form, child) => AuthPrimaryButton(
                         label: LocaleKeys.button_sign_up.tr(),
-                        onPressed: form.valid
+                        isLoading: isSubmitting,
+                        onPressed: form.valid && !isSubmitting
                             ? () {
                                 final city = form.control('city').value as AppCity;
                                 context.read<AuthCubit>().signUpClient(
@@ -220,10 +124,9 @@ class _SignupScreenState extends State<SignupScreen> {
                                   fullName:
                                       (form.control('fullName').value as String)
                                           .trim(),
-                                  phone:
-                                      (form.control('phoneNumber').value
-                                              as String)
-                                          .trim(),
+                                  phone: (form.control('phoneNumber').value
+                                          as String)
+                                      .trim(),
                                   cityId: city.id,
                                 );
                               }
@@ -231,12 +134,8 @@ class _SignupScreenState extends State<SignupScreen> {
                       ),
                     ),
                     const SizedBox(height: 24),
-
-                    // ── Social login ──
                     const AuthSocialLoginSection(),
                     const SizedBox(height: 32),
-
-                    // ── Login link ──
                     AuthTextLinkRow(
                       prefixText: LocaleKeys.have_account.tr(),
                       linkText: LocaleKeys.sign_in_alt.tr(),
@@ -248,8 +147,8 @@ class _SignupScreenState extends State<SignupScreen> {
               },
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

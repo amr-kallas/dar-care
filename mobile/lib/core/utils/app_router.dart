@@ -1,3 +1,4 @@
+import 'package:dar_care/features/auth/presentation/models/auth_registration_data.dart';
 import 'package:dar_care/features/auth/presentation/screens/auth_gate_screen.dart';
 import 'package:dar_care/features/auth/presentation/screens/forgot_password_screen.dart';
 import 'package:dar_care/features/auth/presentation/screens/login_screen.dart';
@@ -52,12 +53,22 @@ abstract class AppRouter {
       GoRoute(
         path: signupPath,
         name: 'signup',
-        builder: (context, state) => const SignupScreen(),
+        builder: (context, state) {
+          final registrationData = state.extra is AuthRegistrationData
+              ? state.extra as AuthRegistrationData
+              : null;
+          return SignupScreen(registrationData: registrationData);
+        },
       ),
       GoRoute(
         path: providerSignupPath,
         name: 'provider-signup',
-        builder: (context, state) => const ProviderSignupScreen(),
+        builder: (context, state) {
+          final registrationData = state.extra is AuthRegistrationData
+              ? state.extra as AuthRegistrationData
+              : null;
+          return ProviderSignupScreen(registrationData: registrationData);
+        },
       ),
       GoRoute(
         path: forgotPasswordPath,

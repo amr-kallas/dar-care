@@ -9,13 +9,15 @@ class RoleCard extends StatelessWidget {
     required this.icon,
     required this.buttonText,
     required this.onPressed,
+    this.isLoading = false,
   });
 
   final String title;
   final String description;
   final IconData icon;
   final String buttonText;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +85,7 @@ class RoleCard extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: onPressed,
+                    onPressed: isLoading ? null : onPressed,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.brightGreen,
                       foregroundColor: Colors.white,
@@ -92,10 +94,21 @@ class RoleCard extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.symmetric(vertical: 14),
                     ),
-                    child: Text(
-                      buttonText,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                    child: isLoading
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.4,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : Text(
+                            buttonText,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
                   ),
                 ),
               ],

@@ -10,6 +10,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
+import '../../../../core/widgets/app_snackbar.dart';
+
 class LocationSetupScreen extends StatefulWidget {
   const LocationSetupScreen({super.key});
 
@@ -159,9 +161,7 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
       setState(() {
         _inlineError = 'Failed to save location. Please try again.';
       });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Location save failed: $e')));
+      AppSnackbar.showError(context, 'Location save failed: $e');
     } finally {
       if (mounted) {
         setState(() {

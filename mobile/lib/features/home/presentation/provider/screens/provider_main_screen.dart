@@ -2,13 +2,14 @@ import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:dar_care/core/utils/app_router.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth_state.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 import '../../../../../core/theme/app_colors.dart';
+import 'package:dar_care/core/widgets/app_snackbar.dart';
 
 class ProviderMainScreen extends StatefulWidget {
   const ProviderMainScreen({super.key});
@@ -56,9 +57,7 @@ class _ProviderMainScreenState extends State<ProviderMainScreen> {
         if (state is AuthSignOutSuccess) {
           context.go(AppRouter.loginPath);
         } else if (state is AuthError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+          AppSnackbar.showError(context, state.messageKey.tr());
         }
       },
       child: Scaffold(

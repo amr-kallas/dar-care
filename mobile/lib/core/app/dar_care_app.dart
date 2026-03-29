@@ -1,7 +1,7 @@
 import 'package:dar_care/core/theme/app_theme.dart';
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/di/injection.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';

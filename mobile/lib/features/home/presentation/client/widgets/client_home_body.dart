@@ -8,8 +8,8 @@ import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:dar_care/core/theme/app_colors.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth_state.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 
 import '../../../../../generated/locale_keys.g.dart';
 import '../cubit/home_cubit.dart';

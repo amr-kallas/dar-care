@@ -1,11 +1,12 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
 import 'package:dar_care/core/services/supabase_service.dart';
+import 'package:dar_care/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_in_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart';
-import 'package:dar_care/features/auth/domain/usecases/get_current_user_use_case.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth_state.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
+import 'package:dar_care/features/auth/presentation/utils/auth_error_mapper.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 /// Authentication Cubit for managing auth state
 @injectable
@@ -30,8 +31,13 @@ class AuthCubit extends Cubit<AuthState> {
     required String cityId,
     String? phone,
   }) async {
+    if (state is AuthLoading &&
+        (state as AuthLoading).operation == AuthOperation.signUp) {
+      return;
+    }
+
     try {
-      emit(const AuthLoading());
+      emit(const AuthLoading(operation: AuthOperation.signUp));
       final user = await signUpUseCase.signUpClient(
         email: email,
         password: password,
@@ -40,8 +46,8 @@ class AuthCubit extends Cubit<AuthState> {
         phone: phone,
       );
       emit(AuthSignUpSuccess(user));
-    } catch (e) {
-      emit(AuthError(e.toString()));
+    } catch (error) {
+      emit(AuthError(AuthErrorMapper.signUpClient(error)));
     }
   }
 
@@ -56,8 +62,13 @@ class AuthCubit extends Cubit<AuthState> {
     required int experienceYears,
     String? bio,
   }) async {
+    if (state is AuthLoading &&
+        (state as AuthLoading).operation == AuthOperation.signUp) {
+      return;
+    }
+
     try {
-      emit(const AuthLoading());
+      emit(const AuthLoading(operation: AuthOperation.signUp));
       final user = await signUpUseCase.signUpProvider(
         email: email,
         password: password,
@@ -69,30 +80,35 @@ class AuthCubit extends Cubit<AuthState> {
         bio: bio,
       );
       emit(AuthSignUpSuccess(user));
-    } catch (e) {
-      emit(AuthError(e.toString()));
+    } catch (error) {
+      emit(AuthError(AuthErrorMapper.signUpProvider(error)));
     }
   }
 
   /// Sign in a user
   Future<void> signIn({required String email, required String password}) async {
+    if (state is AuthLoading &&
+        (state as AuthLoading).operation == AuthOperation.signIn) {
+      return;
+    }
+
     try {
-      emit(const AuthLoading());
+      emit(const AuthLoading(operation: AuthOperation.signIn));
       final user = await signInUseCase(email: email, password: password);
       emit(AuthSignInSuccess(user));
-    } catch (e) {
-      emit(AuthError(e.toString()));
+    } catch (error) {
+      emit(AuthError(AuthErrorMapper.signIn(error)));
     }
   }
 
   /// Sign out the current user
   Future<void> signOut() async {
     try {
-      emit(const AuthLoading());
+      emit(const AuthLoading(operation: AuthOperation.signOut));
       await signOutUseCase();
       emit(const AuthSignOutSuccess());
-    } catch (e) {
-      emit(AuthError(e.toString()));
+    } catch (error) {
+      emit(AuthError(AuthErrorMapper.signOut(error)));
     }
   }
 
@@ -101,21 +117,19 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       final session = SupabaseService.auth.currentSession;
       if (session != null) {
-        emit(const AuthLoading());
+        emit(const AuthLoading(operation: AuthOperation.checkSession));
         final user = await getCurrentUserUseCase();
         if (user != null) {
           emit(AuthAuthenticated(user));
         } else {
-          // Session exists but user not found in DB? Weird edge case.
-          // Maybe force sign out or emit Unauthenticated.
-          await signOut(); // Clear invalid session
+          await signOut();
           emit(const AuthUnauthenticated());
         }
       } else {
         emit(const AuthUnauthenticated());
       }
-    } catch (e) {
-      emit(AuthError(e.toString()));
+    } catch (error) {
+      emit(AuthError(AuthErrorMapper.session(error)));
     }
   }
 }

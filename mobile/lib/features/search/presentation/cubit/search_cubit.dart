@@ -34,7 +34,7 @@ class SearchCubit extends Cubit<SearchState> {
           errorMessage: null,
         ),
       );
-    } catch (e) {
+    } catch (_) {
       if (requestId != _latestRequestId) {
         return;
       }
@@ -42,7 +42,7 @@ class SearchCubit extends Cubit<SearchState> {
       emit(
         state.copyWith(
           status: SearchStatus.failure,
-          errorMessage: e.toString(),
+          errorMessage: null,
           results: const [],
         ),
       );

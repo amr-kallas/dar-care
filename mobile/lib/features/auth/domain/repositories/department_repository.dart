@@ -1,6 +1,5 @@
-import 'package:dar_care/features/auth/data/models/app_department.dart';
+import 'package:dar_care/features/auth/domain/entities/department.dart';
 
 abstract class DepartmentRepository {
-  Future<List<AppDepartment>> getDepartments();
+  Future<List<Department>> getDepartments();
 }
-

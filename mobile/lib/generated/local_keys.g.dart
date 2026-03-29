@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class LocaleKeys {
+abstract class  LocaleKeys {
   static const app_name = 'app_name';
   static const onboarding_title_1 = 'onboarding_title_1';
   static const onboarding_subtitle_1 = 'onboarding_subtitle_1';
@@ -27,8 +27,7 @@ abstract class LocaleKeys {
   static const auth_join_as = 'auth_join_as';
   static const auth_provider_signup_subtitle = 'auth_provider_signup_subtitle';
   static const auth_provider_section_basic = 'auth_provider_section_basic';
-  static const auth_provider_section_professional =
-      'auth_provider_section_professional';
+  static const auth_provider_section_professional = 'auth_provider_section_professional';
   static const label_email = 'label_email';
   static const label_password = 'label_password';
   static const label_full_name = 'label_full_name';
@@ -72,24 +71,18 @@ abstract class LocaleKeys {
   static const validation_required_city = 'validation_required_city';
   static const validation_required_otp = 'validation_required_otp';
   static const validation_min_otp = 'validation_min_otp';
-  static const validation_required_department =
-      'validation_required_department';
-  static const validation_required_experience =
-      'validation_required_experience';
+  static const validation_required_department = 'validation_required_department';
+  static const validation_required_experience = 'validation_required_experience';
   static const validation_invalid_experience = 'validation_invalid_experience';
   static const auth_error_generic = 'auth_error_generic';
-  static const auth_error_invalid_credentials =
-      'auth_error_invalid_credentials';
+  static const auth_error_invalid_credentials = 'auth_error_invalid_credentials';
   static const auth_error_sign_in_failed = 'auth_error_sign_in_failed';
   static const auth_error_sign_up_failed = 'auth_error_sign_up_failed';
-  static const auth_error_provider_sign_up_failed =
-      'auth_error_provider_sign_up_failed';
+  static const auth_error_provider_sign_up_failed = 'auth_error_provider_sign_up_failed';
   static const auth_error_sign_out_failed = 'auth_error_sign_out_failed';
   static const auth_error_session_failed = 'auth_error_session_failed';
   static const auth_error_cities_failed = 'auth_error_cities_failed';
   static const auth_error_departments_failed = 'auth_error_departments_failed';
-  static const auth_success_sign_in = 'auth_success_sign_in';
-  static const auth_success_sign_up = 'auth_success_sign_up';
   static const home_tab = 'home_tab';
   static const orders_tab = 'orders_tab';
   static const favorites_tab = 'favorites_tab';
@@ -114,9 +107,6 @@ abstract class LocaleKeys {
   static const distance_from_you = 'distance_from_you';
   static const search_results_title = 'search_results_title';
   static const search_results_found = 'search_results_found';
-  static const search_results_empty = 'search_results_empty';
-  static const search_results_error_generic = 'search_results_error_generic';
-  static const search_results_retry_button = 'search_results_retry_button';
   static const location_riyadh = 'location_riyadh';
   static const filter_highest_rated = 'filter_highest_rated';
   static const filter_map = 'filter_map';
@@ -136,7 +126,6 @@ abstract class LocaleKeys {
   static const button_view_profile = 'button_view_profile';
   static const button_chat = 'button_chat';
   static const price_on_request = 'price_on_request';
-  static const price_per_hour = 'price_per_hour';
   static const profile_title = 'profile_title';
   static const gold_member = 'gold_member';
   static const completed_orders = 'completed_orders';
@@ -173,4 +162,5 @@ abstract class LocaleKeys {
   static const orders_no_address = 'orders_no_address';
   static const orders_action_repeat = 'orders_action_repeat';
   static const orders_action_view_details = 'orders_action_view_details';
+
 }

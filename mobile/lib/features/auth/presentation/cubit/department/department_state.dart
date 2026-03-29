@@ -1,4 +1,4 @@
-import 'package:dar_care/features/auth/data/models/app_department.dart';
+import 'package:dar_care/features/auth/domain/entities/department.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class DepartmentState extends Equatable {
@@ -17,7 +17,7 @@ class DepartmentLoading extends DepartmentState {
 }
 
 class DepartmentLoaded extends DepartmentState {
-  final List<AppDepartment> departments;
+  final List<Department> departments;
 
   const DepartmentLoaded(this.departments);
 
@@ -26,11 +26,10 @@ class DepartmentLoaded extends DepartmentState {
 }
 
 class DepartmentError extends DepartmentState {
-  final String message;
+  final String messageKey;
 
-  const DepartmentError(this.message);
+  const DepartmentError(this.messageKey);
 
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [messageKey];
 }
-

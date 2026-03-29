@@ -6,6 +6,8 @@ abstract class AuthState extends Equatable {
   const AuthState();
 }
 
+enum AuthOperation { signIn, signUp, signOut, checkSession }
+
 /// Initial state
 class AuthInitial extends AuthState {
   const AuthInitial();
@@ -16,10 +18,12 @@ class AuthInitial extends AuthState {
 
 /// Loading state
 class AuthLoading extends AuthState {
-  const AuthLoading();
+  const AuthLoading({this.operation});
+
+  final AuthOperation? operation;
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [operation];
 }
 
 /// Authenticated state
@@ -42,12 +46,12 @@ class AuthUnauthenticated extends AuthState {
 
 /// Authentication error state
 class AuthError extends AuthState {
-  final String message;
+  final String messageKey;
 
-  const AuthError(this.message);
+  const AuthError(this.messageKey);
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [messageKey];
 }
 
 /// Sign up success state

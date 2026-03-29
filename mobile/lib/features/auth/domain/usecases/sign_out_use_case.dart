@@ -1,14 +1,12 @@
-import 'package:injectable/injectable.dart';
 import 'package:dar_care/features/auth/domain/repositories/auth_repository.dart';
+import 'package:injectable/injectable.dart';
 
 /// Use case for user sign out
 @injectable
 class SignOutUseCase {
-  final AuthRepository repository;
+  final AuthRepository _repository;
 
-  SignOutUseCase({required this.repository});
+  SignOutUseCase(this._repository);
 
-  Future<void> call() async {
-    return await repository.signOut();
-  }
+  Future<void> call() => _repository.signOut();
 }
