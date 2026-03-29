@@ -2,6 +2,7 @@ import 'package:dar_care/core/di/injectable_config.dart';
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/validation_messages.dart';
 import 'package:dar_care/features/auth/data/models/app_department.dart';
+import 'package:dar_care/features/auth/data/models/app_city.dart';
 import 'package:dar_care/features/auth/presentation/cubit/department_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/department_state.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
@@ -21,9 +22,24 @@ import '../widgets/auth_section_header.dart';
 import '../widgets/auth_social_login_section.dart';
 import '../widgets/auth_text_link_row.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
+import 'package:dar_care/features/auth/data/repositories/city_repository.dart';
 
-class ProviderSignupScreen extends StatelessWidget {
+class ProviderSignupScreen extends StatefulWidget {
   const ProviderSignupScreen({super.key});
+
+  @override
+  State<ProviderSignupScreen> createState() => _ProviderSignupScreenState();
+}
+
+class _ProviderSignupScreenState extends State<ProviderSignupScreen> {
+  final CityRepository _cityRepository = CityRepository();
+  late final Future<List<AppCity>> _citiesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _citiesFuture = _cityRepository.getCities();
+  }
 
   // ── Form definition ───────────────────────────────────────────────────────
   FormGroup buildForm() => fb.group({
@@ -34,6 +50,7 @@ class ProviderSignupScreen extends StatelessWidget {
       Validators.required,
       Validators.pattern(r'^[0-9]+$'),
     ]),
+    'city': fb.control<AppCity?>(null, [Validators.required]),
     'password': fb.control<String>('', [
       Validators.required,
       Validators.minLength(8),
@@ -150,6 +167,52 @@ class ProviderSignupScreen extends StatelessWidget {
                           hintText: LocaleKeys.hint_phone_number.tr(),
                         ),
                         validationMessages: ValidationMessages.phoneNumber,
+                      ),
+                      const SizedBox(height: 16),
+
+                      // City (maps to providers.city_id)
+                      FutureBuilder<List<AppCity>>(
+                        future: _citiesFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const AppLoadingIndicator(
+                              padding: EdgeInsets.all(8),
+                              size: 24,
+                              strokeWidth: 3,
+                            );
+                          } else if (snapshot.hasError) {
+                            return Text(
+                              'Error loading cities: ${snapshot.error}',
+                              style: const TextStyle(color: Colors.red),
+                            );
+                          }
+
+                          final cities = snapshot.data ?? <AppCity>[];
+                          final languageCode = context.locale.languageCode;
+
+                          return ReactiveDropdownField<AppCity?>(
+                            formControlName: 'city',
+                            decoration: InputDecoration(
+                              labelText: LocaleKeys.label_city.tr(),
+                              prefixIcon: const Icon(
+                                Icons.location_city_outlined,
+                              ),
+                              hintText: LocaleKeys.hint_city.tr(),
+                            ),
+                            items: cities
+                                .map(
+                                  (c) => DropdownMenuItem<AppCity?>(
+                                    value: c,
+                                    child: Text(
+                                      c.nameForLanguage(languageCode),
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                            validationMessages: ValidationMessages.city,
+                          );
+                        },
                       ),
                       const SizedBox(height: 16),
 
@@ -271,6 +334,8 @@ class ProviderSignupScreen extends StatelessWidget {
                                   final department =
                                       form.control('department').value
                                           as AppDepartment;
+                                  final city =
+                                      form.control('city').value as AppCity;
                                   context.read<AuthCubit>().signUpProvider(
                                     email:
                                         (form.control('email').value as String)
@@ -287,6 +352,7 @@ class ProviderSignupScreen extends StatelessWidget {
                                         (form.control('phoneNumber').value
                                                 as String)
                                             .trim(),
+                                    cityId: city.id,
                                     departmentId: department.id,
                                     experienceYears: int.parse(
                                       (form.control('experienceYears').value

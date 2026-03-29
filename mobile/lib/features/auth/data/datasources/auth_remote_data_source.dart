@@ -12,6 +12,7 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
     required String fullName,
+    required String cityId,
     String? phone,
   });
 
@@ -21,6 +22,7 @@ abstract class AuthRemoteDataSource {
     required String password,
     required String fullName,
     required String phone,
+    required String cityId,
     required String departmentId,
     required int experienceYears,
     String? bio,
@@ -67,6 +69,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
     required String fullName,
+    required String cityId,
     String? phone,
   }) async {
     try {
@@ -78,6 +81,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'full_name': fullName,
           'role': UserRole.client.value,
           'phone': phone,
+          'city_id': cityId,
         },
       );
 
@@ -95,10 +99,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      // Create client profile in the clients table
-      await supabaseClient.from('clients').insert({
-        'user_id': authResponse.user!.id,
-      });
+      // Create client profile and attach an address carrying the selected city.
+      final insertedClient = await supabaseClient
+          .from('clients')
+          .insert({'user_id': authResponse.user!.id})
+          .select('id')
+          .single();
+
+      await _attachAddressToClient(
+        clientId: insertedClient['id'] as String,
+        cityId: cityId,
+      );
 
       return AuthUserModel.fromSupabaseUser(authResponse.user!);
     } catch (e) {
@@ -113,6 +124,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String password,
     required String fullName,
     required String phone,
+    required String cityId,
     required String departmentId,
     required int experienceYears,
     String? bio,
@@ -126,6 +138,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           'full_name': fullName,
           'role': UserRole.provider.value,
           'phone': phone,
+          'city_id': cityId,
           'department_id': departmentId,
           'experience_years': experienceYears,
           'bio': bio,
@@ -146,14 +159,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'created_at': DateTime.now().toIso8601String(),
       });
 
-      // Create provider profile in the providers table
-      await supabaseClient.from('providers').insert({
-        'user_id': authResponse.user!.id,
-        'department_id': departmentId,
-        'experience_years': experienceYears,
-        'bio': bio,
-        'status': 'pending', // pending verification
-      });
+      // Create provider profile and attach an address carrying the selected city.
+      final insertedProvider = await supabaseClient
+          .from('providers')
+          .insert({
+            'user_id': authResponse.user!.id,
+            'department_id': departmentId,
+            'experience_years': experienceYears,
+            'bio': bio,
+            'status': 'pending',
+          })
+          .select('id')
+          .single();
+
+      await _attachAddressToProvider(
+        providerId: insertedProvider['id'] as String,
+        cityId: cityId,
+      );
 
       return AuthUserModel.fromSupabaseUser(authResponse.user!);
     } catch (e) {
@@ -261,6 +283,48 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       log('Update user profile error: $e');
       rethrow;
     }
+  }
+
+  Future<void> _attachAddressToClient({
+    required String clientId,
+    required String cityId,
+  }) async {
+    final insertedAddress = await supabaseClient
+        .from('addresses')
+        .insert({
+          'client_id': clientId,
+          'city_id': cityId,
+          'details': 'Signup city',
+          'location_updated_at': DateTime.now().toIso8601String(),
+        })
+        .select('id')
+        .single();
+
+    await supabaseClient
+        .from('clients')
+        .update({'address_id': insertedAddress['id']})
+        .eq('id', clientId);
+  }
+
+  Future<void> _attachAddressToProvider({
+    required String providerId,
+    required String cityId,
+  }) async {
+    final insertedAddress = await supabaseClient
+        .from('addresses')
+        .insert({
+          'provider_id': providerId,
+          'city_id': cityId,
+          'details': 'Signup city',
+          'location_updated_at': DateTime.now().toIso8601String(),
+        })
+        .select('id')
+        .single();
+
+    await supabaseClient
+        .from('providers')
+        .update({'address_id': insertedAddress['id']})
+        .eq('id', providerId);
   }
 
   @override

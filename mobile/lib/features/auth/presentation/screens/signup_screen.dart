@@ -1,11 +1,14 @@
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/validation_messages.dart';
+import 'package:dar_care/features/auth/data/models/app_city.dart';
+import 'package:dar_care/features/auth/data/repositories/city_repository.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:reactive_forms/reactive_forms.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -17,13 +20,28 @@ import '../widgets/auth_text_link_row.dart';
 
 /// Client (user) signup screen.
 /// Role is always 'user' — provider registration uses [ProviderSignupScreen].
-class SignupScreen extends StatelessWidget {
+class SignupScreen extends StatefulWidget {
   const SignupScreen({super.key});
+
+  @override
+  State<SignupScreen> createState() => _SignupScreenState();
+}
+
+class _SignupScreenState extends State<SignupScreen> {
+  final CityRepository _cityRepository = CityRepository();
+  late final Future<List<AppCity>> _citiesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _citiesFuture = _cityRepository.getCities();
+  }
 
   FormGroup buildForm() => fb.group({
     'fullName': ['', Validators.required],
     'email': ['', Validators.required, Validators.email],
     'phoneNumber': ['', Validators.required, Validators.pattern(r'^[0-9]+$')],
+    'city': fb.control<AppCity?>(null, [Validators.required]),
     'password': ['', Validators.required, Validators.minLength(8)],
     'agreeToTerms': [false, Validators.requiredTrue],
   });
@@ -115,6 +133,49 @@ class SignupScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
 
+                    // ── City ──
+                    FutureBuilder<List<AppCity>>(
+                      future: _citiesFuture,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const AppLoadingIndicator(
+                            padding: EdgeInsets.all(8),
+                            size: 24,
+                            strokeWidth: 3,
+                          );
+                        }
+
+                        if (snapshot.hasError) {
+                          return Text(
+                            'Error loading cities: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.red),
+                          );
+                        }
+
+                        final cities = snapshot.data ?? <AppCity>[];
+                        final languageCode = context.locale.languageCode;
+
+                        return ReactiveDropdownField<AppCity?>(
+                          formControlName: 'city',
+                          decoration: InputDecoration(
+                            labelText: LocaleKeys.label_city.tr(),
+                            prefixIcon: const Icon(Icons.location_city_outlined),
+                            hintText: LocaleKeys.hint_city.tr(),
+                          ),
+                          items: cities
+                              .map(
+                                (city) => DropdownMenuItem<AppCity?>(
+                                  value: city,
+                                  child: Text(city.nameForLanguage(languageCode)),
+                                ),
+                              )
+                              .toList(),
+                          validationMessages: ValidationMessages.city,
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 16),
+
                     // ── Password ──
                     ReactiveTextField<String>(
                       formControlName: 'password',
@@ -149,6 +210,7 @@ class SignupScreen extends StatelessWidget {
                         label: LocaleKeys.button_sign_up.tr(),
                         onPressed: form.valid
                             ? () {
+                                final city = form.control('city').value as AppCity;
                                 context.read<AuthCubit>().signUpClient(
                                   email: (form.control('email').value as String)
                                       .trim(),
@@ -162,6 +224,7 @@ class SignupScreen extends StatelessWidget {
                                       (form.control('phoneNumber').value
                                               as String)
                                           .trim(),
+                                  cityId: city.id,
                                 );
                               }
                             : null,

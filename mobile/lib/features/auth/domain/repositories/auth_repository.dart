@@ -8,6 +8,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String fullName,
+    required String cityId,
     String? phone,
   });
 
@@ -17,6 +18,7 @@ abstract class AuthRepository {
     required String password,
     required String fullName,
     required String phone,
+    required String cityId,
     required String departmentId,
     required int experienceYears,
     String? bio,

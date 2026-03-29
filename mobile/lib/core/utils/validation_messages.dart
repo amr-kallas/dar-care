@@ -32,6 +32,11 @@ abstract class ValidationMessages {
     'minLength': (_) => LocaleKeys.validation_min_otp.tr(),
   };
 
+  /// City validation messages
+  static Map<String, String Function(Object)> get city => {
+    'required': (_) => LocaleKeys.validation_required_city.tr(),
+  };
+
   /// Department / service type validation messages
   static Map<String, String Function(Object)> get department => {
     'required': (_) => LocaleKeys.validation_required_department.tr(),

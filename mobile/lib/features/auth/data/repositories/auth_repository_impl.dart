@@ -15,12 +15,14 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String fullName,
+    required String cityId,
     String? phone,
   }) async {
     return await remoteDataSource.signUpClient(
       email: email,
       password: password,
       fullName: fullName,
+      cityId: cityId,
       phone: phone,
     );
   }
@@ -31,6 +33,7 @@ class AuthRepositoryImpl implements AuthRepository {
     required String password,
     required String fullName,
     required String phone,
+    required String cityId,
     required String departmentId,
     required int experienceYears,
     String? bio,
@@ -40,6 +43,7 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
       fullName: fullName,
       phone: phone,
+      cityId: cityId,
       departmentId: departmentId,
       experienceYears: experienceYears,
       bio: bio,

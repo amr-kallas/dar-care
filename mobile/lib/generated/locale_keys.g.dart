@@ -34,6 +34,8 @@ abstract class LocaleKeys {
   static const label_full_name = 'label_full_name';
   static const label_phone_number = 'label_phone_number';
   static const hint_phone_number = 'hint_phone_number';
+  static const label_city = 'label_city';
+  static const hint_city = 'hint_city';
   static const label_remember_me = 'label_remember_me';
   static const label_agree_terms = 'label_agree_terms';
   static const label_department = 'label_department';
@@ -67,6 +69,7 @@ abstract class LocaleKeys {
   static const validation_required_name = 'validation_required_name';
   static const validation_required_phone = 'validation_required_phone';
   static const validation_invalid_phone = 'validation_invalid_phone';
+  static const validation_required_city = 'validation_required_city';
   static const validation_required_otp = 'validation_required_otp';
   static const validation_min_otp = 'validation_min_otp';
   static const validation_required_department =
