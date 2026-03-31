@@ -185,28 +185,58 @@ class ClientHomeBody extends StatelessWidget {
                 SectionHeader(
                   title: LocaleKeys.section_services.tr(),
                   actionText: LocaleKeys.see_all.tr(),
-                  onTap: () {},
+                  onTap: () => context.push(
+                    AppRouter.allDepartmentsPath,
+                    extra: state.categories,
+                  ),
                 ),
                 const SizedBox(height: 16),
 
-                GridView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    childAspectRatio: 0.8,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 12,
-                  ),
-                  itemCount: state.categories.length,
-                  itemBuilder: (context, index) {
-                    final category = state.categories[index];
-                    return ServiceItem(
-                      icon: category
-                          .icon, // Assuming CategoryModel has an icon getter
-                      label: category.localizedName(languageCode),
-                      onTap: () {
-                        // Navigate to category details or filter
+                Builder(
+                  builder: (context) {
+                    const previewSlots = 8; // 2 rows x 4 columns
+                    final hasMore = state.categories.length > previewSlots;
+                    final previewCount = hasMore
+                        ? previewSlots
+                        : state.categories.length;
+
+                    return GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            childAspectRatio: 0.8,
+                            mainAxisSpacing: 16,
+                            crossAxisSpacing: 12,
+                          ),
+                      itemCount: previewCount,
+                      itemBuilder: (context, index) {
+                        final isMoreTile = hasMore && index == previewSlots - 1;
+                        if (isMoreTile) {
+                          return ServiceItem(
+                            icon: Icons.more_horiz,
+                            label: LocaleKeys.service_more.tr(),
+                            isMore: true,
+                            onTap: () => context.push(
+                              AppRouter.allDepartmentsPath,
+                              extra: state.categories,
+                            ),
+                          );
+                        }
+
+                        final category = state.categories[index];
+                        return ServiceItem(
+                          icon: category.icon,
+                          label: category.localizedName(languageCode),
+                          imageUrl: category.imageUrl,
+                          onTap: () {
+                            context.push(
+                              AppRouter.subCategoriesPath,
+                              extra: category,
+                            );
+                          },
+                        );
                       },
                     );
                   },

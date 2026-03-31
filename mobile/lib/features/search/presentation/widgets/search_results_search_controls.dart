@@ -9,10 +9,12 @@ class SearchResultsSearchControls extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onSubmitSearch,
+    required this.onQueryChanged,
   });
 
   final TextEditingController controller;
   final VoidCallback onSubmitSearch;
+  final ValueChanged<String> onQueryChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +37,7 @@ class SearchResultsSearchControls extends StatelessWidget {
             child: TextField(
               controller: controller,
               textInputAction: TextInputAction.search,
+              onChanged: onQueryChanged,
               onSubmitted: (_) => onSubmitSearch(),
               decoration: InputDecoration(
                 hintText: LocaleKeys.search_hint.tr(),

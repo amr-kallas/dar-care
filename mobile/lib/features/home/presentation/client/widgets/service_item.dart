@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 
 import 'package:dar_care/core/theme/app_colors.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ServiceItem extends StatelessWidget {
   const ServiceItem({
     super.key,
     required this.icon,
     required this.label,
+    this.imageUrl,
     this.isMore = false,
     this.onTap,
   });
 
   final IconData icon;
   final String label;
+  final String? imageUrl;
   final bool isMore;
   final VoidCallback? onTap;
 
@@ -38,11 +41,31 @@ class ServiceItem extends StatelessWidget {
                   ? Border.all(color: Colors.white10)
                   : null,
             ),
-            child: Icon(
-              icon,
-              color: isMore ? Colors.grey : AppColors.brightGreen,
-              size: 28,
-            ),
+            child: imageUrl != null && imageUrl!.isNotEmpty
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(18),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrl!,
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        padding: const EdgeInsets.all(16),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.brightGreen,
+                        ),
+                      ),
+                      errorWidget: (context, url, error) => Icon(
+                        icon,
+                        color: isMore ? Colors.grey : AppColors.brightGreen,
+                        size: 28,
+                      ),
+                    ),
+                  )
+                : Icon(
+                    icon,
+                    color: isMore ? Colors.grey : AppColors.brightGreen,
+                    size: 28,
+                  ),
           ),
           const SizedBox(height: 8),
           Text(

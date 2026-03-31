@@ -7,11 +7,15 @@ import 'package:dar_care/features/auth/presentation/screens/provider_signup_scre
 import 'package:dar_care/features/auth/presentation/screens/signup_screen.dart';
 import 'package:dar_care/features/location_setup/presentation/screens/location_setup_screen.dart';
 import 'package:dar_care/features/splash/presentation/screens/splash_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
 import 'package:dar_care/features/home/presentation/home_screen.dart';
+import 'package:dar_care/features/home/data/models/category_model.dart';
+import 'package:dar_care/features/home/presentation/client/screens/all_departments_screen.dart';
+import 'package:dar_care/features/home/presentation/client/screens/sub_categories_screen.dart';
 import 'package:dar_care/features/search/presentation/screens/search_results_screen.dart';
 
 abstract class AppRouter {
@@ -26,6 +30,8 @@ abstract class AppRouter {
   static const String locationSetupPath = '/location-setup';
   static const String homePath = '/home';
   static const String searchResultsPath = '/search-results';
+  static const String allDepartmentsPath = '/all-departments';
+  static const String subCategoriesPath = '/sub-categories';
 
   static final router = GoRouter(
     initialLocation: splashPath,
@@ -102,6 +108,30 @@ abstract class AppRouter {
               : null;
           final query = extraQuery ?? state.uri.queryParameters['q'];
           return SearchResultsScreen(initialQuery: query);
+        },
+      ),
+      GoRoute(
+        path: allDepartmentsPath,
+        name: 'all-departments',
+        builder: (context, state) {
+          final extra = state.extra;
+          final categories = extra is List<CategoryModel>
+              ? extra
+              : const <CategoryModel>[];
+          return AllDepartmentsScreen(categories: categories);
+        },
+      ),
+      GoRoute(
+        path: subCategoriesPath,
+        name: 'sub-categories',
+        builder: (context, state) {
+          final extra = state.extra;
+          final department = extra is CategoryModel
+              ? extra
+              : null;
+          return department != null
+              ? SubCategoriesScreen(department: department)
+              : const Scaffold(body: Center(child: Text('Invalid department')));
         },
       ),
     ],

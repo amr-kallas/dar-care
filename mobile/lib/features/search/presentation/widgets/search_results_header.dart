@@ -35,14 +35,8 @@ class SearchResultsHeader extends StatelessWidget {
               fontWeight: FontWeight.bold,
             ),
           ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? AppColors.surfaceDark : Colors.grey.shade100,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(SolarLinearIcons.bell),
-          ),
+          // Keep width parity with the back button so title stays centered.
+          const SizedBox(width: 48),
         ],
       ),
     );

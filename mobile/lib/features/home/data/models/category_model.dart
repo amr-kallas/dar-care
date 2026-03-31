@@ -6,11 +6,13 @@ class CategoryModel {
   final String id;
   final LocalizedDbText nameText;
   final LocalizedDbText descriptionText;
+  final String? imageUrl;
 
   const CategoryModel({
     required this.id,
     required this.nameText,
     this.descriptionText = const LocalizedDbText(),
+    this.imageUrl,
   });
 
   /// Backward-compatible default display value.
@@ -38,6 +40,7 @@ class CategoryModel {
       id: json['id'] as String,
       nameText: LocalizedDbText.fromSupabase(json['name']),
       descriptionText: LocalizedDbText.fromSupabase(json['description']),
+      imageUrl: json['image_url'] as String?,
     );
   }
 

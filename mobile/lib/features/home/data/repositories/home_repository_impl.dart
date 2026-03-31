@@ -1,6 +1,7 @@
 import 'dart:developer';
 import 'package:dar_care/features/home/data/models/category_model.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
+import 'package:dar_care/features/home/data/models/sub_category_model.dart';
 import 'package:dar_care/features/home/domain/repositories/home_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -25,6 +26,23 @@ class HomeRepositoryImpl implements HomeRepository {
           .toList();
     } catch (e) {
       throw Exception('Failed to load service categories: $e');
+    }
+  }
+
+  @override
+  Future<List<SubCategoryModel>> getSubCategories(String departmentId) async {
+    try {
+      final response = await _supabase
+          .from('categories')
+          .select()
+          .eq('department_id', departmentId)
+          .order('name');
+
+      return (response as List<dynamic>)
+          .map((json) => SubCategoryModel.fromJson(json))
+          .toList();
+    } catch (e) {
+      throw Exception('Failed to load sub categories: $e');
     }
   }
 

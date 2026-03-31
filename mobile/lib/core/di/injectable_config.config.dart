@@ -31,9 +31,9 @@ import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart'
 import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart'
     as _i547;
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart'
-    as _i184;
+    as _i321;
 import 'package:dar_care/features/auth/presentation/cubit/department/department_cubit.dart'
-    as _i183;
+    as _i118;
 import 'package:dar_care/features/favorites/data/repositories/favorites_repository_impl.dart'
     as _i369;
 import 'package:dar_care/features/favorites/domain/repositories/favorites_repository.dart'
@@ -46,6 +46,8 @@ import 'package:dar_care/features/home/domain/repositories/home_repository.dart'
     as _i59;
 import 'package:dar_care/features/home/presentation/client/cubit/home_cubit.dart'
     as _i253;
+import 'package:dar_care/features/home/presentation/client/cubit/sub_categories/sub_categories_cubit.dart'
+    as _i749;
 import 'package:dar_care/features/orders/data/repositories/orders_repository_impl.dart'
     as _i862;
 import 'package:dar_care/features/orders/domain/repositories/orders_repository.dart'
@@ -83,8 +85,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i75.OrdersRepository>(
       () => _i862.OrdersRepositoryImpl(gh<_i454.SupabaseClient>()),
     );
-    gh.factory<_i183.DepartmentCubit>(
-      () => _i183.DepartmentCubit(gh<_i687.GetDepartmentsUseCase>()),
+    gh.factory<_i118.DepartmentCubit>(
+      () => _i118.DepartmentCubit(gh<_i687.GetDepartmentsUseCase>()),
     );
     gh.lazySingleton<_i59.HomeRepository>(
       () => _i668.HomeRepositoryImpl(gh<_i454.SupabaseClient>()),
@@ -112,6 +114,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i253.HomeCubit>(
       () => _i253.HomeCubit(gh<_i59.HomeRepository>()),
     );
+    gh.factory<_i749.SubCategoriesCubit>(
+      () => _i749.SubCategoriesCubit(gh<_i59.HomeRepository>()),
+    );
     gh.factory<_i481.GetCurrentUserUseCase>(
       () => _i481.GetCurrentUserUseCase(gh<_i287.AuthRepository>()),
     );
@@ -124,8 +129,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i547.SignUpUseCase>(
       () => _i547.SignUpUseCase(gh<_i287.AuthRepository>()),
     );
-    gh.factory<_i184.AuthCubit>(
-      () => _i184.AuthCubit(
+    gh.factory<_i321.AuthCubit>(
+      () => _i321.AuthCubit(
         signUpUseCase: gh<_i547.SignUpUseCase>(),
         signInUseCase: gh<_i679.SignInUseCase>(),
         signOutUseCase: gh<_i818.SignOutUseCase>(),
