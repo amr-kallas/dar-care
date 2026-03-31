@@ -12,13 +12,13 @@ import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
+import 'package:dar_care/features/home/presentation/client/cubit/home_cubit.dart';
+import 'package:dar_care/features/home/presentation/client/cubit/home_state.dart';
+import 'package:dar_care/features/home/presentation/client/widgets/section_header.dart';
+import 'package:dar_care/features/home/presentation/client/widgets/service_item.dart';
+import 'package:dar_care/core/widgets/provider_card.dart';
 
 import '../../../../../generated/locale_keys.g.dart';
-import '../cubit/home_cubit.dart';
-import '../cubit/home_state.dart';
-import 'provider_card.dart';
-import 'section_header.dart';
-import 'service_item.dart';
 
 class ClientHomeBody extends StatelessWidget {
   const ClientHomeBody({super.key});
@@ -154,8 +154,7 @@ class ClientHomeBody extends StatelessWidget {
                         child: AbsorbPointer(
                           // Prevent TextField focus
                           child: TextField(
-                            textAlign:
-                                TextAlign.right, // Arabic RTL alignment usually
+                            textAlign: TextAlign.start,
                             decoration: InputDecoration(
                               hintText: LocaleKeys.search_hint.tr(),
                               hintStyle: const TextStyle(color: Colors.grey),
@@ -264,48 +263,67 @@ class ClientHomeBody extends StatelessWidget {
                   const Center(child: Text('No providers found')),
 
                 if (state.topProviders.isNotEmpty)
-                  SizedBox(
-                    height: 220,
-                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
-                      builder: (context, favoritesState) {
-                        return ListView.separated(
-                          scrollDirection: Axis.horizontal,
-                          clipBehavior: Clip.none,
-                          itemCount: state.topProviders.length,
-                          separatorBuilder: (context, index) =>
-                              const SizedBox(width: 16),
-                          itemBuilder: (context, index) {
-                            final provider = state.topProviders[index];
-                            final isFavorite = favoritesState.favorites.any(
-                              (p) => p.id == provider.id,
-                            );
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final cardWidth = (constraints.maxWidth * 0.9).clamp(
+                        280.0,
+                        360.0,
+                      );
 
-                            return ProviderCard(
-                              name: provider.fullName,
-                              profession: provider.professionForLanguage(
-                                languageCode,
-                              ),
-                              rating: provider.rating,
-                              distance: LocaleKeys.distance_from_you.tr(
-                                namedArgs: {
-                                  'distance': '2.5',
-                                }, // Mock distance for now
-                              ),
-                              imageUrl: provider.imageUrl ?? '',
-                              isFavorite: isFavorite,
-                              onFavoriteToggle: () {
-                                context.read<FavoritesCubit>().toggleFavorite(
-                                  provider,
+                      return SizedBox(
+                        height: 188,
+                        child: BlocBuilder<FavoritesCubit, FavoritesState>(
+                          builder: (context, favoritesState) {
+                            return ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              clipBehavior: Clip.none,
+                              itemCount: state.topProviders.length,
+                              separatorBuilder: (context, index) =>
+                                  const SizedBox(width: 16),
+                              itemBuilder: (context, index) {
+                                final provider = state.topProviders[index];
+                                final isFavorite = favoritesState.favorites.any(
+                                  (p) => p.id == provider.id,
                                 );
-                              },
-                              onTap: () {
-                                // Navigate to provider details
+
+                                final hourlyRateText = provider.hourlyRate != null
+                                    ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
+                                    : LocaleKeys.price_on_request.tr();
+
+                                return ProviderCard(
+                                  width: cardWidth,
+                                  margin: EdgeInsets.zero,
+                                  isCompact: true,
+                                  hourlyRate: hourlyRateText,
+                                  name: provider.fullName,
+                                  profession: provider.professionForLanguage(
+                                    languageCode,
+                                  ),
+                                  rating: provider.rating.toStringAsFixed(1),
+                                  distance: LocaleKeys.distance_from_you.tr(
+                                    namedArgs: {
+                                      'distance': '2.5',
+                                    }, // Mock distance for now
+                                  ),
+                                  imageUrl: provider.imageUrl ?? '',
+                                  availabilityText: LocaleKeys.available_now.tr(),
+                                  isAvailable: true,
+                                  isFavorite: isFavorite,
+                                  onFavoriteTap: () {
+                                    context.read<FavoritesCubit>().toggleFavorite(
+                                          provider,
+                                        );
+                                  },
+                                  onTap: () {
+                                    // Navigate to booking/details
+                                  },
+                                );
                               },
                             );
                           },
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 const SizedBox(height: 80), // Bottom spacer
               ],

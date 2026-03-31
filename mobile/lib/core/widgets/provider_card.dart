@@ -4,10 +4,10 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 
-import '../../../../core/theme/app_colors.dart';
+import '../theme/app_colors.dart';
 
-class SearchProviderCard extends StatelessWidget {
-  const SearchProviderCard({
+class ProviderCard extends StatelessWidget {
+  const ProviderCard({
     super.key,
     required this.name,
     required this.profession,
@@ -19,6 +19,9 @@ class SearchProviderCard extends StatelessWidget {
     this.isFullyBooked = false, // if true, shows Grey "Fully Booked" button
     this.hourlyRate,
     this.tag,
+    this.width,
+    this.margin,
+    this.isCompact = false,
     this.onTap,
     this.isFavorite = false,
     this.onFavoriteTap,
@@ -34,6 +37,9 @@ class SearchProviderCard extends StatelessWidget {
   final bool isFullyBooked;
   final String? hourlyRate;
   final String? tag;
+  final double? width;
+  final EdgeInsetsGeometry? margin;
+  final bool isCompact;
   final VoidCallback? onTap;
   final bool isFavorite;
   final VoidCallback? onFavoriteTap;
@@ -45,10 +51,14 @@ class SearchProviderCard extends StatelessWidget {
 
     final cardColor = isDark ? AppColors.surfaceDark : Colors.white;
     final borderColor = isDark ? AppColors.borderDark : Colors.grey.shade200;
+    final cardPadding = isCompact ? 12.0 : 16.0;
+    final actionHeight = isCompact ? 42.0 : 48.0;
+    final spacingBeforeActions = isCompact ? 12.0 : 20.0;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      width: width,
+      margin: margin ?? const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(cardPadding),
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(24),
@@ -78,77 +88,46 @@ class SearchProviderCard extends StatelessWidget {
                 ),
               ),
 
-              const Spacer(),
-
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    name,
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.white : Colors.black,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : Colors.black,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    profession,
-                    style: const TextStyle(
-                      color: AppColors.brightGreen,
-                      fontWeight: FontWeight.w500,
-                      fontSize: 12,
+                    const SizedBox(height: 4),
+                    Text(
+                      profession,
+                      style: const TextStyle(
+                        color: AppColors.brightGreen,
+                        fontWeight: FontWeight.w500,
+                        fontSize: 12,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      if (isAvailable) ...[
-                        Text(
-                          availabilityText,
-                          style: const TextStyle(
-                            color: Colors.grey,
-                            fontSize: 11,
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Flexible(
+                          child: _AvailabilityRow(
+                            isAvailable: isAvailable,
+                            availabilityText: availabilityText,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          SolarLinearIcons.clockCircle,
-                          size: 14,
-                          color: Colors.grey,
-                        ),
-                      ] else ...[
-                        Text(
-                          availabilityText,
-                          style: const TextStyle(
-                            color: AppColors.errorRed,
-                            fontSize: 11,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        const Icon(
-                          SolarLinearIcons.stopCircle,
-                          size: 14,
-                          color: AppColors.errorRed,
+                        const SizedBox(width: 12),
+                        Flexible(
+                          child: _DistanceRow(distance: distance),
                         ),
                       ],
-                      const SizedBox(width: 12),
-                      Text(
-                        distance,
-                        style: const TextStyle(
-                          color: Colors.grey,
-                          fontSize: 11,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      const Icon(
-                        SolarLinearIcons.mapPoint,
-                        size: 14,
-                        color: Colors.grey,
-                      ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
 
               const SizedBox(width: 12),
@@ -234,13 +213,13 @@ class SearchProviderCard extends StatelessWidget {
             ),
           ],
 
-          const SizedBox(height: 20),
+          SizedBox(height: spacingBeforeActions),
 
           Row(
             children: [
               Container(
-                width: 48,
-                height: 48,
+                width: actionHeight,
+                height: actionHeight,
                 decoration: BoxDecoration(
                   color: isDark
                       ? AppColors.deepDarkGreen
@@ -255,10 +234,11 @@ class SearchProviderCard extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: SizedBox(
-                  height: 48,
+                  height: actionHeight,
                   child: ElevatedButton(
                     onPressed: isFullyBooked ? null : onTap,
                     style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
                       backgroundColor: isFullyBooked
                           ? Colors.transparent
                           : AppColors.brightGreen,
@@ -275,16 +255,20 @@ class SearchProviderCard extends StatelessWidget {
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         if (!isFullyBooked) ...[
                           const Icon(SolarLinearIcons.calendar, size: 18),
                           const SizedBox(width: 8),
                         ],
-                        Text(
-                          isFullyBooked
-                              ? LocaleKeys.fully_booked.tr()
-                              : LocaleKeys.button_book_now.tr(),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        Flexible(
+                          child: Text(
+                            isFullyBooked
+                                ? LocaleKeys.fully_booked.tr()
+                                : LocaleKeys.button_book_now.tr(),
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            overflow: TextOverflow.visible,
+                          ),
                         ),
                       ],
                     ),
@@ -325,6 +309,75 @@ class _ProviderAvatar extends StatelessWidget {
               )
             : Assets.images.png.defaultAvatar.image(fit: BoxFit.cover),
       ),
+    );
+  }
+}
+
+class _AvailabilityRow extends StatelessWidget {
+  final bool isAvailable;
+  final String availabilityText;
+
+  const _AvailabilityRow({
+    required this.isAvailable,
+    required this.availabilityText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (isAvailable) {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              availabilityText,
+              style: const TextStyle(color: Colors.grey, fontSize: 11),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(SolarLinearIcons.clockCircle, size: 14, color: Colors.grey),
+        ],
+      );
+    } else {
+      return Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              availabilityText,
+              style: const TextStyle(color: AppColors.errorRed, fontSize: 11),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Icon(SolarLinearIcons.stopCircle, size: 14, color: AppColors.errorRed),
+        ],
+      );
+    }
+  }
+}
+
+class _DistanceRow extends StatelessWidget {
+  final String distance;
+
+  const _DistanceRow({required this.distance});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Flexible(
+          child: Text(
+            distance,
+            style: const TextStyle(color: Colors.grey, fontSize: 11),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+        const SizedBox(width: 4),
+        const Icon(SolarLinearIcons.mapPoint, size: 14, color: Colors.grey),
+      ],
     );
   }
 }

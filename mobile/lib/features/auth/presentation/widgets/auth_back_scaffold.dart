@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:dar_care/core/widgets/custom_app_bar.dart';
 
 /// Shared scaffold for auth screens with back arrow and padded scrollable body.
 class AuthBackScaffold extends StatelessWidget {
@@ -14,18 +14,9 @@ class AuthBackScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Scaffold(
-      appBar: AppBar(
+      appBar: const CustomAppBar(
         backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: Icon(
-            SolarLinearIcons.altArrowLeft,
-            color: isDark ? Colors.white : Colors.black,
-          ),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

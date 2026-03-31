@@ -3,7 +3,7 @@ import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 
 /// Data model for AuthUser with JSON serialization
 class AuthUserModel extends AuthUser {
-  AuthUserModel({
+  const AuthUserModel({
     required super.id,
     required super.email,
     super.fullName,

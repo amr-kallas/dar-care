@@ -8,6 +8,7 @@ import '../widgets/profile_stats.dart';
 import '../widgets/profile_menu_section.dart';
 import '../widgets/profile_menu_item.dart';
 import '../widgets/logout_button.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -18,36 +19,20 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark
-          ? AppColors.deepDarkGreen
+          ? AppColors.backgroundDark
           : AppColors.backgroundLight,
-      appBar: AppBar(
+      appBar: CustomAppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
-        title: Text(
+        titleWidget: Text(
           LocaleKeys.profile_title.tr(),
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
-            fontSize: 18,
           ),
         ),
-        leading: const SizedBox.shrink(),
-        actions: [
-          IconButton(
-            icon: Icon(
-              SolarLinearIcons.altArrowRight,
-              color: isDark ? Colors.white : Colors.black,
-              size: 24,
-            ),
-            onPressed: () {
-              if (Navigator.canPop(context)) {
-                Navigator.pop(context);
-              }
-            },
-          ),
-          const SizedBox(width: 10),
-        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(left: 20.0, right: 20.0, bottom: 120.0),

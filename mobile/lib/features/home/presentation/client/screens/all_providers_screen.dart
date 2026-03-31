@@ -1,6 +1,6 @@
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
-import 'package:dar_care/features/search/presentation/widgets/search_provider_card.dart';
+import 'package:dar_care/core/widgets/provider_card.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,6 +8,7 @@ import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.d
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
 
 import '../../../../../generated/locale_keys.g.dart';
+import '../../../../../core/widgets/custom_app_bar.dart';
 
 class AllProvidersScreen extends StatelessWidget {
   const AllProvidersScreen({super.key, required this.providers});
@@ -23,8 +24,8 @@ class AllProvidersScreen extends StatelessWidget {
       backgroundColor: isDark
           ? AppColors.backgroundDark
           : AppColors.backgroundLight,
-      appBar: AppBar(
-        title: Text(
+      appBar: CustomAppBar(
+        titleWidget: Text(
           LocaleKeys.section_providers_near.tr(),
           style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.bold,
@@ -48,15 +49,23 @@ class AllProvidersScreen extends StatelessWidget {
                     final isFavorite = favoritesState.favorites.any(
                       (p) => p.id == provider.id,
                     );
-                    return SearchProviderCard(
+
+                    final hourlyRateText = provider.hourlyRate != null
+                        ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
+                        : LocaleKeys.price_on_request.tr();
+
+                    return ProviderCard(
+                      hourlyRate: hourlyRateText,
                       name: provider.fullName,
                       profession: provider.professionForLanguage(
                         context.locale.languageCode,
                       ),
                       rating: provider.rating.toString(),
-                      distance: '2.5 km', // Mock distance
+                      distance: LocaleKeys.distance_from_you.tr(
+                        namedArgs: {'distance': '2.5'},
+                      ),
                       imageUrl: provider.imageUrl ?? '',
-                      availabilityText: 'Available',
+                      availabilityText: LocaleKeys.available_now.tr(),
                       isAvailable: true, // Mock availability
                       isFavorite: isFavorite,
                       onFavoriteTap: () {

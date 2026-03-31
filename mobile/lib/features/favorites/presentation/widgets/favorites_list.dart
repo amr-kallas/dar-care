@@ -1,5 +1,5 @@
 import 'package:dar_care/features/home/data/models/provider_model.dart';
-import 'package:dar_care/features/search/presentation/widgets/search_provider_card.dart';
+import 'package:dar_care/core/widgets/provider_card.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -29,7 +29,7 @@ class FavoritesList extends StatelessWidget {
         separatorBuilder: (context, index) => const SizedBox(height: 16),
         itemBuilder: (context, index) {
           final provider = favorites[index];
-          return SearchProviderCard(
+          return ProviderCard(
             name: provider.fullName,
             profession: provider.professionForLanguage(languageCode),
             rating: provider.rating.toStringAsFixed(1),

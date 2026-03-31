@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../../core/utils/app_router.dart';
 import '../../../../../generated/locale_keys.g.dart';
+import '../../../../../core/widgets/custom_app_bar.dart';
 
 class AllDepartmentsScreen extends StatelessWidget {
   const AllDepartmentsScreen({super.key, required this.categories});
@@ -17,7 +18,7 @@ class AllDepartmentsScreen extends StatelessWidget {
     final languageCode = context.locale.languageCode;
 
     return Scaffold(
-      appBar: AppBar(title: Text(LocaleKeys.section_services.tr())),
+      appBar: CustomAppBar(titleWidget: Text(LocaleKeys.section_services.tr())),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: GridView.builder(

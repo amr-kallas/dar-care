@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/core/widgets/custom_app_bar.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 
 class SubCategoriesScreen extends StatelessWidget {
   const SubCategoriesScreen({super.key, required this.department});
@@ -17,12 +19,15 @@ class SubCategoriesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageCode = context.locale.languageCode;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final departmentDescription = department.localizedDescription(languageCode);
 
     return BlocProvider(
       create: (context) =>
           getIt<SubCategoriesCubit>()..fetchSubCategories(department.id),
       child: Scaffold(
-        appBar: AppBar(title: Text(department.localizedName(languageCode))),
+        appBar: CustomAppBar(titleWidget: Text(department.localizedName(languageCode))),
         body: BlocBuilder<SubCategoriesCubit, SubCategoriesState>(
           builder: (context, state) {
             if (state.status == SubCategoriesStatus.loading ||
@@ -38,31 +43,71 @@ class SubCategoriesScreen extends StatelessWidget {
               );
             }
 
-            if (state.subCategories.isEmpty) {
-              return const Center(child: Text('No subcategories found.'));
-            }
-
             return Padding(
               padding: const EdgeInsets.all(24),
-              child: GridView.builder(
-                itemCount: state.subCategories.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  childAspectRatio: 0.8,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 12,
-                ),
-                itemBuilder: (context, index) {
-                  final subCategory = state.subCategories[index];
-                  // Using default icon or we could add imageUrl mapping if needed later.
-                  return ServiceItem(
-                    icon: SolarLinearIcons.box, // Default icon
-                    label: subCategory.localizedName(languageCode),
-                    onTap: () {
-                      // Navigate to specific sub-category or provider list
-                    },
-                  );
-                },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (departmentDescription != null &&
+                      departmentDescription.trim().isNotEmpty) ...[
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color: theme.dividerColor.withValues(alpha: 0.2),
+                        ),
+                        boxShadow: isDark
+                            ? null
+                            : [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.04),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
+                      ),
+                      child: Text(
+                        departmentDescription,
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
+                  Text(
+                    LocaleKeys.section_services.tr(),
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: state.subCategories.isEmpty
+                        ? Center(child: Text('subcategories_empty'.tr()))
+                        : GridView.builder(
+                            itemCount: state.subCategories.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  childAspectRatio: 0.8,
+                                  mainAxisSpacing: 16,
+                                  crossAxisSpacing: 12,
+                                ),
+                            itemBuilder: (context, index) {
+                              final subCategory = state.subCategories[index];
+                              return ServiceItem(
+                                icon: SolarLinearIcons.box,
+                                label: subCategory.localizedName(languageCode),
+                                onTap: () {
+                                  // Navigate to specific sub-category or provider list.
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
               ),
             );
           },

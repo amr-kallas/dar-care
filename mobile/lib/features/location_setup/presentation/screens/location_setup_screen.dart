@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 
 import '../../../../core/widgets/app_snackbar.dart';
+import '../../../../core/widgets/custom_app_bar.dart';
 
 class LocationSetupScreen extends StatefulWidget {
   const LocationSetupScreen({super.key});
@@ -173,10 +174,8 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedPoint = _selectedPoint ?? _fallbackCenter;
-
     return Scaffold(
-      appBar: AppBar(title: const Text('Set your location')),
+      appBar: const CustomAppBar(titleWidget: Text('Set your location')),
       body: Column(
         children: [
           if (_inlineError != null)
@@ -195,7 +194,7 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
                 FlutterMap(
                   mapController: _mapController,
                   options: MapOptions(
-                    initialCenter: selectedPoint,
+                    initialCenter: _selectedPoint ?? _fallbackCenter,
                     initialZoom: 16,
                     onTap: (_, tappedPoint) {
                       setState(() {
@@ -212,7 +211,7 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
                     MarkerLayer(
                       markers: [
                         Marker(
-                          point: selectedPoint,
+                          point: _selectedPoint ?? _fallbackCenter,
                           width: 40,
                           height: 40,
                           child: const Icon(
@@ -241,8 +240,8 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
                 Text(
                   _selectedPoint == null
                       ? 'Tap the map to set your location.'
-                      : 'Lat: ${selectedPoint.latitude.toStringAsFixed(6)} | '
-                            'Lng: ${selectedPoint.longitude.toStringAsFixed(6)}',
+                      : 'Lat: ${_selectedPoint!.latitude.toStringAsFixed(6)} | '
+                            'Lng: ${_selectedPoint!.longitude.toStringAsFixed(6)}',
                 ),
                 const SizedBox(height: 10),
                 OutlinedButton.icon(

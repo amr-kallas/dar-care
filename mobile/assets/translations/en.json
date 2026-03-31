@@ -163,5 +163,6 @@
   "orders_address_label": "Address ID: {id}",
   "orders_no_address": "No address selected",
   "orders_action_repeat": "Re-order",
-  "orders_action_view_details": "View details"
+  "orders_action_view_details": "View details",
+  "subcategories_empty": "No categories found for this department."
 }

@@ -163,5 +163,6 @@
   "orders_address_label": "معرف العنوان: {id}",
   "orders_no_address": "لا يوجد عنوان محدد",
   "orders_action_repeat": "إعادة طلب",
-  "orders_action_view_details": "عرض التفاصيل"
+  "orders_action_view_details": "عرض التفاصيل",
+  "subcategories_empty": "لا توجد فئات متاحة لهذا القسم."
 }

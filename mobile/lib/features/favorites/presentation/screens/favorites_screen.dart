@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
+import 'package:dar_care/core/widgets/custom_app_bar.dart';
 
 class FavoritesScreen extends StatelessWidget {
   const FavoritesScreen({super.key});
@@ -16,8 +17,8 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text(LocaleKeys.favorites_screen_placeholder.tr()),
+      appBar: CustomAppBar(
+        titleWidget: Text(LocaleKeys.favorites_screen_placeholder.tr()),
       ),
       body: BlocConsumer<FavoritesCubit, FavoritesState>(
         listenWhen: (previous, current) =>
