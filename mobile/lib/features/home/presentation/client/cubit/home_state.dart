@@ -14,9 +14,4 @@ abstract class HomeState with _$HomeState {
   }) = _HomeState;
 }
 
-enum HomeStatus {
-  initial,
-  loading,
-  success,
-  failure,
-}
+enum HomeStatus { initial, loading, success, failure }

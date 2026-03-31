@@ -16,6 +16,8 @@ class ProviderCard extends StatelessWidget {
     required this.distance,
     required this.imageUrl,
     required this.onTap,
+    this.isFavorite = false,
+    this.onFavoriteToggle,
   });
 
   final String name;
@@ -24,6 +26,8 @@ class ProviderCard extends StatelessWidget {
   final String distance;
   final String imageUrl; // For now placeholder logic
   final VoidCallback onTap;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -159,24 +163,28 @@ class ProviderCard extends StatelessWidget {
               ),
             ],
           ),
-
-          const Spacer(), // Use Spacer to push button to bottom if there's extra space, or just SizedBox(height: 12)
-
+          const SizedBox(height: 16),
+          // Actions: Like + Book
           Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.deepDarkGreen
-                      : Colors.grey.shade100,
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(
-                  SolarLinearIcons.heart,
-                  color: Colors.white70,
-                  size: 18,
+              GestureDetector(
+                onTap: onFavoriteToggle,
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.deepDarkGreen
+                        : Colors.grey.shade100,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    isFavorite ? SolarBoldIcons.heart : SolarLinearIcons.heart,
+                    color: isFavorite
+                        ? AppColors.errorRed
+                        : (isDark ? Colors.white70 : Colors.black54),
+                    size: 18,
+                  ),
                 ),
               ),
               const SizedBox(width: 10),

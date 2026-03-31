@@ -17,7 +17,9 @@ class ProfileScreen extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? AppColors.deepDarkGreen : AppColors.backgroundLight,
+      backgroundColor: isDark
+          ? AppColors.deepDarkGreen
+          : AppColors.backgroundLight,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,

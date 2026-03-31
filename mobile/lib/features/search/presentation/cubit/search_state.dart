@@ -13,9 +13,4 @@ abstract class SearchState with _$SearchState {
   }) = _SearchState;
 }
 
-enum SearchStatus {
-  initial,
-  loading,
-  success,
-  failure,
-}
+enum SearchStatus { initial, loading, success, failure }

@@ -2,6 +2,7 @@ import 'package:dar_care/core/theme/app_theme.dart';
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/di/injection.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -13,8 +14,15 @@ class DarCareApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<AuthCubit>()..checkAuthStatus(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => getIt<AuthCubit>()..checkAuthStatus(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
+        ),
+      ],
       child: MaterialApp.router(
         // Router configuration
         routerConfig: AppRouter.router,

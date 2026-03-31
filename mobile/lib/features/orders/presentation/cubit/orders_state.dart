@@ -12,9 +12,4 @@ abstract class OrdersState with _$OrdersState {
   }) = _OrdersState;
 }
 
-enum OrdersStatus {
-  initial,
-  loading,
-  success,
-  failure,
-}
+enum OrdersStatus { initial, loading, success, failure }

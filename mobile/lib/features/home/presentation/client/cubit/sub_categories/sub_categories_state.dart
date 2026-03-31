@@ -13,4 +13,3 @@ abstract class SubCategoriesState with _$SubCategoriesState {
     String? errorMessage,
   }) = _SubCategoriesState;
 }
-

@@ -30,13 +30,13 @@ class SignupScreen extends StatelessWidget {
   final AuthRegistrationData? registrationData;
 
   FormGroup buildForm() => fb.group({
-        'fullName': ['', Validators.required],
-        'email': ['', Validators.required, Validators.email],
-        'phoneNumber': ['', Validators.required, Validators.pattern(r'^[0-9]+$')],
-        'city': fb.control<AppCity?>(null, [Validators.required]),
-        'password': ['', Validators.required, Validators.minLength(8)],
-        'agreeToTerms': [false, Validators.requiredTrue],
-      });
+    'fullName': ['', Validators.required],
+    'email': ['', Validators.required, Validators.email],
+    'phoneNumber': ['', Validators.required, Validators.pattern(r'^[0-9]+$')],
+    'city': fb.control<AppCity?>(null, [Validators.required]),
+    'password': ['', Validators.required, Validators.minLength(8)],
+    'agreeToTerms': [false, Validators.requiredTrue],
+  });
 
   Future<List<AppCity>> _loadCities() async {
     if (registrationData != null) {
@@ -54,9 +54,7 @@ class SignupScreen extends StatelessWidget {
       future: _loadCities(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const AuthBackScaffold(
-            child: AppLoadingIndicator(),
-          );
+          return const AuthBackScaffold(child: AppLoadingIndicator());
         }
 
         if (snapshot.hasError) {
@@ -80,7 +78,10 @@ class SignupScreen extends StatelessWidget {
                 context,
                 LocaleKeys.auth_success_sign_up.tr(),
               );
-              context.go(AppRouter.otpVerificationPath, extra: state.user.phone);
+              context.go(
+                AppRouter.otpVerificationPath,
+                extra: state.user.phone,
+              );
             } else if (state is AuthError) {
               AppSnackbar.showError(context, state.messageKey.tr());
             }
@@ -90,7 +91,8 @@ class SignupScreen extends StatelessWidget {
               form: buildForm,
               builder: (context, form, child) {
                 final authState = context.watch<AuthCubit>().state;
-                final isSubmitting = authState is AuthLoading &&
+                final isSubmitting =
+                    authState is AuthLoading &&
                     authState.operation == AuthOperation.signUp;
 
                 return Column(
@@ -114,7 +116,8 @@ class SignupScreen extends StatelessWidget {
                         isLoading: isSubmitting,
                         onPressed: form.valid && !isSubmitting
                             ? () {
-                                final city = form.control('city').value as AppCity;
+                                final city =
+                                    form.control('city').value as AppCity;
                                 context.read<AuthCubit>().signUpClient(
                                   email: (form.control('email').value as String)
                                       .trim(),
@@ -124,9 +127,10 @@ class SignupScreen extends StatelessWidget {
                                   fullName:
                                       (form.control('fullName').value as String)
                                           .trim(),
-                                  phone: (form.control('phoneNumber').value
-                                          as String)
-                                      .trim(),
+                                  phone:
+                                      (form.control('phoneNumber').value
+                                              as String)
+                                          .trim(),
                                   cityId: city.id,
                                 );
                               }

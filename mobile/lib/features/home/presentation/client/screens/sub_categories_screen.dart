@@ -19,19 +19,23 @@ class SubCategoriesScreen extends StatelessWidget {
     final languageCode = context.locale.languageCode;
 
     return BlocProvider(
-      create: (context) => getIt<SubCategoriesCubit>()..fetchSubCategories(department.id),
+      create: (context) =>
+          getIt<SubCategoriesCubit>()..fetchSubCategories(department.id),
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(department.localizedName(languageCode)),
-        ),
+        appBar: AppBar(title: Text(department.localizedName(languageCode))),
         body: BlocBuilder<SubCategoriesCubit, SubCategoriesState>(
           builder: (context, state) {
-            if (state.status == SubCategoriesStatus.loading || state.status == SubCategoriesStatus.initial) {
+            if (state.status == SubCategoriesStatus.loading ||
+                state.status == SubCategoriesStatus.initial) {
               return const AppLoadingIndicator();
             }
 
             if (state.status == SubCategoriesStatus.failure) {
-              return Center(child: Text(state.errorMessage ?? 'Error loading subcategories'));
+              return Center(
+                child: Text(
+                  state.errorMessage ?? 'Error loading subcategories',
+                ),
+              );
             }
 
             if (state.subCategories.isEmpty) {
@@ -67,4 +71,3 @@ class SubCategoriesScreen extends StatelessWidget {
     );
   }
 }
-

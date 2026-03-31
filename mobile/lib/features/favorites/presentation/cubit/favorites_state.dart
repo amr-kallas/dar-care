@@ -12,9 +12,4 @@ abstract class FavoritesState with _$FavoritesState {
   }) = _FavoritesState;
 }
 
-enum FavoritesStatus {
-  initial,
-  loading,
-  success,
-  failure,
-}
+enum FavoritesStatus { initial, loading, success, failure }

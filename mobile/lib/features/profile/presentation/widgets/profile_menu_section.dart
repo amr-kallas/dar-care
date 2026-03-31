@@ -30,11 +30,8 @@ class ProfileMenuSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 10),
-        Column(
-          children: children,
-        ),
+        Column(children: children),
       ],
     );
   }
 }
-

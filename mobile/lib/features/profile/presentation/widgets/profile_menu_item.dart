@@ -84,4 +84,3 @@ class ProfileMenuItem extends StatelessWidget {
     );
   }
 }
-

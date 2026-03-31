@@ -53,11 +53,15 @@ class HomeRepositoryImpl implements HomeRepository {
       // Doing simple select first to check if relation exists.
       // If schema differs or relationship is missing, a fallback is provided.
       try {
-        final response = await _supabase.from('providers').select('''
+        final response = await _supabase
+            .from('providers')
+            .select('''
           *,
           users!inner (full_name),
           departments (name)
-        ''').order('avg_rating', ascending: false).limit(10);
+        ''')
+            .order('avg_rating', ascending: false)
+            .limit(10);
 
         log('getTopProviders raw response: $response');
 
@@ -66,26 +70,44 @@ class HomeRepositoryImpl implements HomeRepository {
             .toList();
 
         // If users was returned as null due to RLS, let's trigger fallback
-        if (mapped.isNotEmpty && (mapped.first.fullName == 'Unknown Provider' || mapped.first.fullName.isEmpty)) {
-           throw Exception('Users returned null, triggering fallback');
+        if (mapped.isNotEmpty &&
+            (mapped.first.fullName == 'Unknown Provider' ||
+                mapped.first.fullName.isEmpty)) {
+          throw Exception('Users returned null, triggering fallback');
         }
 
         return mapped;
       } catch (e) {
         log('First DB query failed in getTopProviders: $e');
         // Fallback for missing relationships or schema cache issues
-        final providersResponse = await _supabase.from('providers').select().order('avg_rating', ascending: false).limit(10);
+        final providersResponse = await _supabase
+            .from('providers')
+            .select()
+            .order('avg_rating', ascending: false)
+            .limit(10);
 
         // Fetch users manually for these providers
-        final providerUserIds = (providersResponse as List<dynamic>).map((p) => p['user_id']).toSet().toList();
+        final providerUserIds = (providersResponse as List<dynamic>)
+            .map((p) => p['user_id'])
+            .toSet()
+            .toList();
 
         log('Fallback fetching users for IDs: $providerUserIds');
-        final usersResponse = await _supabase.from('users').select().inFilter('id', providerUserIds);
+        final usersResponse = await _supabase
+            .from('users')
+            .select()
+            .inFilter('id', providerUserIds);
         log('Fallback fetched users: $usersResponse');
 
         // Fetch departments manually
-        final providerDeptIds = providersResponse.map((p) => p['department_id']).toSet().toList();
-        final deptsResponse = await _supabase.from('departments').select().inFilter('id', providerDeptIds);
+        final providerDeptIds = providersResponse
+            .map((p) => p['department_id'])
+            .toSet()
+            .toList();
+        final deptsResponse = await _supabase
+            .from('departments')
+            .select()
+            .inFilter('id', providerDeptIds);
 
         return providersResponse.map((p) {
           final userStr = p['user_id'] as String;
@@ -95,11 +117,13 @@ class HomeRepositoryImpl implements HomeRepository {
           final deptMaps = deptsResponse as List<dynamic>;
 
           final user = userMaps.firstWhere(
-              (u) => u['id'] == userStr,
-              orElse: () => <String, dynamic>{});
+            (u) => u['id'] == userStr,
+            orElse: () => <String, dynamic>{},
+          );
           final dept = deptMaps.firstWhere(
-              (d) => d['id'] == deptStr,
-              orElse: () => <String, dynamic>{});
+            (d) => d['id'] == deptStr,
+            orElse: () => <String, dynamic>{},
+          );
 
           log('Fallback matching user: $user for provider userId: $userStr');
 

@@ -10,6 +10,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
+import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
+import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
 
 import '../../../../../generated/locale_keys.g.dart';
 import '../cubit/home_cubit.dart';
@@ -123,7 +125,8 @@ class ClientHomeBody extends StatelessWidget {
                     const SizedBox(width: 12),
                     CircleAvatar(
                       radius: 24,
-                      backgroundImage: Assets.images.png.defaultAvatar.provider(),
+                      backgroundImage: Assets.images.png.defaultAvatar
+                          .provider(),
                     ),
                   ],
                 ),
@@ -248,7 +251,12 @@ class ClientHomeBody extends StatelessWidget {
                 SectionHeader(
                   title: LocaleKeys.section_providers_near.tr(),
                   actionText: LocaleKeys.see_all.tr(),
-                  onTap: () {},
+                  onTap: () {
+                    context.push(
+                      AppRouter.allProvidersPath,
+                      extra: state.topProviders,
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
 
@@ -258,28 +266,42 @@ class ClientHomeBody extends StatelessWidget {
                 if (state.topProviders.isNotEmpty)
                   SizedBox(
                     height: 220,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      clipBehavior: Clip.none,
-                      itemCount: state.topProviders.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        final provider = state.topProviders[index];
-                        return ProviderCard(
-                          name: provider.fullName,
-                          profession: provider.professionForLanguage(
-                            languageCode,
-                          ),
-                          rating: provider.rating,
-                          distance: LocaleKeys.distance_from_you.tr(
-                            namedArgs: {
-                              'distance': '2.5',
-                            }, // Mock distance for now
-                          ),
-                          imageUrl: provider.imageUrl ?? '',
-                          onTap: () {
-                            // Navigate to provider details
+                    child: BlocBuilder<FavoritesCubit, FavoritesState>(
+                      builder: (context, favoritesState) {
+                        return ListView.separated(
+                          scrollDirection: Axis.horizontal,
+                          clipBehavior: Clip.none,
+                          itemCount: state.topProviders.length,
+                          separatorBuilder: (context, index) =>
+                              const SizedBox(width: 16),
+                          itemBuilder: (context, index) {
+                            final provider = state.topProviders[index];
+                            final isFavorite = favoritesState.favorites.any(
+                              (p) => p.id == provider.id,
+                            );
+
+                            return ProviderCard(
+                              name: provider.fullName,
+                              profession: provider.professionForLanguage(
+                                languageCode,
+                              ),
+                              rating: provider.rating,
+                              distance: LocaleKeys.distance_from_you.tr(
+                                namedArgs: {
+                                  'distance': '2.5',
+                                }, // Mock distance for now
+                              ),
+                              imageUrl: provider.imageUrl ?? '',
+                              isFavorite: isFavorite,
+                              onFavoriteToggle: () {
+                                context.read<FavoritesCubit>().toggleFavorite(
+                                  provider,
+                                );
+                              },
+                              onTap: () {
+                                // Navigate to provider details
+                              },
+                            );
                           },
                         );
                       },

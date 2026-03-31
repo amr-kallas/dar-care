@@ -15,8 +15,10 @@ import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:dar_care/features/home/presentation/home_screen.dart';
 import 'package:dar_care/features/home/data/models/category_model.dart';
 import 'package:dar_care/features/home/presentation/client/screens/all_departments_screen.dart';
+import 'package:dar_care/features/home/presentation/client/screens/all_providers_screen.dart';
 import 'package:dar_care/features/home/presentation/client/screens/sub_categories_screen.dart';
 import 'package:dar_care/features/search/presentation/screens/search_results_screen.dart';
+import 'package:dar_care/features/home/data/models/provider_model.dart';
 
 abstract class AppRouter {
   static const String splashPath = '/';
@@ -32,6 +34,7 @@ abstract class AppRouter {
   static const String searchResultsPath = '/search-results';
   static const String allDepartmentsPath = '/all-departments';
   static const String subCategoriesPath = '/sub-categories';
+  static const String allProvidersPath = '/all-providers';
 
   static final router = GoRouter(
     initialLocation: splashPath,
@@ -126,12 +129,21 @@ abstract class AppRouter {
         name: 'sub-categories',
         builder: (context, state) {
           final extra = state.extra;
-          final department = extra is CategoryModel
-              ? extra
-              : null;
+          final department = extra is CategoryModel ? extra : null;
           return department != null
               ? SubCategoriesScreen(department: department)
               : const Scaffold(body: Center(child: Text('Invalid department')));
+        },
+      ),
+      GoRoute(
+        path: allProvidersPath,
+        name: 'all-providers',
+        builder: (context, state) {
+          final extra = state.extra;
+          final providers = extra is List<ProviderModel>
+              ? extra
+              : const <ProviderModel>[];
+          return AllProvidersScreen(providers: providers);
         },
       ),
     ],

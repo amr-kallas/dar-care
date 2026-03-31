@@ -14,7 +14,10 @@ class SubCategoryModel {
   });
 
   String localizedName(String languageCode) {
-    return nameText.resolve(languageCode: languageCode, fallbackLanguageCode: 'en');
+    return nameText.resolve(
+      languageCode: languageCode,
+      fallbackLanguageCode: 'en',
+    );
   }
 
   String? localizedDescription(String languageCode) {
@@ -36,4 +39,3 @@ class SubCategoryModel {
     );
   }
 }
-

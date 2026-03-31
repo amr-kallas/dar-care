@@ -40,4 +40,3 @@ class FavoritesErrorState extends StatelessWidget {
     );
   }
 }
-

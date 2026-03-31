@@ -19,10 +19,14 @@ class CategoryModel {
   String get name => nameText.defaultValue;
 
   /// Backward-compatible default description value.
-  String? get description => descriptionText.isEmpty ? null : descriptionText.defaultValue;
+  String? get description =>
+      descriptionText.isEmpty ? null : descriptionText.defaultValue;
 
   String localizedName(String languageCode) {
-    return nameText.resolve(languageCode: languageCode, fallbackLanguageCode: 'en');
+    return nameText.resolve(
+      languageCode: languageCode,
+      fallbackLanguageCode: 'en',
+    );
   }
 
   String? localizedDescription(String languageCode) {

@@ -46,7 +46,10 @@ class ProviderModel {
     if (bioText.isEmpty) {
       return null;
     }
-    return bioText.resolve(languageCode: languageCode, fallbackLanguageCode: 'en');
+    return bioText.resolve(
+      languageCode: languageCode,
+      fallbackLanguageCode: 'en',
+    );
   }
 
   bool matchesKeyword(String keyword) {

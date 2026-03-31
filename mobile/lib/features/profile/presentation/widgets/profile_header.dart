@@ -51,7 +51,11 @@ class ProfileHeader extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Icon(SolarBoldIcons.checkCircle, color: Colors.white, size: 12),
+                    const Icon(
+                      SolarBoldIcons.checkCircle,
+                      color: Colors.white,
+                      size: 12,
+                    ),
                     const SizedBox(width: 4),
                     Text(
                       LocaleKeys.gold_member.tr(),

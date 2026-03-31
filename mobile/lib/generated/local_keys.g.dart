@@ -2,7 +2,7 @@
 
 // ignore_for_file: constant_identifier_names
 
-abstract class  LocaleKeys {
+abstract class LocaleKeys {
   static const app_name = 'app_name';
   static const onboarding_title_1 = 'onboarding_title_1';
   static const onboarding_subtitle_1 = 'onboarding_subtitle_1';
@@ -27,7 +27,8 @@ abstract class  LocaleKeys {
   static const auth_join_as = 'auth_join_as';
   static const auth_provider_signup_subtitle = 'auth_provider_signup_subtitle';
   static const auth_provider_section_basic = 'auth_provider_section_basic';
-  static const auth_provider_section_professional = 'auth_provider_section_professional';
+  static const auth_provider_section_professional =
+      'auth_provider_section_professional';
   static const label_email = 'label_email';
   static const label_password = 'label_password';
   static const label_full_name = 'label_full_name';
@@ -71,14 +72,18 @@ abstract class  LocaleKeys {
   static const validation_required_city = 'validation_required_city';
   static const validation_required_otp = 'validation_required_otp';
   static const validation_min_otp = 'validation_min_otp';
-  static const validation_required_department = 'validation_required_department';
-  static const validation_required_experience = 'validation_required_experience';
+  static const validation_required_department =
+      'validation_required_department';
+  static const validation_required_experience =
+      'validation_required_experience';
   static const validation_invalid_experience = 'validation_invalid_experience';
   static const auth_error_generic = 'auth_error_generic';
-  static const auth_error_invalid_credentials = 'auth_error_invalid_credentials';
+  static const auth_error_invalid_credentials =
+      'auth_error_invalid_credentials';
   static const auth_error_sign_in_failed = 'auth_error_sign_in_failed';
   static const auth_error_sign_up_failed = 'auth_error_sign_up_failed';
-  static const auth_error_provider_sign_up_failed = 'auth_error_provider_sign_up_failed';
+  static const auth_error_provider_sign_up_failed =
+      'auth_error_provider_sign_up_failed';
   static const auth_error_sign_out_failed = 'auth_error_sign_out_failed';
   static const auth_error_session_failed = 'auth_error_session_failed';
   static const auth_error_cities_failed = 'auth_error_cities_failed';
@@ -162,5 +167,4 @@ abstract class  LocaleKeys {
   static const orders_no_address = 'orders_no_address';
   static const orders_action_repeat = 'orders_action_repeat';
   static const orders_action_view_details = 'orders_action_view_details';
-
 }

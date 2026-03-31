@@ -3,4 +3,3 @@ import 'package:dar_care/features/home/data/models/provider_model.dart'; // Reus
 abstract class SearchRepository {
   Future<List<ProviderModel>> searchProviders(String query);
 }
-

@@ -5,4 +5,3 @@ abstract class FavoritesRepository {
   Future<void> addFavorite(String providerId);
   Future<void> removeFavorite(String providerId);
 }
-

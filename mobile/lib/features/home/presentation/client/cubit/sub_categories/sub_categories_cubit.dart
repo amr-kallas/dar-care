@@ -10,19 +10,26 @@ class SubCategoriesCubit extends Cubit<SubCategoriesState> {
   SubCategoriesCubit(this._homeRepository) : super(const SubCategoriesState());
 
   Future<void> fetchSubCategories(String departmentId) async {
-    emit(state.copyWith(status: SubCategoriesStatus.loading, errorMessage: null));
+    emit(
+      state.copyWith(status: SubCategoriesStatus.loading, errorMessage: null),
+    );
     try {
-      final subCategories = await _homeRepository.getSubCategories(departmentId);
-      emit(state.copyWith(
-        status: SubCategoriesStatus.success,
-        subCategories: subCategories,
-      ));
+      final subCategories = await _homeRepository.getSubCategories(
+        departmentId,
+      );
+      emit(
+        state.copyWith(
+          status: SubCategoriesStatus.success,
+          subCategories: subCategories,
+        ),
+      );
     } catch (e) {
-      emit(state.copyWith(
-        status: SubCategoriesStatus.failure,
-        errorMessage: e.toString(),
-      ));
+      emit(
+        state.copyWith(
+          status: SubCategoriesStatus.failure,
+          errorMessage: e.toString(),
+        ),
+      );
     }
   }
 }
-

@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 
 /// Application entry point
 void main() => runDarCareApp(
-  // Enable device preview only in debug mode
+  // Enable dee vice preview only in debug mode
   kDebugMode
       ? DevicePreview(enabled: true, builder: (context) => const DarCareApp())
       : const DarCareApp(),

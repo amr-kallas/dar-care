@@ -47,4 +47,3 @@ class LogoutButton extends StatelessWidget {
     );
   }
 }
-

@@ -17,9 +17,7 @@ class AllDepartmentsScreen extends StatelessWidget {
     final languageCode = context.locale.languageCode;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(LocaleKeys.section_services.tr()),
-      ),
+      appBar: AppBar(title: Text(LocaleKeys.section_services.tr())),
       body: Padding(
         padding: const EdgeInsets.all(24),
         child: GridView.builder(
@@ -46,4 +44,3 @@ class AllDepartmentsScreen extends StatelessWidget {
     );
   }
 }
-

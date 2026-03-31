@@ -120,7 +120,8 @@ class LocalizedDbText {
       return false;
     }
 
-    return searchableValues.any((value) => value.toLowerCase().contains(needle));
+    return searchableValues.any(
+      (value) => value.toLowerCase().contains(needle),
+    );
   }
 }
-

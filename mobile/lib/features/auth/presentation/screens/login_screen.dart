@@ -33,7 +33,10 @@ class LoginScreen extends StatelessWidget {
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
         if (state is AuthSignInSuccess) {
-          AppSnackbar.showSuccess(context, LocaleKeys.auth_success_sign_in.tr());
+          AppSnackbar.showSuccess(
+            context,
+            LocaleKeys.auth_success_sign_in.tr(),
+          );
           context.go(AppRouter.locationSetupPath);
         } else if (state is AuthError) {
           AppSnackbar.showError(context, state.messageKey.tr());
@@ -44,7 +47,8 @@ class LoginScreen extends StatelessWidget {
           form: buildForm,
           builder: (context, form, child) {
             final authState = context.watch<AuthCubit>().state;
-            final isSubmitting = authState is AuthLoading &&
+            final isSubmitting =
+                authState is AuthLoading &&
                 authState.operation == AuthOperation.signIn;
 
             return Column(

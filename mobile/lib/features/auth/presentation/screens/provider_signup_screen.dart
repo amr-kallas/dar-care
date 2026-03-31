@@ -76,9 +76,7 @@ class ProviderSignupScreen extends StatelessWidget {
       future: _loadRegistrationData(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const AuthBackScaffold(
-            child: AppLoadingIndicator(),
-          );
+          return const AuthBackScaffold(child: AppLoadingIndicator());
         }
 
         if (snapshot.hasError) {
@@ -102,7 +100,10 @@ class ProviderSignupScreen extends StatelessWidget {
                 context,
                 LocaleKeys.auth_success_sign_up.tr(),
               );
-              context.go(AppRouter.otpVerificationPath, extra: state.user.phone);
+              context.go(
+                AppRouter.otpVerificationPath,
+                extra: state.user.phone,
+              );
             } else if (state is AuthError) {
               AppSnackbar.showError(context, state.messageKey.tr());
             }
@@ -112,7 +113,8 @@ class ProviderSignupScreen extends StatelessWidget {
               form: buildForm,
               builder: (context, form, child) {
                 final authState = context.watch<AuthCubit>().state;
-                final isSubmitting = authState is AuthLoading &&
+                final isSubmitting =
+                    authState is AuthLoading &&
                     authState.operation == AuthOperation.signUp;
 
                 return Column(
@@ -126,7 +128,9 @@ class ProviderSignupScreen extends StatelessWidget {
                       subtitle: LocaleKeys.auth_provider_signup_subtitle.tr(),
                     ),
                     const SizedBox(height: 16),
-                    AuthRoleBadge(role: LocaleKeys.auth_professional_title.tr()),
+                    AuthRoleBadge(
+                      role: LocaleKeys.auth_professional_title.tr(),
+                    ),
                     const SizedBox(height: 28),
                     AuthSectionHeader(
                       title: LocaleKeys.auth_provider_section_basic.tr(),
@@ -147,8 +151,10 @@ class ProviderSignupScreen extends StatelessWidget {
                         onPressed: form.valid && !isSubmitting
                             ? () {
                                 final department =
-                                    form.control('department').value as Department;
-                                final city = form.control('city').value as AppCity;
+                                    form.control('department').value
+                                        as Department;
+                                final city =
+                                    form.control('city').value as AppCity;
                                 context.read<AuthCubit>().signUpProvider(
                                   email: (form.control('email').value as String)
                                       .trim(),
@@ -158,9 +164,10 @@ class ProviderSignupScreen extends StatelessWidget {
                                   fullName:
                                       (form.control('fullName').value as String)
                                           .trim(),
-                                  phone: (form.control('phoneNumber').value
-                                          as String)
-                                      .trim(),
+                                  phone:
+                                      (form.control('phoneNumber').value
+                                              as String)
+                                          .trim(),
                                   cityId: city.id,
                                   departmentId: department.id,
                                   experienceYears: int.parse(

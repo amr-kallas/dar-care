@@ -7,4 +7,3 @@ abstract class RegisterModule {
   @lazySingleton
   SupabaseClient get supabaseClient => SupabaseService.client;
 }
-
