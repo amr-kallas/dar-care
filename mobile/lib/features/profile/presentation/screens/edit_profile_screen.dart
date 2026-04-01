@@ -1,5 +1,6 @@
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
+import 'package:dar_care/core/utils/profile_edit_actions_helper.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/core/widgets/custom_app_bar.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
@@ -115,38 +116,25 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 AppSnackbar.showError(context, message);
               },
               onAvatarSelected: (bytes) async {
-                if (user == null) return;
-                _isAvatarFlow = true;
-                await context.read<AuthCubit>().uploadAndUpdateAvatar(
-                  userId: user.id,
-                  fileBytes: bytes,
+                await ProfileEditActionsHelper.uploadAvatar(
+                  context: context,
+                  user: user,
+                  bytes: bytes,
+                  onAvatarFlowStarted: () {
+                    _isAvatarFlow = true;
+                  },
                 );
               },
               onSubmit: () async {
-                if (user == null) return;
-
-                FocusScope.of(context).unfocus();
-                if (!_formKey.currentState!.validate()) {
-                  return;
-                }
-
-                final fullName = _fullNameController.text.trim();
-                final phone = _phoneController.text.trim();
-                final noTextChanges =
-                    fullName == (user.fullName ?? '').trim() &&
-                    phone == (user.phone ?? '').trim();
-
-                if (noTextChanges) {
-                  context.pop();
-                  return;
-                }
-
-                if (!context.mounted) return;
-                _didSubmit = true;
-                context.read<AuthCubit>().updateProfile(
-                  userId: user.id,
-                  fullName: fullName,
-                  phone: phone,
+                await ProfileEditActionsHelper.submitProfileChanges(
+                  context: context,
+                  user: user,
+                  formKey: _formKey,
+                  fullNameController: _fullNameController,
+                  phoneController: _phoneController,
+                  onSubmitStarted: () {
+                    _didSubmit = true;
+                  },
                 );
               },
             ),
