@@ -7,11 +7,11 @@ import 'package:solar_icon_pack/solar_icon_pack.dart';
 class OrdersErrorState extends StatelessWidget {
   const OrdersErrorState({
     super.key,
-    required this.message,
+    required this.messageKey,
     required this.onRetry,
   });
 
-  final String? message;
+  final String? messageKey;
   final VoidCallback onRetry;
 
   @override
@@ -40,8 +40,8 @@ class OrdersErrorState extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              message?.trim().isNotEmpty == true
-                  ? message!
+              (messageKey?.trim().isNotEmpty ?? false)
+                  ? messageKey!.tr()
                   : LocaleKeys.orders_error_generic.tr(),
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: isDark ? Colors.white70 : Colors.black54,

@@ -1,14 +1,8 @@
 import 'package:dar_care/core/theme/app_colors.dart';
+import 'package:dar_care/core/utils/order_presentation_utils.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-
-abstract class OrderFilterValues {
-  static const String all = 'all';
-  static const String pending = 'pending';
-  static const String completed = 'completed';
-  static const String cancelled = 'cancelled';
-}
 
 class OrdersStatusFilterTabs extends StatelessWidget {
   const OrdersStatusFilterTabs({
