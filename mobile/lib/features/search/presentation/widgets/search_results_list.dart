@@ -1,3 +1,6 @@
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
+import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
@@ -16,12 +19,23 @@ class SearchResultsList extends StatelessWidget {
   final List<ProviderModel> results;
   final String languageCode;
 
+  String? _resolveCurrentUserId(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    return switch (authState) {
+      AuthAuthenticated(:final user) => user.id,
+      AuthSignInSuccess(:final user) => user.id,
+      AuthSignUpSuccess(:final user) => user.id,
+      _ => null,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final favoriteIds = context.select(
       (FavoritesCubit cubit) =>
           cubit.state.favorites.map((item) => item.id).toSet(),
     );
+    final currentUserId = _resolveCurrentUserId(context);
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -49,6 +63,19 @@ class SearchResultsList extends StatelessWidget {
             context.read<FavoritesCubit>().toggleFavorite(provider);
           },
           onTap: () {},
+          onChatTap: currentUserId == null
+              ? null
+              : () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => ChatScreen(
+                        currentUserId: currentUserId,
+                        providerId: provider.userId,
+                        title: provider.fullName,
+                      ),
+                    ),
+                  );
+                },
         );
       },
     );

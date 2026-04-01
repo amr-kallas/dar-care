@@ -15,6 +15,7 @@ import 'package:dar_care/features/favorites/presentation/screens/favorites_scree
 import 'package:dar_care/core/widgets/app_snackbar.dart';
 import '../cubit/home_cubit.dart';
 import '../widgets/client_home_body.dart';
+import 'package:dar_care/features/chat/presentation/screens/chats_screen.dart';
 
 class ClientMainScreen extends StatefulWidget {
   const ClientMainScreen({super.key});
@@ -32,6 +33,7 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
       child: const ClientHomeBody(),
     ),
     const OrdersScreen(),
+    const ChatsScreen(),
     const FavoritesScreen(),
     ProfileScreen(),
   ];
@@ -61,6 +63,7 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
           items: const [
             Icon(SolarLinearIcons.home, size: 30),
             Icon(SolarLinearIcons.billList, size: 30),
+            Icon(SolarLinearIcons.chatRoundLine, size: 30),
             Icon(SolarLinearIcons.heart, size: 30),
             Icon(SolarLinearIcons.user, size: 30),
           ],

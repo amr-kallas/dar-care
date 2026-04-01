@@ -25,6 +25,7 @@ class ProviderCard extends StatelessWidget {
     this.onTap,
     this.isFavorite = false,
     this.onFavoriteTap,
+    this.onChatTap,
   });
 
   final String name;
@@ -43,6 +44,7 @@ class ProviderCard extends StatelessWidget {
   final VoidCallback? onTap;
   final bool isFavorite;
   final VoidCallback? onFavoriteTap;
+  final VoidCallback? onChatTap;
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +69,7 @@ class ProviderCard extends StatelessWidget {
             ? []
             : [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
+                  color: Colors.black.withAlpha(13),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -226,9 +228,13 @@ class ProviderCard extends StatelessWidget {
                       : Colors.grey.shade100,
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(
-                  SolarLinearIcons.chatRoundLine,
-                  color: Colors.grey,
+                child: IconButton(
+                  onPressed: onChatTap,
+                  splashRadius: 20,
+                  icon: const Icon(
+                    SolarLinearIcons.chatRoundLine,
+                    color: Colors.grey,
+                  ),
                 ),
               ),
               const SizedBox(width: 12),
@@ -297,7 +303,7 @@ class _ProviderAvatar extends StatelessWidget {
       height: 60,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+        border: Border.all(color: Colors.grey.withAlpha(51)),
       ),
       child: ClipOval(
         child: hasImage

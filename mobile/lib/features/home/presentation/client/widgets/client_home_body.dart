@@ -17,17 +17,29 @@ import 'package:dar_care/features/home/presentation/client/cubit/home_state.dart
 import 'package:dar_care/features/home/presentation/client/widgets/section_header.dart';
 import 'package:dar_care/features/home/presentation/client/widgets/service_item.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
+import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
 
 import '../../../../../generated/locale_keys.g.dart';
 
 class ClientHomeBody extends StatelessWidget {
   const ClientHomeBody({super.key});
 
+  String? _resolveCurrentUserId(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    return switch (authState) {
+      AuthAuthenticated(:final user) => user.id,
+      AuthSignInSuccess(:final user) => user.id,
+      AuthSignUpSuccess(:final user) => user.id,
+      _ => null,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final languageCode = context.locale.languageCode;
+    final currentUserId = _resolveCurrentUserId(context);
 
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
@@ -317,6 +329,19 @@ class ClientHomeBody extends StatelessWidget {
                                   onTap: () {
                                     // Navigate to booking/details
                                   },
+                                  onChatTap: currentUserId == null
+                                      ? null
+                                      : () {
+                                          Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                              builder: (_) => ChatScreen(
+                                                currentUserId: currentUserId,
+                                                providerId: provider.userId,
+                                                title: provider.fullName,
+                                              ),
+                                            ),
+                                          );
+                                        },
                                 );
                               },
                             );

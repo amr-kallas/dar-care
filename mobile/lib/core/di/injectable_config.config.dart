@@ -34,6 +34,14 @@ import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart'
     as _i321;
 import 'package:dar_care/features/auth/presentation/cubit/department/department_cubit.dart'
     as _i118;
+import 'package:dar_care/features/chat/data/datasources/chat_remote_data_source.dart'
+    as _i977;
+import 'package:dar_care/features/chat/data/repositories/chat_repository_impl.dart'
+    as _i78;
+import 'package:dar_care/features/chat/domain/repositories/chat_repository.dart'
+    as _i900;
+import 'package:dar_care/features/chat/presentation/cubit/chat_cubit.dart'
+    as _i673;
 import 'package:dar_care/features/favorites/data/repositories/favorites_repository_impl.dart'
     as _i369;
 import 'package:dar_care/features/favorites/domain/repositories/favorites_repository.dart'
@@ -79,6 +87,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i129.DepartmentRepository>(
       () => _i113.DepartmentRepositoryImpl(gh<_i454.SupabaseClient>()),
     );
+    gh.lazySingleton<_i977.ChatRemoteDataSource>(
+      () => _i977.ChatRemoteDataSourceImpl(gh<_i454.SupabaseClient>()),
+    );
     gh.factory<_i687.GetDepartmentsUseCase>(
       () => _i687.GetDepartmentsUseCase(gh<_i129.DepartmentRepository>()),
     );
@@ -87,6 +98,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i118.DepartmentCubit>(
       () => _i118.DepartmentCubit(gh<_i687.GetDepartmentsUseCase>()),
+    );
+    gh.lazySingleton<_i900.ChatRepository>(
+      () => _i78.ChatRepositoryImpl(gh<_i977.ChatRemoteDataSource>()),
     );
     gh.lazySingleton<_i59.HomeRepository>(
       () => _i668.HomeRepositoryImpl(gh<_i454.SupabaseClient>()),
@@ -116,6 +130,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i749.SubCategoriesCubit>(
       () => _i749.SubCategoriesCubit(gh<_i59.HomeRepository>()),
+    );
+    gh.factory<_i673.ChatCubit>(
+      () => _i673.ChatCubit(gh<_i900.ChatRepository>()),
     );
     gh.factory<_i481.GetCurrentUserUseCase>(
       () => _i481.GetCurrentUserUseCase(gh<_i287.AuthRepository>()),

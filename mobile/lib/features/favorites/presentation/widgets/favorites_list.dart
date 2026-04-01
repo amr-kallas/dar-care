@@ -1,8 +1,12 @@
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
+import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class FavoritesList extends StatelessWidget {
   const FavoritesList({
@@ -16,9 +20,20 @@ class FavoritesList extends StatelessWidget {
   final Future<void> Function() onRefresh;
   final Future<void> Function(String providerId) onRemoveFavorite;
 
+  String? _resolveCurrentUserId(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    return switch (authState) {
+      AuthAuthenticated(:final user) => user.id,
+      AuthSignInSuccess(:final user) => user.id,
+      AuthSignUpSuccess(:final user) => user.id,
+      _ => null,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final languageCode = context.locale.languageCode;
+    final currentUserId = _resolveCurrentUserId(context);
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -49,6 +64,19 @@ class FavoritesList extends StatelessWidget {
             onTap: () {
               // Navigate to provider details.
             },
+            onChatTap: currentUserId == null
+                ? null
+                : () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          currentUserId: currentUserId,
+                          providerId: provider.userId,
+                          title: provider.fullName,
+                        ),
+                      ),
+                    );
+                  },
           );
         },
       ),

@@ -9,16 +9,30 @@ import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.d
 
 import '../../../../../generated/locale_keys.g.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
+import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
 
 class AllProvidersScreen extends StatelessWidget {
   const AllProvidersScreen({super.key, required this.providers});
 
   final List<ProviderModel> providers;
 
+  String? _resolveCurrentUserId(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    return switch (authState) {
+      AuthAuthenticated(:final user) => user.id,
+      AuthSignInSuccess(:final user) => user.id,
+      AuthSignUpSuccess(:final user) => user.id,
+      _ => null,
+    };
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final currentUserId = _resolveCurrentUserId(context);
 
     return Scaffold(
       backgroundColor: isDark
@@ -74,6 +88,19 @@ class AllProvidersScreen extends StatelessWidget {
                       onTap: () {
                         // Navigate to provider details
                       },
+                      onChatTap: currentUserId == null
+                          ? null
+                          : () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (_) => ChatScreen(
+                                    currentUserId: currentUserId,
+                                    providerId: provider.userId,
+                                    title: provider.fullName,
+                                  ),
+                                ),
+                              );
+                            },
                     );
                   },
                 );
