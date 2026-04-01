@@ -1,94 +1,129 @@
 import 'dart:ui' as ui;
+import 'package:dar_care/features/auth/domain/entities/auth_user.dart';
 import 'package:dar_care/gen/assets.gen.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/locale_keys.g.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key});
+  const ProfileHeader({super.key, this.user});
+
+  final AuthUser? user;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final displayName = user?.fullName?.trim().isNotEmpty == true
+        ? user!.fullName!.trim()
+        : user?.email.split('@').first ?? LocaleKeys.profile_title.tr();
 
     return Column(
       children: [
-        Stack(
-          alignment: Alignment.bottomCenter,
-          clipBehavior: Clip.none,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(4), // For the green border
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.brightGreen,
-                    AppColors.brightGreen.withAlpha(128),
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                ),
-              ),
-              child: CircleAvatar(
-                radius: 46,
-                backgroundImage: Assets.images.png.defaultAvatar.provider(),
-              ),
+        Container(
+          padding: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              colors: [
+                AppColors.brightGreen,
+                AppColors.brightGreen.withAlpha(128),
+              ],
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
             ),
-            Positioned(
-              bottom: -10,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 4,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.brightGreen,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      SolarBoldIcons.checkCircle,
-                      color: Colors.white,
-                      size: 12,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      LocaleKeys.gold_member.tr(),
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+          ),
+          child: CircleAvatar(
+            radius: 46,
+            backgroundImage: (user?.avatarUrl != null &&
+                    user!.avatarUrl!.trim().isNotEmpty)
+                ? NetworkImage(user!.avatarUrl!.trim())
+                : Assets.images.png.defaultAvatar.provider(),
+          ),
         ),
         const SizedBox(height: 20),
         Text(
-          'أحمد العلي',
+          displayName,
           style: TextStyle(
             color: isDark ? Colors.white : Colors.black,
             fontSize: 22,
             fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 4),
-        Text(
-          '+966 55 123 4567',
-          style: TextStyle(
-            color: isDark ? AppColors.lightGrey : AppColors.mediumGrey,
-            fontSize: 14,
-          ),
-          textDirection: ui.TextDirection.ltr, // Keep phone number LTR
+        const SizedBox(height: 10),
+        _InfoLine(
+          icon: Icons.email_outlined,
+          text: user?.email ?? '--',
+          isDark: isDark,
+          forceLtr: true,
         ),
+        if (user?.phone != null && user!.phone!.trim().isNotEmpty) ...[
+          const SizedBox(height: 6),
+          _InfoLine(
+            icon: Icons.phone_outlined,
+            text: user!.phone!.trim(),
+            isDark: isDark,
+            forceLtr: true,
+          ),
+        ],
+        const SizedBox(height: 6),
+        _InfoLine(
+          icon: Icons.badge_outlined,
+          text: user?.role.displayName ?? '--',
+          isDark: isDark,
+        ),
+        if (user?.address != null && user!.address!.trim().isNotEmpty) ...[
+          const SizedBox(height: 6),
+          _InfoLine(
+            icon: Icons.location_on_outlined,
+            text: user!.address!.trim(),
+            isDark: isDark,
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _InfoLine extends StatelessWidget {
+  const _InfoLine({
+    required this.icon,
+    required this.text,
+    required this.isDark,
+    this.forceLtr = false,
+  });
+
+  final IconData icon;
+  final String text;
+  final bool isDark;
+  final bool forceLtr;
+
+  @override
+  Widget build(BuildContext context) {
+    final textWidget = Text(
+      text,
+      style: TextStyle(
+        color: isDark ? AppColors.lightGrey : AppColors.mediumGrey,
+        fontSize: 14,
+      ),
+    );
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          size: 16,
+          color: isDark ? AppColors.lightGrey : AppColors.mediumGrey,
+        ),
+        const SizedBox(width: 8),
+        if (forceLtr)
+          Directionality(
+            textDirection: ui.TextDirection.ltr,
+            child: textWidget,
+          )
+        else
+          textWidget,
       ],
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dar_care/features/auth/data/datasources/auth_remote_data_source.dart';
 import 'package:dar_care/features/auth/domain/entities/auth_user.dart';
 import 'package:dar_care/features/auth/domain/repositories/auth_repository.dart';
@@ -75,6 +77,15 @@ class AuthRepositoryImpl implements AuthRepository {
     fullName: fullName,
     phone: phone,
     avatarUrl: avatarUrl,
+  );
+
+  @override
+  Future<String> uploadAndUpdateAvatar({
+    required String userId,
+    required Uint8List fileBytes,
+  }) => _remoteDataSource.uploadAndUpdateAvatar(
+    userId: userId,
+    fileBytes: fileBytes,
   );
 
   @override

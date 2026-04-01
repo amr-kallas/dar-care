@@ -6,7 +6,14 @@ abstract class AuthState extends Equatable {
   const AuthState();
 }
 
-enum AuthOperation { signIn, signUp, signOut, checkSession }
+enum AuthOperation {
+  signIn,
+  signUp,
+  signOut,
+  checkSession,
+  updateProfile,
+  uploadAvatar,
+}
 
 /// Initial state
 class AuthInitial extends AuthState {

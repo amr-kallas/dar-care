@@ -7,6 +7,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:dar_care/core/theme/theme_controller.dart';
 
 /// Main application widget
 class DarCareApp extends StatelessWidget {
@@ -14,36 +15,41 @@ class DarCareApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
-        BlocProvider(
-          create: (context) => getIt<AuthCubit>()..checkAuthStatus(),
-        ),
-        BlocProvider(
-          create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
-        ),
-      ],
-      child: MaterialApp.router(
-        // Router configuration
-        routerConfig: AppRouter.router,
+    return AnimatedBuilder(
+      animation: ThemeController.instance,
+      builder: (context, _) {
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (context) => getIt<AuthCubit>()..checkAuthStatus(),
+            ),
+            BlocProvider(
+              create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
+            ),
+          ],
+          child: MaterialApp.router(
+            // Router configuration
+            routerConfig: AppRouter.router,
 
-        // App metadata
-        title: 'DarCare',
-        debugShowCheckedModeBanner: false,
+            // App metadata
+            title: 'DarCare',
+            debugShowCheckedModeBanner: false,
 
-        // Localization
-        localizationsDelegates: context.localizationDelegates,
-        supportedLocales: context.supportedLocales,
-        locale: context.locale,
+            // Localization
+            localizationsDelegates: context.localizationDelegates,
+            supportedLocales: context.supportedLocales,
+            locale: context.locale,
 
-        // Theme
-        theme: AppTheme.lightTheme,
-        darkTheme: AppTheme.darkTheme,
-        themeMode: ThemeMode.system,
+            // Theme
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeController.instance.themeMode,
 
-        // DevicePreview integration
-        builder: DevicePreview.appBuilder,
-      ),
+            // DevicePreview integration
+            builder: DevicePreview.appBuilder,
+          ),
+        );
+      },
     );
   }
 }

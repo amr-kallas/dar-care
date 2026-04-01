@@ -54,7 +54,7 @@ class _ProviderMainScreenState extends State<ProviderMainScreen> {
 
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthSignOutSuccess) {
+        if (state is AuthSignOutSuccess || state is AuthUnauthenticated) {
           context.go(AppRouter.loginPath);
         } else if (state is AuthError) {
           AppSnackbar.showError(context, state.messageKey.tr());

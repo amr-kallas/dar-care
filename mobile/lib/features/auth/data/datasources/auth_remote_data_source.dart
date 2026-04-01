@@ -1,10 +1,12 @@
 import 'dart:developer';
+import 'dart:typed_data';
 
 import 'package:dar_care/core/errors/app_exceptions.dart';
 import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/features/auth/data/models/auth_user_model.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 import 'package:injectable/injectable.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
 
 /// Abstract data source for authentication
 abstract class AuthRemoteDataSource {
@@ -53,6 +55,12 @@ abstract class AuthRemoteDataSource {
     String? fullName,
     String? phone,
     String? avatarUrl,
+  });
+
+  /// Upload avatar to storage and update profile image URL.
+  Future<String> uploadAndUpdateAvatar({
+    required String userId,
+    required Uint8List fileBytes,
   });
 
   /// Listen to authentication state changes
@@ -304,6 +312,44 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (error, stackTrace) {
       throw DataAppException(
         'Failed to update profile.',
+        cause: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<String> uploadAndUpdateAvatar({
+    required String userId,
+    required Uint8List fileBytes,
+  }) async {
+    try {
+      final storagePath = 'users/$userId';
+      final bucket = supabaseClient.storage.from('avatars');
+
+      await bucket.uploadBinary(
+        storagePath,
+        fileBytes,
+        fileOptions: const FileOptions(upsert: true),
+      );
+
+      final publicUrl = bucket.getPublicUrl(storagePath);
+
+      await supabaseClient
+          .from('clients')
+          .update({'image_url': publicUrl})
+          .eq('user_id', userId);
+
+      // Keep existing user profile reads in sync with the client image URL.
+      await supabaseClient
+          .from('users')
+          .update({'avatar_url': publicUrl})
+          .eq('id', userId);
+
+      return publicUrl;
+    } catch (error, stackTrace) {
+      throw DataAppException(
+        'Failed to upload avatar.',
         cause: error,
         stackTrace: stackTrace,
       );

@@ -147,6 +147,9 @@ abstract class LocaleKeys {
   static const manage_addresses = 'manage_addresses';
   static const settings_tab = 'settings_tab';
   static const language = 'language';
+  static const theme = 'theme';
+  static const theme_light = 'theme_light';
+  static const theme_dark = 'theme_dark';
   static const notifications = 'notifications';
   static const support_tab = 'support_tab';
   static const help_center = 'help_center';

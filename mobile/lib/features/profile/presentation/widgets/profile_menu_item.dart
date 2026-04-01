@@ -74,7 +74,7 @@ class ProfileMenuItem extends StatelessWidget {
               const SizedBox(width: 10),
             ],
             Icon(
-              SolarLinearIcons.altArrowLeft,
+              SolarLinearIcons.altArrowRight,
               size: 16,
               color: isDark ? AppColors.lightGrey : AppColors.mediumGrey,
             ),

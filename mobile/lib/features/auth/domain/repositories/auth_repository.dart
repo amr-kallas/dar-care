@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dar_care/features/auth/domain/entities/auth_user.dart';
 
 /// Abstract repository for authentication operations
@@ -47,6 +49,12 @@ abstract class AuthRepository {
     String? fullName,
     String? phone,
     String? avatarUrl,
+  });
+
+  /// Upload avatar to storage and persist image URL.
+  Future<String> uploadAndUpdateAvatar({
+    required String userId,
+    required Uint8List fileBytes,
   });
 
   /// Listen to authentication state changes

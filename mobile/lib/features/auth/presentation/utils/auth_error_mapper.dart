@@ -26,6 +26,9 @@ class AuthErrorMapper {
   static String registrationLookups(Object error) =>
       _toKey(error, fallbackKey: LocaleKeys.auth_error_generic);
 
+  static String updateProfile(Object error) =>
+      _toKey(error, fallbackKey: LocaleKeys.auth_error_generic);
+
   static String _toKey(Object error, {required String fallbackKey}) {
     if (error is AppException) {
       final message = error.message.toLowerCase();

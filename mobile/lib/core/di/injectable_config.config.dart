@@ -30,6 +30,8 @@ import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart'
     as _i818;
 import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart'
     as _i547;
+import 'package:dar_care/features/auth/domain/usecases/update_user_profile_use_case.dart'
+    as _i839;
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart'
     as _i321;
 import 'package:dar_care/features/auth/presentation/cubit/department/department_cubit.dart'
@@ -146,12 +148,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i547.SignUpUseCase>(
       () => _i547.SignUpUseCase(gh<_i287.AuthRepository>()),
     );
+    gh.factory<_i839.UpdateUserProfileUseCase>(
+      () => _i839.UpdateUserProfileUseCase(gh<_i287.AuthRepository>()),
+    );
     gh.factory<_i321.AuthCubit>(
       () => _i321.AuthCubit(
         signUpUseCase: gh<_i547.SignUpUseCase>(),
         signInUseCase: gh<_i679.SignInUseCase>(),
         signOutUseCase: gh<_i818.SignOutUseCase>(),
         getCurrentUserUseCase: gh<_i481.GetCurrentUserUseCase>(),
+        updateUserProfileUseCase: gh<_i839.UpdateUserProfileUseCase>(),
       ),
     );
     return this;

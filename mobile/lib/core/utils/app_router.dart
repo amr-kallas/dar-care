@@ -19,6 +19,7 @@ import 'package:dar_care/features/home/presentation/client/screens/all_providers
 import 'package:dar_care/features/home/presentation/client/screens/sub_categories_screen.dart';
 import 'package:dar_care/features/search/presentation/screens/search_results_screen.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
+import 'package:dar_care/features/profile/presentation/screens/edit_profile_screen.dart';
 
 abstract class AppRouter {
   static const String splashPath = '/';
@@ -35,6 +36,7 @@ abstract class AppRouter {
   static const String allDepartmentsPath = '/all-departments';
   static const String subCategoriesPath = '/sub-categories';
   static const String allProvidersPath = '/all-providers';
+  static const String editProfilePath = '/edit-profile';
 
   static final router = GoRouter(
     initialLocation: splashPath,
@@ -145,6 +147,11 @@ abstract class AppRouter {
               : const <ProviderModel>[];
           return AllProvidersScreen(providers: providers);
         },
+      ),
+      GoRoute(
+        path: editProfilePath,
+        name: 'edit-profile',
+        builder: (context, state) => const EditProfileScreen(),
       ),
     ],
   );

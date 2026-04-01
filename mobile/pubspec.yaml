@@ -69,6 +69,7 @@ dependencies:
   # icons
   solar_icon_pack: ^0.2.1
   cached_network_image: ^3.4.1
+  image_picker: ^1.2.0
 
 dev_dependencies:
 

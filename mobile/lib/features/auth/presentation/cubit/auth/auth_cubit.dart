@@ -1,8 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:dar_care/core/services/supabase_service.dart';
+import 'package:dar_care/features/auth/domain/entities/auth_user.dart';
 import 'package:dar_care/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_in_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart';
+import 'package:dar_care/features/auth/domain/usecases/update_user_profile_use_case.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/auth/presentation/utils/auth_error_mapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,12 +19,14 @@ class AuthCubit extends Cubit<AuthState> {
   final SignInUseCase signInUseCase;
   final SignOutUseCase signOutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
+  final UpdateUserProfileUseCase updateUserProfileUseCase;
 
   AuthCubit({
     required this.signUpUseCase,
     required this.signInUseCase,
     required this.signOutUseCase,
     required this.getCurrentUserUseCase,
+    required this.updateUserProfileUseCase,
   }) : super(const AuthInitial());
 
   /// Sign up a standard client user
@@ -130,6 +136,81 @@ class AuthCubit extends Cubit<AuthState> {
       }
     } catch (error) {
       emit(AuthError(AuthErrorMapper.session(error)));
+    }
+  }
+
+  /// Upload and update user avatar
+  Future<void> uploadAndUpdateAvatar({
+    required String userId,
+    required Uint8List fileBytes,
+  }) async {
+    if (state is AuthLoading &&
+        (state as AuthLoading).operation == AuthOperation.uploadAvatar) {
+      return;
+    }
+
+    final previousState = state;
+
+    try {
+      emit(const AuthLoading(operation: AuthOperation.uploadAvatar));
+      final avatarUrl = await updateUserProfileUseCase.uploadAndUpdateAvatar(
+        userId: userId,
+        fileBytes: fileBytes,
+      );
+
+      final previousUser = _extractUser(previousState);
+      if (previousUser != null) {
+        emit(AuthAuthenticated(previousUser.copyWith(avatarUrl: avatarUrl)));
+      }
+
+      // Best effort refresh so UI does not fail when read-back is temporarily blocked.
+      final refreshedUser = await getCurrentUserUseCase();
+      if (refreshedUser != null) {
+        emit(AuthAuthenticated(refreshedUser));
+      } else if (previousUser == null) {
+        emit(const AuthError('auth_error_generic'));
+      }
+    } catch (error) {
+      emit(AuthError(AuthErrorMapper.updateProfile(error)));
+    }
+  }
+
+  AuthUser? _extractUser(AuthState sourceState) {
+    if (sourceState is AuthAuthenticated) return sourceState.user;
+    if (sourceState is AuthSignInSuccess) return sourceState.user;
+    if (sourceState is AuthSignUpSuccess) return sourceState.user;
+    return null;
+  }
+
+  /// Update user profile
+  Future<void> updateProfile({
+    required String userId,
+    required String fullName,
+    required String phone,
+    String? avatarUrl,
+  }) async {
+    if (state is AuthLoading &&
+        (state as AuthLoading).operation == AuthOperation.updateProfile) {
+      return;
+    }
+
+    try {
+      emit(const AuthLoading(operation: AuthOperation.updateProfile));
+      await updateUserProfileUseCase(
+        userId: userId,
+        fullName: fullName,
+        phone: phone,
+        avatarUrl: avatarUrl,
+      );
+
+      final refreshedUser = await getCurrentUserUseCase();
+      if (refreshedUser != null) {
+        emit(AuthAuthenticated(refreshedUser));
+      } else {
+        emit(const AuthError('auth_error_generic'));
+      }
+    } catch (error) {
+      emit(AuthError(AuthErrorMapper.updateProfile(error)));
     }
   }
 }
