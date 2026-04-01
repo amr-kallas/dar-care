@@ -1,5 +1,6 @@
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
+import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 import 'package:dar_care/features/home/presentation/provider/screens/provider_main_screen.dart';
 import 'package:flutter/material.dart';
@@ -27,22 +28,16 @@ class HomeScreen extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        if (state is AuthAuthenticated) {
-          if (state.user.role == UserRole.provider) {
+        final user = resolveAuthUser(state);
+
+        if (user != null) {
+          if (user.role == UserRole.provider) {
             return const ProviderMainScreen();
           }
           return const ClientMainScreen();
-        } else if (state is AuthSignInSuccess) {
-          if (state.user.role == UserRole.provider) {
-            return const ProviderMainScreen();
-          }
-          return const ClientMainScreen();
-        } else if (state is AuthSignUpSuccess) {
-          if (state.user.role == UserRole.provider) {
-            return const ProviderMainScreen();
-          }
-          return const ClientMainScreen();
-        } else if (state is AuthError) {
+        }
+
+        if (state is AuthError) {
           return Scaffold(
             body: Center(
               child: Column(
@@ -60,7 +55,6 @@ class HomeScreen extends StatelessWidget {
           );
         }
 
-        // Fallback or loading state
         return const Scaffold(body: AppLoadingIndicator());
       },
     );

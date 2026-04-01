@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
+import 'package:dar_care/core/utils/home_error_utils.dart';
+
 import '../../../domain/repositories/home_repository.dart';
 import 'home_state.dart';
 
@@ -31,7 +33,10 @@ class HomeCubit extends Cubit<HomeState> {
       );
     } catch (e) {
       emit(
-        state.copyWith(status: HomeStatus.failure, errorMessage: e.toString()),
+        state.copyWith(
+          status: HomeStatus.failure,
+          errorMessage: resolveHomeErrorMessageKey(e),
+        ),
       );
     }
   }

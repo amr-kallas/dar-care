@@ -178,14 +178,10 @@
   "orders_action_repeat": "إعادة طلب",
   "orders_action_view_details": "عرض التفاصيل",
   "subcategories_empty": "لا توجد فئات متاحة لهذا القسم.",
-  "location_setup_title": "حدد موقعك",
-  "location_setup_tap_to_set": "اضغط على الخريطة لتحديد موقعك.",
-  "location_setup_coordinates": "خط العرض: {lat} | خط الطول: {lng}",
-  "location_setup_use_current_location": "استخدم موقعي الحالي",
-  "location_setup_confirm_continue": "تأكيد الموقع والمتابعة",
-  "location_setup_error_enable_services": "يرجى تفعيل خدمات الموقع للمتابعة.",
-  "location_setup_error_permission_required": "إذن الموقع مطلوب للمتابعة.",
-  "location_setup_error_pick_first": "يرجى اختيار موقع أولاً.",
-  "location_setup_error_save_failed": "فشل حفظ الموقع. يرجى المحاولة مرة أخرى.",
-  "location_setup_error_generic": "حدث خطأ أثناء إعداد موقعك."
+  "home_error_generic": "حدث خطأ أثناء تحميل بيانات الصفحة الرئيسية.",
+  "home_no_providers_found": "لم يتم العثور على مقدمي خدمة",
+  "home_unknown_user": "مستخدم",
+  "provider_dashboard_placeholder": "عنصر لوحة تحكم المزود",
+  "provider_requests_placeholder": "عنصر طلبات المزود",
+  "provider_earnings_placeholder": "عنصر أرباح المزود"
 }

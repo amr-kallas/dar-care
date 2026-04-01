@@ -1,45 +1,27 @@
-import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
-import 'package:dar_care/gen/assets.gen.dart';
+import 'package:dar_care/features/home/presentation/client/widgets/client_home_error_state.dart';
+import 'package:dar_care/features/home/presentation/client/widgets/client_home_header.dart';
+import 'package:dar_care/features/home/presentation/client/widgets/client_home_providers_section.dart';
+import 'package:dar_care/features/home/presentation/client/widgets/client_home_search_bar.dart';
+import 'package:dar_care/features/home/presentation/client/widgets/client_home_services_section.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
-import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
-import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
 import 'package:dar_care/features/home/presentation/client/cubit/home_cubit.dart';
 import 'package:dar_care/features/home/presentation/client/cubit/home_state.dart';
-import 'package:dar_care/features/home/presentation/client/widgets/section_header.dart';
-import 'package:dar_care/features/home/presentation/client/widgets/service_item.dart';
-import 'package:dar_care/core/widgets/provider_card.dart';
-import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
-
-import '../../../../../generated/locale_keys.g.dart';
 
 class ClientHomeBody extends StatelessWidget {
   const ClientHomeBody({super.key});
-
-  String? _resolveCurrentUserId(BuildContext context) {
-    final authState = context.read<AuthCubit>().state;
-    return switch (authState) {
-      AuthAuthenticated(:final user) => user.id,
-      AuthSignInSuccess(:final user) => user.id,
-      AuthSignUpSuccess(:final user) => user.id,
-      _ => null,
-    };
-  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final languageCode = context.locale.languageCode;
-    final currentUserId = _resolveCurrentUserId(context);
+    final currentUserId = resolveAuthUser(context.read<AuthCubit>().state)?.id;
 
     return BlocBuilder<HomeCubit, HomeState>(
       builder: (context, state) {
@@ -48,7 +30,7 @@ class ClientHomeBody extends StatelessWidget {
         }
 
         if (state.status == HomeStatus.failure) {
-          return Center(child: Text('Error: ${state.errorMessage}'));
+          return ClientHomeErrorState(errorKey: state.errorMessage);
         }
 
         return SafeArea(
@@ -56,301 +38,21 @@ class ClientHomeBody extends StatelessWidget {
             padding: const EdgeInsets.all(24.0),
             child: Column(
               children: [
-                // Header
-                Row(
-                  children: [
-                    // Notification Button
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: isDark ? AppColors.surfaceDark : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isDark
-                              ? Colors.transparent
-                              : Colors.grey.shade200,
-                        ),
-                      ),
-                      child: const Stack(
-                        children: [
-                          Icon(SolarLinearIcons.bell),
-                          Positioned(
-                            right: 0,
-                            top: 0,
-                            child: CircleAvatar(
-                              radius: 4,
-                              backgroundColor: AppColors.errorRed,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const Spacer(),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Row(
-                          children: [
-                            Text(
-                              LocaleKeys.good_morning.tr(),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              SolarBoldIcons.sun,
-                              size: 14,
-                              color: AppColors.warningOrange,
-                            ),
-                          ],
-                        ),
-                        BlocBuilder<AuthCubit, AuthState>(
-                          builder: (context, authState) {
-                            String name = 'Unknown';
-                            if (authState is AuthAuthenticated &&
-                                authState.user.fullName != null) {
-                              name = authState.user.fullName!;
-                            } else if (authState is AuthSignInSuccess &&
-                                authState.user.fullName != null) {
-                              name = authState.user.fullName!;
-                            } else if (authState is AuthSignUpSuccess &&
-                                authState.user.fullName != null) {
-                              name = authState.user.fullName!;
-                            }
-                            // Extract just the first name if available
-                            name = name.split(' ').first;
-
-                            return Text(
-                              LocaleKeys.welcome_back.tr(
-                                namedArgs: {'name': name},
-                              ),
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 12),
-                    CircleAvatar(
-                      radius: 24,
-                      backgroundImage: Assets.images.png.defaultAvatar
-                          .provider(),
-                    ),
-                  ],
-                ),
-
+                const ClientHomeHeader(),
                 const SizedBox(height: 24),
-
-                // Search Bar
-                GestureDetector(
-                  onTap: () => context.push(AppRouter.searchResultsPath),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.brightGreen,
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: const Icon(
-                          SolarLinearIcons.tuning,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: AbsorbPointer(
-                          // Prevent TextField focus
-                          child: TextField(
-                            textAlign: TextAlign.start,
-                            decoration: InputDecoration(
-                              hintText: LocaleKeys.search_hint.tr(),
-                              hintStyle: const TextStyle(color: Colors.grey),
-                              suffixIcon: const Icon(SolarLinearIcons.magnifer),
-                              filled: true,
-                              fillColor: isDark
-                                  ? AppColors.surfaceDark
-                                  : Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: isDark
-                                    ? BorderSide.none
-                                    : BorderSide(color: Colors.grey.shade200),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
+                ClientHomeSearchBar(isDark: isDark),
                 const SizedBox(height: 32),
-
-                // Services Section
-                SectionHeader(
-                  title: LocaleKeys.section_services.tr(),
-                  actionText: LocaleKeys.see_all.tr(),
-                  onTap: () => context.push(
-                    AppRouter.allDepartmentsPath,
-                    extra: state.categories,
-                  ),
+                ClientHomeServicesSection(
+                  categories: state.categories,
+                  languageCode: languageCode,
                 ),
-                const SizedBox(height: 16),
-
-                Builder(
-                  builder: (context) {
-                    const previewSlots = 8; // 2 rows x 4 columns
-                    final hasMore = state.categories.length > previewSlots;
-                    final previewCount = hasMore
-                        ? previewSlots
-                        : state.categories.length;
-
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            childAspectRatio: 0.8,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 12,
-                          ),
-                      itemCount: previewCount,
-                      itemBuilder: (context, index) {
-                        final isMoreTile = hasMore && index == previewSlots - 1;
-                        if (isMoreTile) {
-                          return ServiceItem(
-                            icon: Icons.more_horiz,
-                            label: LocaleKeys.service_more.tr(),
-                            isMore: true,
-                            onTap: () => context.push(
-                              AppRouter.allDepartmentsPath,
-                              extra: state.categories,
-                            ),
-                          );
-                        }
-
-                        final category = state.categories[index];
-                        return ServiceItem(
-                          icon: category.icon,
-                          label: category.localizedName(languageCode),
-                          imageUrl: category.imageUrl,
-                          onTap: () {
-                            context.push(
-                              AppRouter.subCategoriesPath,
-                              extra: category,
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-                ),
-
                 const SizedBox(height: 32),
-
-                // Providers Section
-                SectionHeader(
-                  title: LocaleKeys.section_providers_near.tr(),
-                  actionText: LocaleKeys.see_all.tr(),
-                  onTap: () {
-                    context.push(
-                      AppRouter.allProvidersPath,
-                      extra: state.topProviders,
-                    );
-                  },
+                ClientHomeProvidersSection(
+                  topProviders: state.topProviders,
+                  currentUserId: currentUserId,
+                  languageCode: languageCode,
                 ),
-                const SizedBox(height: 16),
-
-                if (state.topProviders.isEmpty)
-                  const Center(child: Text('No providers found')),
-
-                if (state.topProviders.isNotEmpty)
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final cardWidth = (constraints.maxWidth * 0.9).clamp(
-                        280.0,
-                        360.0,
-                      );
-
-                      return SizedBox(
-                        height: 188,
-                        child: BlocBuilder<FavoritesCubit, FavoritesState>(
-                          builder: (context, favoritesState) {
-                            return ListView.separated(
-                              scrollDirection: Axis.horizontal,
-                              clipBehavior: Clip.none,
-                              itemCount: state.topProviders.length,
-                              separatorBuilder: (context, index) =>
-                                  const SizedBox(width: 16),
-                              itemBuilder: (context, index) {
-                                final provider = state.topProviders[index];
-                                final isFavorite = favoritesState.favorites.any(
-                                  (p) => p.id == provider.id,
-                                );
-
-                                final hourlyRateText = provider.hourlyRate != null
-                                    ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
-                                    : LocaleKeys.price_on_request.tr();
-
-                                return ProviderCard(
-                                  width: cardWidth,
-                                  margin: EdgeInsets.zero,
-                                  isCompact: true,
-                                  hourlyRate: hourlyRateText,
-                                  name: provider.fullName,
-                                  profession: provider.professionForLanguage(
-                                    languageCode,
-                                  ),
-                                  rating: provider.rating.toStringAsFixed(1),
-                                  distance: LocaleKeys.distance_from_you.tr(
-                                    namedArgs: {
-                                      'distance': '2.5',
-                                    }, // Mock distance for now
-                                  ),
-                                  imageUrl: provider.imageUrl ?? '',
-                                  availabilityText: LocaleKeys.available_now.tr(),
-                                  isAvailable: true,
-                                  isFavorite: isFavorite,
-                                  onFavoriteTap: () {
-                                    context.read<FavoritesCubit>().toggleFavorite(
-                                          provider,
-                                        );
-                                  },
-                                  onTap: () {
-                                    // Navigate to booking/details
-                                  },
-                                  onChatTap: currentUserId == null
-                                      ? null
-                                      : () {
-                                          Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => ChatScreen(
-                                                currentUserId: currentUserId,
-                                                providerId: provider.userId,
-                                                title: provider.fullName,
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
-                const SizedBox(height: 80), // Bottom spacer
+                const SizedBox(height: 80),
               ],
             ),
           ),

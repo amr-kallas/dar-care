@@ -27,7 +27,9 @@ class SubCategoriesScreen extends StatelessWidget {
       create: (context) =>
           getIt<SubCategoriesCubit>()..fetchSubCategories(department.id),
       child: Scaffold(
-        appBar: CustomAppBar(titleWidget: Text(department.localizedName(languageCode))),
+        appBar: CustomAppBar(
+          titleWidget: Text(department.localizedName(languageCode)),
+        ),
         body: BlocBuilder<SubCategoriesCubit, SubCategoriesState>(
           builder: (context, state) {
             if (state.status == SubCategoriesStatus.loading ||
@@ -38,7 +40,7 @@ class SubCategoriesScreen extends StatelessWidget {
             if (state.status == SubCategoriesStatus.failure) {
               return Center(
                 child: Text(
-                  state.errorMessage ?? 'Error loading subcategories',
+                  state.errorMessage ?? LocaleKeys.home_error_generic.tr(),
                 ),
               );
             }
@@ -85,7 +87,9 @@ class SubCategoriesScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   Expanded(
                     child: state.subCategories.isEmpty
-                        ? Center(child: Text('subcategories_empty'.tr()))
+                        ? Center(
+                            child: Text(LocaleKeys.subcategories_empty.tr()),
+                          )
                         : GridView.builder(
                             itemCount: state.subCategories.length,
                             gridDelegate:

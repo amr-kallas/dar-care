@@ -182,5 +182,11 @@ abstract class  LocaleKeys {
   static const orders_action_repeat = 'orders_action_repeat';
   static const orders_action_view_details = 'orders_action_view_details';
   static const subcategories_empty = 'subcategories_empty';
+  static const home_error_generic = 'home_error_generic';
+  static const home_no_providers_found = 'home_no_providers_found';
+  static const home_unknown_user = 'home_unknown_user';
+  static const provider_dashboard_placeholder = 'provider_dashboard_placeholder';
+  static const provider_requests_placeholder = 'provider_requests_placeholder';
+  static const provider_earnings_placeholder = 'provider_earnings_placeholder';
 
 }

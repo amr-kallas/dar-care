@@ -10,29 +10,20 @@ import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.d
 import '../../../../../generated/locale_keys.g.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
+import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
+import 'package:dar_care/core/utils/home_presentation_utils.dart';
 
 class AllProvidersScreen extends StatelessWidget {
   const AllProvidersScreen({super.key, required this.providers});
 
   final List<ProviderModel> providers;
 
-  String? _resolveCurrentUserId(BuildContext context) {
-    final authState = context.read<AuthCubit>().state;
-    return switch (authState) {
-      AuthAuthenticated(:final user) => user.id,
-      AuthSignInSuccess(:final user) => user.id,
-      AuthSignUpSuccess(:final user) => user.id,
-      _ => null,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final currentUserId = _resolveCurrentUserId(context);
+    final currentUserId = resolveAuthUser(context.read<AuthCubit>().state)?.id;
 
     return Scaffold(
       backgroundColor: isDark
@@ -50,7 +41,7 @@ class AllProvidersScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: providers.isEmpty
-          ? const Center(child: Text('No providers found'))
+          ? Center(child: Text(LocaleKeys.home_no_providers_found.tr()))
           : BlocBuilder<FavoritesCubit, FavoritesState>(
               builder: (context, favoritesState) {
                 return ListView.separated(
@@ -64,19 +55,19 @@ class AllProvidersScreen extends StatelessWidget {
                       (p) => p.id == provider.id,
                     );
 
-                    final hourlyRateText = provider.hourlyRate != null
-                        ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
-                        : LocaleKeys.price_on_request.tr();
-
                     return ProviderCard(
-                      hourlyRate: hourlyRateText,
+                      hourlyRate: HomePresentationUtils.hourlyRateText(
+                        provider.hourlyRate,
+                      ),
                       name: provider.fullName,
                       profession: provider.professionForLanguage(
                         context.locale.languageCode,
                       ),
                       rating: provider.rating.toString(),
                       distance: LocaleKeys.distance_from_you.tr(
-                        namedArgs: {'distance': '2.5'},
+                        namedArgs: {
+                          'distance': HomePresentationUtils.mockDistanceKm,
+                        },
                       ),
                       imageUrl: provider.imageUrl ?? '',
                       availabilityText: LocaleKeys.available_now.tr(),

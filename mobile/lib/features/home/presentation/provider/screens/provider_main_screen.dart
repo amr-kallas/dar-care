@@ -22,9 +22,9 @@ class _ProviderMainScreenState extends State<ProviderMainScreen> {
   int _currentIndex = 0;
 
   List<Widget> get _screens => [
-    const Center(child: Text('Provider Dashboard Placeholder')),
-    const Center(child: Text('Provider Requests Placeholder')),
-    const Center(child: Text('Provider Earnings Placeholder')),
+    Center(child: Text(LocaleKeys.provider_dashboard_placeholder.tr())),
+    Center(child: Text(LocaleKeys.provider_requests_placeholder.tr())),
+    Center(child: Text(LocaleKeys.provider_earnings_placeholder.tr())),
     Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -33,7 +33,10 @@ class _ProviderMainScreenState extends State<ProviderMainScreen> {
           const SizedBox(height: 20),
           ElevatedButton.icon(
             icon: const Icon(SolarLinearIcons.logout, color: Colors.white),
-            label: const Text('Logout', style: TextStyle(color: Colors.white)),
+            label: Text(
+              LocaleKeys.logout.tr(),
+              style: const TextStyle(color: Colors.white),
+            ),
             onPressed: () {
               context.read<AuthCubit>().signOut();
             },
