@@ -177,5 +177,15 @@
   "orders_no_address": "No address selected",
   "orders_action_repeat": "Re-order",
   "orders_action_view_details": "View details",
-  "subcategories_empty": "No categories found for this department."
+  "subcategories_empty": "No categories found for this department.",
+  "location_setup_title": "Set your location",
+  "location_setup_tap_to_set": "Tap the map to set your location.",
+  "location_setup_coordinates": "Lat: {lat} | Lng: {lng}",
+  "location_setup_use_current_location": "Use my current location",
+  "location_setup_confirm_continue": "Confirm location and continue",
+  "location_setup_error_enable_services": "Please enable location services to continue.",
+  "location_setup_error_permission_required": "Location permission is required to continue.",
+  "location_setup_error_pick_first": "Please pick a location first.",
+  "location_setup_error_save_failed": "Failed to save location. Please try again.",
+  "location_setup_error_generic": "Something went wrong while setting your location."
 }

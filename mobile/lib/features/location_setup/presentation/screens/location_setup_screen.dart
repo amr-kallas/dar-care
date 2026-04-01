@@ -1,17 +1,20 @@
 import 'dart:async';
-
-import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/utils/location_setup_actions_helper.dart';
+import 'package:dar_care/core/utils/location_permission_utils.dart';
+import 'package:dar_care/core/utils/location_setup_error_utils.dart';
+import 'package:dar_care/core/widgets/app_snackbar.dart';
+import 'package:dar_care/core/widgets/custom_app_bar.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 import 'package:dar_care/features/location_setup/data/location_setup_service.dart';
+import 'package:dar_care/features/location_setup/presentation/widgets/location_setup_action_panel.dart';
+import 'package:dar_care/features/location_setup/presentation/widgets/location_setup_error_banner.dart';
+import 'package:dar_care/features/location_setup/presentation/widgets/location_setup_map_view.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
-
-import '../../../../core/widgets/app_snackbar.dart';
-import '../../../../core/widgets/custom_app_bar.dart';
 
 class LocationSetupScreen extends StatefulWidget {
   const LocationSetupScreen({super.key});
@@ -24,11 +27,14 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
   static const LatLng _fallbackCenter = LatLng(30.0444, 31.2357);
 
   final LocationSetupService _locationSetupService = LocationSetupService();
+  late final LocationSetupActionsHelper _actionsHelper =
+      LocationSetupActionsHelper(locationSetupService: _locationSetupService);
+
   final MapController _mapController = MapController();
 
   bool _isPreparing = true;
   bool _isSaving = false;
-  String? _inlineError;
+  String? _inlineErrorKey;
 
   String? _userId;
   UserRole _role = UserRole.client;
@@ -41,86 +47,47 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
   }
 
   Future<void> _prepareFlow() async {
-    try {
-      final currentUser = SupabaseService.auth.currentUser;
-      if (currentUser == null) {
-        if (!mounted) return;
+    final result = await _actionsHelper.prepareFlow();
+
+    if (!mounted) return;
+
+    switch (result.nextStep) {
+      case LocationSetupPrepareNextStep.goLogin:
         context.go(AppRouter.loginPath);
         return;
-      }
-
-      _userId = currentUser.id;
-      _role = await _locationSetupService.getCurrentUserRole(currentUser.id);
-
-      final hasSavedLocation = await _locationSetupService.hasSavedLocation(
-        userId: currentUser.id,
-        role: _role,
-      );
-      if (hasSavedLocation) {
-        if (!mounted) return;
+      case LocationSetupPrepareNextStep.goHome:
         context.go(AppRouter.homePath);
         return;
-      }
-
-      final Position? position = await _requestAndFetchCurrentPosition();
-
-      if (position != null) {
-        _selectedPoint = LatLng(position.latitude, position.longitude);
-      }
-    } catch (e) {
-      _inlineError = e.toString();
-    } finally {
-      if (mounted) {
+      case LocationSetupPrepareNextStep.stay:
         setState(() {
+          _userId = result.userId ?? _userId;
+          _role = result.role ?? _role;
+          _selectedPoint = result.point ?? _selectedPoint;
+          _inlineErrorKey = result.errorKey;
           _isPreparing = false;
         });
-      }
     }
-  }
-
-  Future<Position?> _requestAndFetchCurrentPosition() async {
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    if (!serviceEnabled) {
-      throw Exception('Please enable location services to continue.');
-    }
-
-    LocationPermission permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      throw Exception('Location permission is required to continue.');
-    }
-
-    return Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(
-        accuracy: LocationAccuracy.high,
-        timeLimit: Duration(seconds: 15),
-      ),
-    );
   }
 
   Future<void> _useCurrentLocation() async {
     setState(() {
-      _inlineError = null;
+      _inlineErrorKey = null;
       _isPreparing = true;
     });
 
     try {
-      final position = await _requestAndFetchCurrentPosition();
+      final position =
+          await LocationPermissionUtils.requestAndFetchCurrentPosition();
       if (!mounted) return;
-      if (position != null) {
-        final point = LatLng(position.latitude, position.longitude);
-        setState(() {
-          _selectedPoint = point;
-        });
-        _mapController.move(point, 16);
-      }
+
+      final point = LatLng(position.latitude, position.longitude);
+      setState(() {
+        _selectedPoint = point;
+      });
+      _mapController.move(point, 16);
     } catch (e) {
       setState(() {
-        _inlineError = e.toString();
+        _inlineErrorKey = resolveLocationSetupErrorKey(e);
       });
     } finally {
       if (mounted) {
@@ -132,138 +99,61 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
   }
 
   Future<void> _saveAndContinue() async {
-    final userId = _userId;
-    final point = _selectedPoint;
+    setState(() {
+      _isSaving = true;
+      _inlineErrorKey = null;
+    });
 
-    if (userId == null || point == null) {
-      setState(() {
-        _inlineError = 'Please pick a location first.';
-      });
+    final result = await _actionsHelper.saveAndContinue(
+      userId: _userId,
+      role: _role,
+      selectedPoint: _selectedPoint,
+    );
+
+    if (!mounted) return;
+
+    if (result.shouldGoHome) {
+      context.go(AppRouter.homePath);
       return;
     }
 
     setState(() {
-      _isSaving = true;
-      _inlineError = null;
+      _inlineErrorKey = result.errorKey;
+      _isSaving = false;
     });
 
-    try {
-      await _locationSetupService.upsertCurrentUserLocation(
-        userId: userId,
-        role: _role,
-        lat: point.latitude,
-        lng: point.longitude,
-      );
-
-      if (!mounted) return;
-      context.go(AppRouter.homePath);
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _inlineError = 'Failed to save location. Please try again.';
-      });
-      AppSnackbar.showError(context, 'Location save failed: $e');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+    if (result.errorKey == 'location_setup_error_save_failed') {
+      AppSnackbar.showError(context, result.errorKey!.tr());
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const CustomAppBar(titleWidget: Text('Set your location')),
+      appBar: CustomAppBar(titleWidget: Text('location_setup_title'.tr())),
       body: Column(
         children: [
-          if (_inlineError != null)
-            Container(
-              width: double.infinity,
-              color: Colors.red.shade50,
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                _inlineError!,
-                style: TextStyle(color: Colors.red.shade900),
-              ),
-            ),
+          if (_inlineErrorKey != null)
+            LocationSetupErrorBanner(errorKey: _inlineErrorKey!),
           Expanded(
-            child: Stack(
-              children: [
-                FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    initialCenter: _selectedPoint ?? _fallbackCenter,
-                    initialZoom: 16,
-                    onTap: (_, tappedPoint) {
-                      setState(() {
-                        _selectedPoint = tappedPoint;
-                      });
-                    },
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.darcare.mobile',
-                    ),
-                    MarkerLayer(
-                      markers: [
-                        Marker(
-                          point: _selectedPoint ?? _fallbackCenter,
-                          width: 40,
-                          height: 40,
-                          child: const Icon(
-                            Icons.location_pin,
-                            size: 40,
-                            color: Colors.red,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-                if (_isPreparing)
-                  const ColoredBox(
-                    color: Color(0x4D000000),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-              ],
+            child: LocationSetupMapView(
+              mapController: _mapController,
+              selectedPoint: _selectedPoint,
+              fallbackCenter: _fallbackCenter,
+              isPreparing: _isPreparing,
+              onTap: (tappedPoint) {
+                setState(() {
+                  _selectedPoint = tappedPoint;
+                });
+              },
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  _selectedPoint == null
-                      ? 'Tap the map to set your location.'
-                      : 'Lat: ${_selectedPoint!.latitude.toStringAsFixed(6)} | '
-                            'Lng: ${_selectedPoint!.longitude.toStringAsFixed(6)}',
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton.icon(
-                  onPressed: _isPreparing ? null : _useCurrentLocation,
-                  icon: const Icon(Icons.my_location),
-                  label: const Text('Use my current location'),
-                ),
-                const SizedBox(height: 10),
-                ElevatedButton(
-                  onPressed: _isSaving || _isPreparing
-                      ? null
-                      : _saveAndContinue,
-                  child: _isSaving
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Text('Confirm location and continue'),
-                ),
-              ],
-            ),
+          LocationSetupActionPanel(
+            selectedPoint: _selectedPoint,
+            isPreparing: _isPreparing,
+            isSaving: _isSaving,
+            onUseCurrentLocation: _useCurrentLocation,
+            onSaveAndContinue: _saveAndContinue,
           ),
         ],
       ),
