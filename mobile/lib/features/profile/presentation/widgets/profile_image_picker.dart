@@ -1,6 +1,8 @@
 import 'dart:typed_data';
 
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -38,13 +40,13 @@ class ProfileImagePicker extends StatelessWidget {
 
       final bytes = await selected.readAsBytes();
       if (bytes.isEmpty) {
-        onError('Could not read selected image');
+        onError(LocaleKeys.profile_image_read_error.tr());
         return;
       }
 
       await onImageSelected(bytes);
     } catch (_) {
-      onError('Could not pick image file');
+      onError(LocaleKeys.profile_image_pick_error.tr());
     }
   }
 
@@ -62,7 +64,9 @@ class ProfileImagePicker extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: radius,
-            backgroundImage: hasImage ? NetworkImage(resolvedImageUrl) : placeholder,
+            backgroundImage: hasImage
+                ? NetworkImage(resolvedImageUrl)
+                : placeholder,
           ),
           if (isLoading)
             Positioned.fill(
