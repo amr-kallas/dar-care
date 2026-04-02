@@ -1,6 +1,6 @@
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
-import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
+import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
@@ -68,7 +68,7 @@ class SearchResultsList extends StatelessWidget {
               : () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ChatScreen(
+                      builder: (_) => ClientChatScreen(
                         currentUserId: currentUserId,
                         providerId: provider.userId,
                         title: provider.fullName,

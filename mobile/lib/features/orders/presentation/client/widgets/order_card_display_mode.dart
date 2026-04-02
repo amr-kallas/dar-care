@@ -1,0 +1,1 @@
+enum OrderCardDisplayMode { client, provider }

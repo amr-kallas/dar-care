@@ -65,6 +65,77 @@ class OrdersRepositoryImpl implements OrdersRepository {
     }
   }
 
+  @override
+  Future<List<OrderModel>> getProviderOrders() async {
+    final providerId = await _getProviderId();
+
+    try {
+      final response = await _supabase
+          .from('orders')
+          .select('''
+            *,
+            clients(*, users(*)),
+            addresses(*, cities(name)),
+            services(*, categories(name))
+          ''')
+          .eq('provider_id', providerId)
+          .order('created_at', ascending: false);
+
+      return (response as List<dynamic>)
+          .whereType<Map<String, dynamic>>()
+          .map(OrderModel.fromJson)
+          .toList(growable: false);
+    } on PostgrestException catch (e) {
+      throw Exception('Failed to load provider orders: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to load provider orders: $e');
+    }
+  }
+
+  @override
+  Future<void> acceptOrderWithQuote({
+    required String orderId,
+    required double quotePrice,
+  }) async {
+    final providerId = await _getProviderId();
+
+    final updatesWithQuote = <Map<String, dynamic>>[
+      {'status': 'accepted', 'quoted_price': quotePrice},
+      {'status': 'accepted', 'price': quotePrice},
+      {'status': 'accepted', 'amount': quotePrice},
+    ];
+
+    for (final payload in updatesWithQuote) {
+      try {
+        await _supabase
+            .from('orders')
+            .update(payload)
+            .eq('id', orderId)
+            .eq('provider_id', providerId);
+        return;
+      } on PostgrestException catch (_) {
+        // Try the next known quote column shape.
+      }
+    }
+
+    await _supabase
+        .from('orders')
+        .update({'status': 'accepted'})
+        .eq('id', orderId)
+        .eq('provider_id', providerId);
+  }
+
+  @override
+  Future<void> rejectOrder({required String orderId}) async {
+    final providerId = await _getProviderId();
+
+    await _supabase
+        .from('orders')
+        .update({'status': 'cancelled'})
+        .eq('id', orderId)
+        .eq('provider_id', providerId);
+  }
+
   Future<String> _getClientId() async {
     final user = _supabase.auth.currentUser;
     if (user == null) {
@@ -85,6 +156,29 @@ class OrdersRepositoryImpl implements OrdersRepository {
       return clientRes['id'].toString();
     } on PostgrestException catch (e) {
       throw Exception('Failed to resolve client profile: ${e.message}');
+    }
+  }
+
+  Future<String> _getProviderId() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('You must be signed in to access provider orders.');
+    }
+
+    try {
+      final providerRes = await _supabase
+          .from('providers')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+      if (providerRes == null || providerRes['id'] == null) {
+        throw Exception('Provider profile not found for current user.');
+      }
+
+      return providerRes['id'].toString();
+    } on PostgrestException catch (e) {
+      throw Exception('Failed to resolve provider profile: ${e.message}');
     }
   }
 }

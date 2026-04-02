@@ -3,6 +3,9 @@ class ChatListItem {
   final String providerId;
   final String? providerUserId;
   final String providerName;
+  final String? clientId;
+  final String? clientUserId;
+  final String? clientName;
   final DateTime? createdAt;
 
   const ChatListItem({
@@ -10,6 +13,9 @@ class ChatListItem {
     required this.providerId,
     required this.providerUserId,
     required this.providerName,
+    required this.clientId,
+    required this.clientUserId,
+    required this.clientName,
     required this.createdAt,
   });
 
@@ -22,6 +28,25 @@ class ChatListItem {
       providerId: (json['provider_id'] ?? '').toString(),
       providerUserId: provider['user_id']?.toString(),
       providerName: (users['full_name'] ?? '').toString(),
+      clientId: json['client_id']?.toString(),
+      clientUserId: null,
+      clientName: null,
+      createdAt: _parseDate(json['created_at']),
+    );
+  }
+
+  factory ChatListItem.fromProviderOrderRow(Map<String, dynamic> json) {
+    final client = _asMap(json['clients']);
+    final user = _asMap(client['users']);
+
+    return ChatListItem(
+      id: (json['id'] ?? '').toString(),
+      providerId: (json['provider_id'] ?? '').toString(),
+      providerUserId: null,
+      providerName: '',
+      clientId: json['client_id']?.toString(),
+      clientUserId: user['id']?.toString(),
+      clientName: (user['full_name'] ?? user['name'] ?? '').toString(),
       createdAt: _parseDate(json['created_at']),
     );
   }

@@ -3,6 +3,7 @@ import 'package:dar_care/features/home/data/models/provider_model.dart';
 
 abstract class OrdersRepository {
   Future<List<OrderModel>> getClientOrders();
+  Future<List<OrderModel>> getProviderOrders();
 
   Future<void> createOrder({
     required ProviderModel provider,
@@ -12,4 +13,11 @@ abstract class OrdersRepository {
     String? serviceId,
     String? addressId,
   });
+
+  Future<void> acceptOrderWithQuote({
+    required String orderId,
+    required double quotePrice,
+  });
+
+  Future<void> rejectOrder({required String orderId});
 }

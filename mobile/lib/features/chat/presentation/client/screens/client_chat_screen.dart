@@ -6,17 +6,19 @@ import 'package:dar_care/features/chat/presentation/widgets/message_list_widget.
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ChatScreen extends StatelessWidget {
-  final String currentUserId;
-  final String providerId;
-  final String? title;
-
-  const ChatScreen({
+class ClientChatScreen extends StatelessWidget {
+  const ClientChatScreen({
     super.key,
     required this.currentUserId,
     required this.providerId,
+    this.explicitClientId,
     this.title,
   });
+
+  final String currentUserId;
+  final String providerId;
+  final String? explicitClientId;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +26,10 @@ class ChatScreen extends StatelessWidget {
       create: (_) =>
           getIt<ChatCubit>()
             ..initializeChat(
-              clientId: currentUserId,
+              clientId: explicitClientId ?? currentUserId,
               providerId: providerId,
             ),
-      child: _ChatScreenView(
+      child: _ClientChatScreenView(
         currentUserId: currentUserId,
         title: title,
       ),
@@ -35,14 +37,14 @@ class ChatScreen extends StatelessWidget {
   }
 }
 
-class _ChatScreenView extends StatelessWidget {
-  final String currentUserId;
-  final String? title;
-
-  const _ChatScreenView({
+class _ClientChatScreenView extends StatelessWidget {
+  const _ClientChatScreenView({
     required this.currentUserId,
     this.title,
   });
+
+  final String currentUserId;
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -66,3 +68,4 @@ class _ChatScreenView extends StatelessWidget {
     );
   }
 }
+

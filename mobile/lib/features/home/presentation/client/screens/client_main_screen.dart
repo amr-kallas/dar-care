@@ -10,12 +10,12 @@ import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../../../../../core/theme/app_colors.dart';
 import 'package:dar_care/core/di/injection.dart';
-import 'package:dar_care/features/orders/presentation/screens/orders_screen.dart';
 import 'package:dar_care/features/favorites/presentation/screens/favorites_screen.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
+import '../../../../orders/presentation/client/screens/orders_screen.dart';
 import '../cubit/home_cubit.dart';
 import '../widgets/client_home_body.dart';
-import 'package:dar_care/features/chat/presentation/screens/chats_screen.dart';
+import 'package:dar_care/features/chat/presentation/client/screens/client_chats_screen.dart';
 
 class ClientMainScreen extends StatefulWidget {
   const ClientMainScreen({super.key});
@@ -33,7 +33,7 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
       child: const ClientHomeBody(),
     ),
     const OrdersScreen(),
-    const ChatsScreen(),
+    const ClientChatsScreen(),
     const FavoritesScreen(),
     ProfileScreen(),
   ];

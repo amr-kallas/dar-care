@@ -1,12 +1,13 @@
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
-import 'package:dar_care/features/orders/presentation/cubit/orders_cubit.dart';
-import 'package:dar_care/features/orders/presentation/cubit/orders_state.dart';
-import 'package:dar_care/features/orders/presentation/widgets/order_history_card.dart';
-import 'package:dar_care/features/orders/presentation/widgets/orders_empty_state.dart';
-import 'package:dar_care/features/orders/presentation/widgets/orders_error_state.dart';
-import 'package:dar_care/features/orders/presentation/widgets/orders_loading_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../cubit/orders_cubit.dart';
+import '../cubit/orders_state.dart';
+import 'order_history_card.dart';
+import 'orders_empty_state.dart';
+import 'orders_error_state.dart';
+import 'orders_loading_state.dart';
 
 class OrdersListSection extends StatelessWidget {
   const OrdersListSection({super.key, required this.selectedFilter});

@@ -5,20 +5,26 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 
+import 'order_card_display_mode.dart';
+
 class OrderHistoryCardHeader extends StatelessWidget {
   const OrderHistoryCardHeader({
     super.key,
     required this.order,
     required this.isDark,
     required this.primaryTextColor,
+    this.displayMode = OrderCardDisplayMode.client,
   });
 
   final OrderModel order;
   final bool isDark;
   final Color primaryTextColor;
+  final OrderCardDisplayMode displayMode;
 
   @override
   Widget build(BuildContext context) {
+    final titleText = _titleText(context);
+
     return Row(
       children: [
         Container(
@@ -41,11 +47,7 @@ class OrderHistoryCardHeader extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                (order.providerName?.trim().isNotEmpty ?? false)
-                    ? order.providerName!.trim()
-                    : LocaleKeys.orders_item_title.tr(
-                        namedArgs: {'id': order.id},
-                      ),
+                titleText,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -85,5 +87,17 @@ class OrderHistoryCardHeader extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _titleText(BuildContext context) {
+    final preferredName = displayMode == OrderCardDisplayMode.provider
+        ? order.clientName
+        : order.providerName;
+
+    if (preferredName != null && preferredName.trim().isNotEmpty) {
+      return preferredName.trim();
+    }
+
+    return LocaleKeys.orders_item_title.tr(namedArgs: {'id': order.id});
   }
 }

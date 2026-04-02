@@ -2,7 +2,9 @@ import 'dart:developer';
 import 'package:dar_care/features/home/data/models/category_model.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/features/home/data/models/sub_category_model.dart';
+import 'package:dar_care/features/home/domain/entities/provider_dashboard_summary.dart';
 import 'package:dar_care/features/home/domain/repositories/home_repository.dart';
+import 'package:dar_care/features/orders/data/models/order_model.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -138,5 +140,100 @@ class HomeRepositoryImpl implements HomeRepository {
       // If everything fails, return empty instead of throwing exception to avoid breaking the UI.
       return [];
     }
+  }
+
+  @override
+  Future<ProviderDashboardSummary> getProviderDashboardSummary() async {
+    final providerRow = await _getCurrentProviderRow();
+    final providerId = providerRow['id'].toString();
+
+    final completedOrders = await _supabase
+        .from('orders')
+        .select('id')
+        .eq('provider_id', providerId)
+        .eq('status', 'completed');
+
+    final completedOrderIds = (completedOrders as List<dynamic>)
+        .map((item) => item['id']?.toString())
+        .whereType<String>()
+        .toList(growable: false);
+
+    double totalEarnings = 0;
+    if (completedOrderIds.isNotEmpty) {
+      final paymentsRows = await _supabase
+          .from('payments')
+          .select('amount')
+          .inFilter('order_id', completedOrderIds);
+
+      for (final payment in (paymentsRows as List<dynamic>)) {
+        totalEarnings += _toDouble(payment['amount']);
+      }
+    }
+
+    return ProviderDashboardSummary(
+      totalEarnings: totalEarnings,
+      completedJobs: completedOrderIds.length,
+      averageRating: _toDouble(providerRow['avg_rating']),
+      isAvailable: providerRow['is_available'] == true,
+    );
+  }
+
+  @override
+  Future<void> updateProviderAvailability({required bool isAvailable}) async {
+    final providerRow = await _getCurrentProviderRow();
+
+    await _supabase
+        .from('providers')
+        .update({'is_available': isAvailable})
+        .eq('id', providerRow['id']);
+  }
+
+  @override
+  Future<List<OrderModel>> getProviderLatestPendingOrders({int limit = 5}) async {
+    final providerRow = await _getCurrentProviderRow();
+
+    final response = await _supabase
+        .from('orders')
+        .select()
+        .eq('provider_id', providerRow['id'])
+        .eq('status', 'pending')
+        .order('created_at', ascending: false)
+        .limit(limit);
+
+    return (response as List<dynamic>)
+        .whereType<Map<String, dynamic>>()
+        .map(OrderModel.fromJson)
+        .toList(growable: false);
+  }
+
+  Future<Map<String, dynamic>> _getCurrentProviderRow() async {
+    final userId = _supabase.auth.currentUser?.id;
+    if (userId == null) {
+      throw StateError('You must be signed in to access provider dashboard.');
+    }
+
+    final row = await _supabase
+        .from('providers')
+        .select('id, avg_rating, is_available')
+        .eq('user_id', userId)
+        .maybeSingle();
+
+    if (row == null || row['id'] == null) {
+      throw StateError('Provider profile not found for current user.');
+    }
+
+    return Map<String, dynamic>.from(row);
+  }
+
+  double _toDouble(dynamic value) {
+    if (value == null) {
+      return 0;
+    }
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString()) ?? 0;
   }
 }

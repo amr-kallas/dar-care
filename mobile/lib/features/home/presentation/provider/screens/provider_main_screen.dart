@@ -1,15 +1,22 @@
-import 'package:dar_care/generated/locale_keys.g.dart';
-import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter/material.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
+import 'package:dar_care/features/chat/presentation/provider/screens/provider_chats_screen.dart';
+import 'package:dar_care/features/profile/presentation/provider/screens/provider_profile_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
-import '../../../../../core/theme/app_colors.dart';
-import 'package:dar_care/core/widgets/app_snackbar.dart';
+
+import 'package:dar_care/features/home/presentation/provider/cubit/provider_home_cubit.dart';
+import 'package:dar_care/features/home/presentation/provider/screens/provider_home_screen.dart';
+
+import '../../../../orders/presentation/provider/screens/provider_orders_screen.dart';
 
 class ProviderMainScreen extends StatefulWidget {
   const ProviderMainScreen({super.key});
@@ -21,39 +28,20 @@ class ProviderMainScreen extends StatefulWidget {
 class _ProviderMainScreenState extends State<ProviderMainScreen> {
   int _currentIndex = 0;
 
-  List<Widget> get _screens => [
-    Center(child: Text(LocaleKeys.provider_dashboard_placeholder.tr())),
-    Center(child: Text(LocaleKeys.provider_requests_placeholder.tr())),
-    Center(child: Text(LocaleKeys.provider_earnings_placeholder.tr())),
-    Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(LocaleKeys.profile_screen_placeholder.tr()),
-          const SizedBox(height: 20),
-          ElevatedButton.icon(
-            icon: const Icon(SolarLinearIcons.logout, color: Colors.white),
-            label: Text(
-              LocaleKeys.logout.tr(),
-              style: const TextStyle(color: Colors.white),
-            ),
-            onPressed: () {
-              context.read<AuthCubit>().signOut();
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
-          ),
-        ],
-      ),
+  late final List<Widget> _screens = [
+    BlocProvider(
+      create: (context) =>
+          ProviderHomeCubit(getIt())..loadDashboard(),
+      child: const ProviderHomeScreen(),
     ),
+    const ProviderOrdersScreen(),
+    const ProviderChatsScreen(),
+    const ProviderProfileScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocListener<AuthCubit, AuthState>(
       listener: (context, state) {
@@ -65,17 +53,17 @@ class _ProviderMainScreenState extends State<ProviderMainScreen> {
       },
       child: Scaffold(
         extendBody: true,
-        body: _screens[_currentIndex],
+        body: IndexedStack(index: _currentIndex, children: _screens),
         bottomNavigationBar: CurvedNavigationBar(
           index: _currentIndex,
           backgroundColor: Colors.transparent,
-          color: isDark ? AppColors.deepDarkGreen : Colors.white,
+          color: isDark ? AppColors.deepDarkGreen : Colors.green.shade50,
           buttonBackgroundColor: AppColors.brightGreen,
           animationDuration: const Duration(milliseconds: 300),
           items: const [
-            Icon(SolarLinearIcons.widget, size: 30),
-            Icon(SolarLinearIcons.clipboardList, size: 30),
-            Icon(SolarLinearIcons.wallet, size: 30),
+            Icon(SolarLinearIcons.home, size: 30),
+            Icon(SolarLinearIcons.billList, size: 30),
+            Icon(SolarLinearIcons.chatRoundLine, size: 30),
             Icon(SolarLinearIcons.user, size: 30),
           ],
           onTap: (index) {

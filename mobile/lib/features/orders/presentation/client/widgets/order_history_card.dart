@@ -2,14 +2,20 @@ import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/features/orders/data/models/order_model.dart';
 import 'package:flutter/material.dart';
 
+import 'order_card_display_mode.dart';
 import 'order_history_card_details.dart';
 import 'order_history_card_footer.dart';
 import 'order_history_card_header.dart';
 
 class OrderHistoryCard extends StatelessWidget {
-  const OrderHistoryCard({super.key, required this.order});
+  const OrderHistoryCard({
+    super.key,
+    required this.order,
+    this.displayMode = OrderCardDisplayMode.client,
+  });
 
   final OrderModel order;
+  final OrderCardDisplayMode displayMode;
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +61,7 @@ class OrderHistoryCard extends StatelessWidget {
             order: order,
             isDark: isDark,
             primaryTextColor: primaryTextColor,
+            displayMode: displayMode,
           ),
           const SizedBox(height: 12),
           Divider(color: isDark ? Colors.white12 : Colors.black12, height: 1),
@@ -63,6 +70,7 @@ class OrderHistoryCard extends StatelessWidget {
             order: order,
             secondaryTextColor: secondaryTextColor,
             tertiaryTextColor: tertiaryTextColor,
+            displayMode: displayMode,
           ),
           const SizedBox(height: 14),
           OrderHistoryCardFooter(

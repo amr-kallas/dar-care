@@ -62,8 +62,8 @@ import 'package:dar_care/features/orders/data/repositories/orders_repository_imp
     as _i862;
 import 'package:dar_care/features/orders/domain/repositories/orders_repository.dart'
     as _i75;
-import 'package:dar_care/features/orders/presentation/cubit/orders_cubit.dart'
-    as _i470;
+import 'package:dar_care/features/orders/presentation/client/cubit/orders_cubit.dart'
+    as _i692;
 import 'package:dar_care/features/search/data/repositories/search_repository_impl.dart'
     as _i997;
 import 'package:dar_care/features/search/domain/repositories/search_repository.dart'
@@ -113,8 +113,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i607.FavoritesRepository>(
       () => _i369.FavoritesRepositoryImpl(gh<_i454.SupabaseClient>()),
     );
-    gh.factory<_i470.OrdersCubit>(
-      () => _i470.OrdersCubit(gh<_i75.OrdersRepository>()),
+    gh.factory<_i692.OrdersCubit>(
+      () => _i692.OrdersCubit(gh<_i75.OrdersRepository>()),
     );
     gh.factory<_i919.FavoritesCubit>(
       () => _i919.FavoritesCubit(gh<_i607.FavoritesRepository>()),

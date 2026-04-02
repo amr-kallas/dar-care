@@ -1,6 +1,7 @@
-import 'package:dar_care/features/orders/presentation/widgets/orders_list_section.dart';
-import 'package:dar_care/features/orders/presentation/widgets/orders_status_filter_tabs.dart';
 import 'package:flutter/material.dart';
+
+import 'orders_list_section.dart';
+import 'orders_status_filter_tabs.dart';
 
 class OrdersScreenContent extends StatelessWidget {
   const OrdersScreenContent({

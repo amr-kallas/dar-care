@@ -1,5 +1,5 @@
 import 'package:dar_care/core/utils/chat_presentation_utils.dart';
-import 'package:dar_care/features/chat/presentation/models/chat_list_item.dart';
+import 'package:dar_care/features/chat/data/models/chat_list_item.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -38,4 +38,3 @@ class ChatListItemTile extends StatelessWidget {
     );
   }
 }
-

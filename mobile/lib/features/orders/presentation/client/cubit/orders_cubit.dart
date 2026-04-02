@@ -1,9 +1,10 @@
 import 'package:dar_care/core/utils/orders_error_utils.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/features/orders/domain/repositories/orders_repository.dart';
-import 'package:dar_care/features/orders/presentation/cubit/orders_state.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+
+import 'orders_state.dart';
 
 @injectable
 class OrdersCubit extends Cubit<OrdersState> {

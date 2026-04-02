@@ -5,17 +5,21 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 
+import 'order_card_display_mode.dart';
+
 class OrderHistoryCardDetails extends StatelessWidget {
   const OrderHistoryCardDetails({
     super.key,
     required this.order,
     required this.secondaryTextColor,
     required this.tertiaryTextColor,
+    this.displayMode = OrderCardDisplayMode.client,
   });
 
   final OrderModel order;
   final Color secondaryTextColor;
   final Color tertiaryTextColor;
+  final OrderCardDisplayMode displayMode;
 
   @override
   Widget build(BuildContext context) {
@@ -48,11 +52,7 @@ class OrderHistoryCardDetails extends StatelessWidget {
           children: [
             Flexible(
               child: Text(
-                order.addressId != null
-                    ? LocaleKeys.orders_address_label.tr(
-                        namedArgs: {'id': order.addressId!},
-                      )
-                    : LocaleKeys.orders_no_address.tr(),
+                _locationText(context),
                 style: TextStyle(color: tertiaryTextColor, fontSize: 12),
                 textAlign: TextAlign.right,
                 overflow: TextOverflow.ellipsis,
@@ -64,5 +64,20 @@ class OrderHistoryCardDetails extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _locationText(BuildContext context) {
+    if (displayMode == OrderCardDisplayMode.provider) {
+      final location = order.locationLabel;
+      if (location != null && location.trim().isNotEmpty) {
+        return location.trim();
+      }
+    }
+
+    if (order.addressId != null) {
+      return LocaleKeys.orders_address_label.tr(namedArgs: {'id': order.addressId!});
+    }
+
+    return LocaleKeys.orders_no_address.tr();
   }
 }

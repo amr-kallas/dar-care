@@ -1,5 +1,5 @@
-import 'package:dar_care/features/chat/presentation/models/chat_list_item.dart';
-import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
+import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
+import 'package:dar_care/features/chat/data/models/chat_list_item.dart';
 import 'package:dar_care/features/chat/presentation/widgets/chat_list_item_tile.dart';
 import 'package:flutter/material.dart';
 
@@ -33,7 +33,7 @@ class ChatsListView extends StatelessWidget {
                 : () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => ChatScreen(
+                        builder: (_) => ClientChatScreen(
                           currentUserId: currentUserId!,
                           providerId: chat.providerUserId ?? chat.providerId,
                           title: chat.providerName,
