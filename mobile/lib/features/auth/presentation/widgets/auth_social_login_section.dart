@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'social_login_button.dart';
 
-/// Renders the "OR" divider and the Google / Apple social login buttons.
+/// Renders the "OR" divider and social login buttons.
 class AuthSocialLoginSection extends StatelessWidget {
   const AuthSocialLoginSection({
     super.key,
@@ -30,13 +30,13 @@ class AuthSocialLoginSection extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SocialLoginButton(
-              label: 'Google',
+              label: LocaleKeys.social_google.tr(),
               icon: SolarLinearIcons.global,
               onPressed: onGooglePressed ?? () {},
             ),
             const SizedBox(width: 16),
             SocialLoginButton(
-              label: 'Apple',
+              label: LocaleKeys.social_apple.tr(),
               icon: SolarLinearIcons.widget,
               onPressed: onApplePressed ?? () {},
             ),

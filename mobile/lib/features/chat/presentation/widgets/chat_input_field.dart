@@ -1,3 +1,5 @@
+import 'package:dar_care/generated/locale_keys.g.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class ChatInputField extends StatefulWidget {
@@ -56,7 +58,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
               textInputAction: TextInputAction.send,
               onSubmitted: (_) => _handleSend(),
               decoration: InputDecoration(
-                hintText: 'Type a message...',
+                hintText: LocaleKeys.chat_input_hint.tr(),
                 filled: true,
                 fillColor: colorScheme.surfaceContainerHighest,
                 contentPadding: const EdgeInsets.symmetric(
@@ -80,4 +82,3 @@ class _ChatInputFieldState extends State<ChatInputField> {
     );
   }
 }
-

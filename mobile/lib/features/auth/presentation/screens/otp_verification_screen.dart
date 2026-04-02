@@ -13,7 +13,7 @@ import '../widgets/otp_pin_input.dart';
 import '../widgets/otp_resend_row.dart';
 
 class OtpVerificationScreen extends StatelessWidget {
-  const OtpVerificationScreen({super.key, this.phoneNumber = '+1 123 456 789'});
+  const OtpVerificationScreen({super.key, this.phoneNumber});
 
   final String? phoneNumber;
 
@@ -37,7 +37,12 @@ class OtpVerificationScreen extends StatelessWidget {
                 icon: SolarLinearIcons.shieldKeyhole,
                 title: LocaleKeys.otp_verification_title.tr(),
                 subtitle: LocaleKeys.otp_verification_description.tr(
-                  namedArgs: {'phoneNumber': phoneNumber ?? ''},
+                  namedArgs: {
+                    'phoneNumber':
+                        (phoneNumber?.trim().isNotEmpty ?? false)
+                            ? phoneNumber!.trim()
+                            : LocaleKeys.otp_phone_placeholder.tr(),
+                  },
                 ),
               ),
               const SizedBox(height: 48),

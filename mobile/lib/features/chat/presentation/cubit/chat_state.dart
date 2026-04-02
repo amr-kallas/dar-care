@@ -38,13 +38,16 @@ class ChatMessageSending extends ChatState {
 }
 
 class ChatError extends ChatState {
-  final String message;
+  final String messageKey;
   final ChatEntity? chat;
   final List<MessageEntity> messages;
 
-  const ChatError({required this.message, this.chat, this.messages = const []});
+  const ChatError({
+    required this.messageKey,
+    this.chat,
+    this.messages = const [],
+  });
 
   @override
-  List<Object?> get props => [message, chat, messages];
+  List<Object?> get props => [messageKey, chat, messages];
 }
-

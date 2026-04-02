@@ -1,7 +1,7 @@
 import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/core/utils/chat_presentation_utils.dart';
 import 'package:dar_care/features/chat/presentation/cubit/chat_cubit.dart';
-import 'package:dar_care/features/chat/presentation/cubit/chat_state.dart';
-import 'package:dar_care/features/chat/presentation/widgets/chat_input_field.dart';
+import 'package:dar_care/features/chat/presentation/widgets/chat_composer_section.dart';
 import 'package:dar_care/features/chat/presentation/widgets/message_list_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -50,7 +50,7 @@ class _ChatScreenView extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title ?? 'Chat'),
+        title: Text(resolveChatTitle(title)),
         backgroundColor: colorScheme.surface,
       ),
       body: SafeArea(
@@ -59,25 +59,7 @@ class _ChatScreenView extends StatelessWidget {
             Expanded(
               child: MessageListWidget(currentUserId: currentUserId),
             ),
-            BlocBuilder<ChatCubit, ChatState>(
-              buildWhen: (previous, current) =>
-                  current is ChatLoaded || current is ChatMessageSending,
-              builder: (context, state) {
-                if (state is ChatLoaded || state is ChatMessageSending) {
-                  return ChatInputField(
-                    enabled: true,
-                    onSend: (text) {
-                      context.read<ChatCubit>().sendMessage(
-                            senderId: currentUserId,
-                            text: text,
-                          );
-                    },
-                  );
-                }
-
-                return const SizedBox.shrink();
-              },
-            ),
+            ChatComposerSection(currentUserId: currentUserId),
           ],
         ),
       ),

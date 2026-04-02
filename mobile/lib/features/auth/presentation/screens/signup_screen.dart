@@ -1,8 +1,11 @@
+import 'package:dar_care/core/di/injection.dart';
 import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/utils/auth_registration_data_loader.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/features/auth/data/models/app_city.dart';
 import 'package:dar_care/features/auth/data/repositories/city_repository.dart';
+import 'package:dar_care/features/auth/domain/usecases/get_departments_use_case.dart';
 import 'package:dar_care/features/auth/presentation/models/auth_registration_data.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -29,6 +32,12 @@ class SignupScreen extends StatelessWidget {
 
   final AuthRegistrationData? registrationData;
 
+  AuthRegistrationDataLoader _registrationDataLoader() =>
+      AuthRegistrationDataLoader(
+        cityRepository: CityRepository(),
+        getDepartmentsUseCase: getIt<GetDepartmentsUseCase>(),
+      );
+
   FormGroup buildForm() => fb.group({
     'fullName': ['', Validators.required],
     'email': ['', Validators.required, Validators.email],
@@ -39,10 +48,7 @@ class SignupScreen extends StatelessWidget {
   });
 
   Future<List<AppCity>> _loadCities() async {
-    if (registrationData != null) {
-      return registrationData!.cities;
-    }
-    return CityRepository().getCities();
+    return _registrationDataLoader().loadCities(preloaded: registrationData);
   }
 
   @override

@@ -1,5 +1,6 @@
 import 'package:dar_care/core/di/injection.dart';
 import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/utils/auth_registration_data_loader.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/features/auth/data/models/app_city.dart';
@@ -32,6 +33,12 @@ class ProviderSignupScreen extends StatelessWidget {
 
   final AuthRegistrationData? registrationData;
 
+  AuthRegistrationDataLoader _registrationDataLoader() =>
+      AuthRegistrationDataLoader(
+        cityRepository: CityRepository(),
+        getDepartmentsUseCase: getIt<GetDepartmentsUseCase>(),
+      );
+
   FormGroup buildForm() => fb.group({
     'fullName': fb.control<String>('', [Validators.required]),
     'email': fb.control<String>('', [Validators.required, Validators.email]),
@@ -54,17 +61,7 @@ class ProviderSignupScreen extends StatelessWidget {
   });
 
   Future<AuthRegistrationData> _loadRegistrationData() async {
-    if (registrationData != null) {
-      return registrationData!;
-    }
-
-    final citiesFuture = CityRepository().getCities();
-    final departmentsFuture = getIt<GetDepartmentsUseCase>()();
-
-    final cities = await citiesFuture;
-    final departments = await departmentsFuture;
-
-    return AuthRegistrationData(cities: cities, departments: departments);
+    return _registrationDataLoader().load(preloaded: registrationData);
   }
 
   @override

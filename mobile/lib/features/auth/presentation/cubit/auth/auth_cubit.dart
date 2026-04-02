@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:dar_care/core/services/supabase_service.dart';
-import 'package:dar_care/features/auth/domain/entities/auth_user.dart';
+import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
 import 'package:dar_care/features/auth/domain/usecases/get_current_user_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_in_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart';
@@ -9,6 +9,7 @@ import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart';
 import 'package:dar_care/features/auth/domain/usecases/update_user_profile_use_case.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/auth/presentation/utils/auth_error_mapper.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -158,7 +159,7 @@ class AuthCubit extends Cubit<AuthState> {
         fileBytes: fileBytes,
       );
 
-      final previousUser = _extractUser(previousState);
+      final previousUser = resolveAuthUser(previousState);
       if (previousUser != null) {
         emit(AuthAuthenticated(previousUser.copyWith(avatarUrl: avatarUrl)));
       }
@@ -168,18 +169,11 @@ class AuthCubit extends Cubit<AuthState> {
       if (refreshedUser != null) {
         emit(AuthAuthenticated(refreshedUser));
       } else if (previousUser == null) {
-        emit(const AuthError('auth_error_generic'));
+        emit(const AuthError(LocaleKeys.auth_error_generic));
       }
     } catch (error) {
       emit(AuthError(AuthErrorMapper.updateProfile(error)));
     }
-  }
-
-  AuthUser? _extractUser(AuthState sourceState) {
-    if (sourceState is AuthAuthenticated) return sourceState.user;
-    if (sourceState is AuthSignInSuccess) return sourceState.user;
-    if (sourceState is AuthSignUpSuccess) return sourceState.user;
-    return null;
   }
 
   /// Update user profile
@@ -207,7 +201,7 @@ class AuthCubit extends Cubit<AuthState> {
       if (refreshedUser != null) {
         emit(AuthAuthenticated(refreshedUser));
       } else {
-        emit(const AuthError('auth_error_generic'));
+        emit(const AuthError(LocaleKeys.auth_error_generic));
       }
     } catch (error) {
       emit(AuthError(AuthErrorMapper.updateProfile(error)));

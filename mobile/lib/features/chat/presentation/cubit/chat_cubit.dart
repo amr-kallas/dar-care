@@ -4,6 +4,7 @@ import 'package:dar_care/features/chat/domain/entities/chat_entity.dart';
 import 'package:dar_care/features/chat/domain/entities/message_entity.dart';
 import 'package:dar_care/features/chat/domain/repositories/chat_repository.dart';
 import 'package:dar_care/features/chat/presentation/cubit/chat_state.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -32,8 +33,8 @@ class ChatCubit extends Cubit<ChatState> {
       _currentChat = chat;
       await _subscribeToMessages(chat.id);
       emit(ChatLoaded(chat: chat, messages: _messages));
-    } catch (error) {
-      emit(ChatError(message: 'Failed to initialize chat: $error'));
+    } catch (_) {
+      emit(const ChatError(messageKey: LocaleKeys.chat_error_initialize));
     }
   }
 
@@ -43,7 +44,7 @@ class ChatCubit extends Cubit<ChatState> {
   }) async {
     final chat = _currentChat;
     if (chat == null) {
-      emit(const ChatError(message: 'Chat is not initialized yet.'));
+      emit(const ChatError(messageKey: LocaleKeys.chat_error_not_initialized));
       return;
     }
 
@@ -61,10 +62,10 @@ class ChatCubit extends Cubit<ChatState> {
         text: normalizedText,
       );
       emit(ChatLoaded(chat: chat, messages: _messages));
-    } catch (error) {
+    } catch (_) {
       emit(
         ChatError(
-          message: 'Failed to send message: $error',
+          messageKey: LocaleKeys.chat_error_send,
           chat: chat,
           messages: _messages,
         ),
@@ -92,10 +93,10 @@ class ChatCubit extends Cubit<ChatState> {
           emit(ChatLoaded(chat: chat, messages: _messages));
         }
       },
-      onError: (error) {
+      onError: (_) {
         emit(
           ChatError(
-            message: 'Failed to receive messages: $error',
+            messageKey: LocaleKeys.chat_error_receive,
             chat: _currentChat,
             messages: _messages,
           ),
@@ -110,4 +111,3 @@ class ChatCubit extends Cubit<ChatState> {
     return super.close();
   }
 }
-
