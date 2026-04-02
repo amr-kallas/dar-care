@@ -12,7 +12,7 @@ import '../../../../../core/widgets/custom_app_bar.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
-import 'package:dar_care/core/utils/home_presentation_utils.dart';
+import 'package:dar_care/core/utils/provider_presentation_utils.dart';
 
 class AllProvidersScreen extends StatelessWidget {
   const AllProvidersScreen({super.key, required this.providers});
@@ -56,7 +56,7 @@ class AllProvidersScreen extends StatelessWidget {
                     );
 
                     return ProviderCard(
-                      hourlyRate: HomePresentationUtils.hourlyRateText(
+                      hourlyRate: ProviderPresentationUtils.hourlyRateText(
                         provider.hourlyRate,
                       ),
                       name: provider.fullName,
@@ -66,7 +66,8 @@ class AllProvidersScreen extends StatelessWidget {
                       rating: provider.rating.toString(),
                       distance: LocaleKeys.distance_from_you.tr(
                         namedArgs: {
-                          'distance': HomePresentationUtils.mockDistanceKm,
+                          'distance':
+                              ProviderPresentationUtils.mockDistanceKm,
                         },
                       ),
                       imageUrl: provider.imageUrl ?? '',

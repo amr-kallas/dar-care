@@ -1,3 +1,4 @@
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:latlong2/latlong.dart';
@@ -21,8 +22,8 @@ class LocationSetupActionPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locationText = selectedPoint == null
-        ? 'location_setup_tap_to_set'.tr()
-        : 'location_setup_coordinates'.tr(
+        ? LocaleKeys.location_setup_tap_to_set.tr()
+        : LocaleKeys.location_setup_coordinates.tr(
             namedArgs: {
               'lat': selectedPoint!.latitude.toStringAsFixed(6),
               'lng': selectedPoint!.longitude.toStringAsFixed(6),
@@ -39,7 +40,7 @@ class LocationSetupActionPanel extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: isPreparing ? null : onUseCurrentLocation,
             icon: const Icon(Icons.my_location),
-            label: Text('location_setup_use_current_location'.tr()),
+            label: Text(LocaleKeys.location_setup_use_current_location.tr()),
           ),
           const SizedBox(height: 10),
           ElevatedButton(
@@ -50,7 +51,7 @@ class LocationSetupActionPanel extends StatelessWidget {
                     height: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text('location_setup_confirm_continue'.tr()),
+                : Text(LocaleKeys.location_setup_confirm_continue.tr()),
           ),
         ],
       ),

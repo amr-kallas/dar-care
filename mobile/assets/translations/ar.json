@@ -87,6 +87,9 @@
   "profile_tab": "الملف الشخصي",
   "orders_screen_placeholder": "شاشة الطلبات",
   "favorites_screen_placeholder": "شاشة المفضلة",
+  "favorites_empty_title": "لا توجد عناصر مفضلة بعد",
+  "favorites_error_generic": "حدث خطأ أثناء تحميل المفضلة.",
+  "favorites_retry_button": "إعادة المحاولة",
   "profile_screen_placeholder": "شاشة الملف الشخصي",
   "good_morning": "صباح الخير",
   "welcome_back": "مرحبًا بعودتك، {name}",
@@ -183,5 +186,15 @@
   "home_unknown_user": "مستخدم",
   "provider_dashboard_placeholder": "عنصر لوحة تحكم المزود",
   "provider_requests_placeholder": "عنصر طلبات المزود",
-  "provider_earnings_placeholder": "عنصر أرباح المزود"
+  "provider_earnings_placeholder": "عنصر أرباح المزود",
+  "location_setup_title": "حدد موقعك",
+  "location_setup_tap_to_set": "اضغط على الخريطة لتحديد موقعك.",
+  "location_setup_coordinates": "خط العرض: {lat} | خط الطول: {lng}",
+  "location_setup_use_current_location": "استخدم موقعي الحالي",
+  "location_setup_confirm_continue": "تأكيد الموقع والمتابعة",
+  "location_setup_error_enable_services": "يرجى تفعيل خدمات الموقع للمتابعة.",
+  "location_setup_error_permission_required": "مطلوب إذن الموقع للمتابعة.",
+  "location_setup_error_pick_first": "يرجى تحديد موقع أولاً.",
+  "location_setup_error_save_failed": "تعذر حفظ الموقع. يرجى المحاولة مرة أخرى.",
+  "location_setup_error_generic": "حدث خطأ أثناء إعداد موقعك."
 }

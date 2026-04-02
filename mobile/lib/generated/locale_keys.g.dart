@@ -91,6 +91,9 @@ abstract class  LocaleKeys {
   static const profile_tab = 'profile_tab';
   static const orders_screen_placeholder = 'orders_screen_placeholder';
   static const favorites_screen_placeholder = 'favorites_screen_placeholder';
+  static const favorites_empty_title = 'favorites_empty_title';
+  static const favorites_error_generic = 'favorites_error_generic';
+  static const favorites_retry_button = 'favorites_retry_button';
   static const profile_screen_placeholder = 'profile_screen_placeholder';
   static const good_morning = 'good_morning';
   static const welcome_back = 'welcome_back';
@@ -188,5 +191,15 @@ abstract class  LocaleKeys {
   static const provider_dashboard_placeholder = 'provider_dashboard_placeholder';
   static const provider_requests_placeholder = 'provider_requests_placeholder';
   static const provider_earnings_placeholder = 'provider_earnings_placeholder';
+  static const location_setup_title = 'location_setup_title';
+  static const location_setup_tap_to_set = 'location_setup_tap_to_set';
+  static const location_setup_coordinates = 'location_setup_coordinates';
+  static const location_setup_use_current_location = 'location_setup_use_current_location';
+  static const location_setup_confirm_continue = 'location_setup_confirm_continue';
+  static const location_setup_error_enable_services = 'location_setup_error_enable_services';
+  static const location_setup_error_permission_required = 'location_setup_error_permission_required';
+  static const location_setup_error_pick_first = 'location_setup_error_pick_first';
+  static const location_setup_error_save_failed = 'location_setup_error_save_failed';
+  static const location_setup_error_generic = 'location_setup_error_generic';
 
 }

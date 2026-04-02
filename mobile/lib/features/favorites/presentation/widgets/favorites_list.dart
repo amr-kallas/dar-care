@@ -1,5 +1,6 @@
+import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
+import 'package:dar_care/core/utils/provider_presentation_utils.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
@@ -20,20 +21,10 @@ class FavoritesList extends StatelessWidget {
   final Future<void> Function() onRefresh;
   final Future<void> Function(String providerId) onRemoveFavorite;
 
-  String? _resolveCurrentUserId(BuildContext context) {
-    final authState = context.read<AuthCubit>().state;
-    return switch (authState) {
-      AuthAuthenticated(:final user) => user.id,
-      AuthSignInSuccess(:final user) => user.id,
-      AuthSignUpSuccess(:final user) => user.id,
-      _ => null,
-    };
-  }
-
   @override
   Widget build(BuildContext context) {
     final languageCode = context.locale.languageCode;
-    final currentUserId = _resolveCurrentUserId(context);
+    final currentUserId = resolveAuthUser(context.read<AuthCubit>().state)?.id;
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -49,21 +40,21 @@ class FavoritesList extends StatelessWidget {
             profession: provider.professionForLanguage(languageCode),
             rating: provider.rating.toStringAsFixed(1),
             distance: LocaleKeys.distance_from_you.tr(
-              namedArgs: {'distance': '2.0'},
+              namedArgs: {
+                'distance': ProviderPresentationUtils.mockDistanceKm,
+              },
             ),
             imageUrl: provider.imageUrl ?? '',
-            hourlyRate: provider.hourlyRate != null
-                ? '\$${provider.hourlyRate!.toStringAsFixed(0)}/hr'
-                : LocaleKeys.price_on_request.tr(),
+            hourlyRate: ProviderPresentationUtils.hourlyRateText(
+              provider.hourlyRate,
+            ),
             availabilityText: LocaleKeys.available_now.tr(),
             isAvailable: true,
             isFavorite: true,
             onFavoriteTap: () async {
               await onRemoveFavorite(provider.id);
             },
-            onTap: () {
-              // Navigate to provider details.
-            },
+            onTap: () {},
             onChatTap: currentUserId == null
                 ? null
                 : () {

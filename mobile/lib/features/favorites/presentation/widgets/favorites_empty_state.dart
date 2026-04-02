@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 
 class FavoritesEmptyState extends StatelessWidget {
   const FavoritesEmptyState({super.key});
@@ -14,7 +16,10 @@ class FavoritesEmptyState extends StatelessWidget {
         children: [
           Icon(SolarLinearIcons.heart, size: 42, color: Colors.grey.shade400),
           const SizedBox(height: 12),
-          Text('No favorites yet', style: theme.textTheme.bodyLarge),
+          Text(
+            LocaleKeys.favorites_empty_title.tr(),
+            style: theme.textTheme.bodyLarge,
+          ),
         ],
       ),
     );

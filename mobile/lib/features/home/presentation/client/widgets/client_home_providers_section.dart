@@ -1,5 +1,5 @@
 import 'package:dar_care/core/utils/app_router.dart';
-import 'package:dar_care/core/utils/home_presentation_utils.dart';
+import 'package:dar_care/core/utils/provider_presentation_utils.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
 import 'package:dar_care/features/chat/presentation/screens/chat_screen.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
@@ -65,7 +65,7 @@ class ClientHomeProvidersSection extends StatelessWidget {
                           width: cardWidth,
                           margin: EdgeInsets.zero,
                           isCompact: true,
-                          hourlyRate: HomePresentationUtils.hourlyRateText(
+                          hourlyRate: ProviderPresentationUtils.hourlyRateText(
                             provider.hourlyRate,
                           ),
                           name: provider.fullName,
@@ -75,7 +75,8 @@ class ClientHomeProvidersSection extends StatelessWidget {
                           rating: provider.rating.toStringAsFixed(1),
                           distance: LocaleKeys.distance_from_you.tr(
                             namedArgs: {
-                              'distance': HomePresentationUtils.mockDistanceKm,
+                              'distance':
+                                  ProviderPresentationUtils.mockDistanceKm,
                             },
                           ),
                           imageUrl: provider.imageUrl ?? '',

@@ -10,6 +10,7 @@ import 'package:dar_care/features/location_setup/data/location_setup_service.dar
 import 'package:dar_care/features/location_setup/presentation/widgets/location_setup_action_panel.dart';
 import 'package:dar_care/features/location_setup/presentation/widgets/location_setup_error_banner.dart';
 import 'package:dar_care/features/location_setup/presentation/widgets/location_setup_map_view.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -122,7 +123,7 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
       _isSaving = false;
     });
 
-    if (result.errorKey == 'location_setup_error_save_failed') {
+    if (result.errorKey == LocaleKeys.location_setup_error_save_failed) {
       AppSnackbar.showError(context, result.errorKey!.tr());
     }
   }
@@ -130,7 +131,8 @@ class _LocationSetupScreenState extends State<LocationSetupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: CustomAppBar(titleWidget: Text('location_setup_title'.tr())),
+      appBar:
+          CustomAppBar(titleWidget: Text(LocaleKeys.location_setup_title.tr())),
       body: Column(
         children: [
           if (_inlineErrorKey != null)

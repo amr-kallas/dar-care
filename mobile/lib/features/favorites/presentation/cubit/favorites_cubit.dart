@@ -1,3 +1,4 @@
+import 'package:dar_care/core/utils/favorites_error_utils.dart';
 import 'package:dar_care/features/favorites/domain/repositories/favorites_repository.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
@@ -30,7 +31,7 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       emit(
         state.copyWith(
           status: FavoritesStatus.failure,
-          errorMessage: e.toString(),
+          errorMessage: resolveFavoritesErrorMessageKey(e),
         ),
       );
     }
@@ -53,7 +54,10 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       await _repository.addFavorite(provider.id);
     } catch (e) {
       emit(
-        state.copyWith(favorites: initialFavorites, errorMessage: e.toString()),
+        state.copyWith(
+          favorites: initialFavorites,
+          errorMessage: resolveFavoritesErrorMessageKey(e),
+        ),
       );
     }
   }
@@ -73,7 +77,10 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       await _repository.removeFavorite(providerId);
     } catch (e) {
       emit(
-        state.copyWith(favorites: initialFavorites, errorMessage: e.toString()),
+        state.copyWith(
+          favorites: initialFavorites,
+          errorMessage: resolveFavoritesErrorMessageKey(e),
+        ),
       );
     }
   }
