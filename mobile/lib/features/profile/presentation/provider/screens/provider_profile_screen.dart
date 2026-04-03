@@ -1,6 +1,8 @@
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/core/theme/theme_controller.dart';
+import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
+import 'package:dar_care/core/utils/localized_db_text.dart';
 import 'package:dar_care/core/utils/profile_preferences_utils.dart';
 import 'package:dar_care/core/widgets/app_confirmation_dialog.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
@@ -17,6 +19,7 @@ import 'package:dar_care/features/profile/presentation/widgets/profile_theme_she
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -29,13 +32,11 @@ class ProviderProfileScreen extends StatefulWidget {
 
 class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
-  final TextEditingController _bioController = TextEditingController();
-  final TextEditingController _experienceController = TextEditingController();
 
   bool _isLoading = true;
-  bool _isSaving = false;
-  String? _providerId;
   String? _selectedDepartmentId;
+  String _bio = '';
+  int? _experienceYears;
   double _walletBalance = 0;
 
   List<_DepartmentOption> _departments = const <_DepartmentOption>[];
@@ -49,8 +50,6 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
 
   @override
   void dispose() {
-    _bioController.dispose();
-    _experienceController.dispose();
     super.dispose();
   }
 
@@ -126,10 +125,8 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
       if (!mounted) return;
 
       setState(() {
-        _providerId = providerId;
-        _bioController.text = (providerRow['bio'] as String?) ?? '';
-        _experienceController.text =
-            (providerRow['experience_years'] as int?)?.toString() ?? '';
+        _bio = (providerRow['bio'] as String?) ?? '';
+        _experienceYears = providerRow['experience_years'] as int?;
         _selectedDepartmentId = providerRow['department_id']?.toString();
         _departments = departmentOptions;
         _walletBalance = balance;
@@ -145,44 +142,12 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     }
   }
 
-  Future<void> _saveProfile() async {
-    if (_providerId == null) {
-      AppSnackbar.showError(context, 'provider_profile_load_error'.tr());
+  Future<void> _openEditProfile() async {
+    final result = await context.push<bool>(AppRouter.providerEditProfilePath);
+    if (!mounted || result != true) {
       return;
     }
-
-    final experience = int.tryParse(_experienceController.text.trim());
-    if (experience == null || experience < 0) {
-      AppSnackbar.showError(context, 'validation_invalid_experience'.tr());
-      return;
-    }
-
-    setState(() {
-      _isSaving = true;
-    });
-
-    try {
-      await _supabase
-          .from('providers')
-          .update({
-            'bio': _bioController.text.trim(),
-            'experience_years': experience,
-            'department_id': _selectedDepartmentId,
-          })
-          .eq('id', _providerId!);
-
-      if (!mounted) return;
-      AppSnackbar.showSuccess(context, 'provider_profile_save_success'.tr());
-    } catch (_) {
-      if (!mounted) return;
-      AppSnackbar.showError(context, 'provider_profile_save_error'.tr());
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
-    }
+    await _loadProviderProfile();
   }
 
   Future<void> _showLanguagePicker() async {
@@ -288,7 +253,19 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                   children: [
                     ProfileHeader(user: user),
                     const SizedBox(height: 24),
-                    _buildEditableSection(isDark),
+                    ProfileMenuSection(
+                      title: 'account_tab'.tr(),
+                      children: [
+                        ProfileMenuItem(
+                          title: 'edit_profile'.tr(),
+                          icon: SolarLinearIcons.pen,
+                          isPrimaryIcon: true,
+                          onTap: _openEditProfile,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    _buildProfessionalInfoSection(isDark),
                     const SizedBox(height: 20),
                     _buildWalletSection(isDark),
                     const SizedBox(height: 20),
@@ -327,68 +304,34 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     );
   }
 
-  Widget _buildEditableSection(bool isDark) {
+  Widget _buildProfessionalInfoSection(bool isDark) {
+    final languageCode = context.locale.languageCode;
+    final departmentName = _departments
+        .cast<_DepartmentOption?>()
+        .firstWhere(
+          (item) => item?.id == _selectedDepartmentId,
+          orElse: () => null,
+        )
+        ?.resolveName(languageCode) ??
+        '-';
+
     return ProfileMenuSection(
       title: 'provider_profile_professional_info'.tr(),
       children: [
-        _FormContainer(
+        _ReadOnlyField(
           isDark: isDark,
-          child: TextField(
-            controller: _bioController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              labelText: 'provider_profile_bio'.tr(),
-              border: InputBorder.none,
-            ),
-          ),
+          label: 'provider_profile_bio'.tr(),
+          value: _bio.trim().isEmpty ? '-' : _bio.trim(),
         ),
-        _FormContainer(
+        _ReadOnlyField(
           isDark: isDark,
-          child: TextField(
-            controller: _experienceController,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              labelText: 'provider_profile_experience_years'.tr(),
-              border: InputBorder.none,
-            ),
-          ),
+          label: 'provider_profile_experience_years'.tr(),
+          value: _experienceYears?.toString() ?? '-',
         ),
-        _FormContainer(
+        _ReadOnlyField(
           isDark: isDark,
-          child: DropdownButtonFormField<String>(
-            initialValue: _selectedDepartmentId,
-            items: _departments
-                .map(
-                  (item) => DropdownMenuItem<String>(
-                    value: item.id,
-                    child: Text(item.name),
-                  ),
-                )
-                .toList(growable: false),
-            onChanged: (value) {
-              setState(() {
-                _selectedDepartmentId = value;
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'provider_profile_department'.tr(),
-              border: InputBorder.none,
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _isSaving ? null : _saveProfile,
-            child: _isSaving
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text('provider_profile_save_changes'.tr()),
-          ),
+          label: 'provider_profile_department'.tr(),
+          value: departmentName,
         ),
       ],
     );
@@ -517,6 +460,7 @@ class _FormContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
@@ -531,16 +475,62 @@ class _FormContainer extends StatelessWidget {
   }
 }
 
+class _ReadOnlyField extends StatelessWidget {
+  const _ReadOnlyField({
+    required this.isDark,
+    required this.label,
+    required this.value,
+  });
+
+  final bool isDark;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return _FormContainer(
+      isDark: isDark,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                color: isDark ? AppColors.lightGrey : AppColors.mediumGrey,
+                fontSize: 12,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              value,
+              style: TextStyle(
+                color: isDark ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _DepartmentOption {
-  const _DepartmentOption({required this.id, required this.name});
+  const _DepartmentOption({required this.id, required this.nameText});
 
   final String id;
-  final String name;
+  final LocalizedDbText nameText;
+
+  String resolveName(String languageCode) {
+    return nameText.resolve(languageCode: languageCode, emptyValue: id);
+  }
 
   factory _DepartmentOption.fromJson(Map<String, dynamic> json) {
     return _DepartmentOption(
       id: (json['id'] ?? '').toString(),
-      name: (json['name'] ?? '').toString(),
+      nameText: LocalizedDbText.fromSupabase(json['name']),
     );
   }
 }
