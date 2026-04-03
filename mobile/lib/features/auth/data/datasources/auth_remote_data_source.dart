@@ -66,6 +66,9 @@ abstract class AuthRemoteDataSource {
 
   /// Listen to authentication state changes
   Stream<AuthUserModel?> authStateChanges();
+
+  /// Persist push token for the current device in users table.
+  Future<void> syncFcmToken({required String userId, String? fcmToken});
 }
 
 /// Implementation of AuthRemoteDataSource using Supabase
@@ -357,6 +360,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } catch (error, stackTrace) {
       throw DataAppException(
         'Failed to upload avatar.',
+        cause: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  @override
+  Future<void> syncFcmToken({required String userId, String? fcmToken}) async {
+    try {
+      await supabaseClient.from('users').update({
+        'fcm_token': fcmToken,
+        'fcm_token_updated_at': DateTime.now().toIso8601String(),
+      }).eq('id', userId);
+    } catch (error, stackTrace) {
+      throw DataAppException(
+        'Failed to sync notification token.',
         cause: error,
         stackTrace: stackTrace,
       );

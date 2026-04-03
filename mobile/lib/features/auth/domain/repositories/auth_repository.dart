@@ -59,4 +59,7 @@ abstract class AuthRepository {
 
   /// Listen to authentication state changes
   Stream<AuthUser?> authStateChanges();
+
+  /// Persist push token for the current device in users table.
+  Future<void> syncFcmToken({required String userId, String? fcmToken});
 }

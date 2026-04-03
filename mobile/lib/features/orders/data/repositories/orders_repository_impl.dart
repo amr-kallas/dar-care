@@ -136,6 +136,35 @@ class OrdersRepositoryImpl implements OrdersRepository {
         .eq('provider_id', providerId);
   }
 
+  @override
+  Future<OrderModel> getProviderOrderById({required String orderId}) async {
+    final providerId = await _getProviderId();
+
+    try {
+      final response = await _supabase
+          .from('orders')
+          .select('''
+            *,
+            clients(*, users(*)),
+            addresses(*, cities(name)),
+            services(*, categories(name))
+          ''')
+          .eq('id', orderId)
+          .eq('provider_id', providerId)
+          .maybeSingle();
+
+      if (response == null) {
+        throw Exception('Order not found.');
+      }
+
+      return OrderModel.fromJson(Map<String, dynamic>.from(response));
+    } on PostgrestException catch (e) {
+      throw Exception('Failed to load order details: ${e.message}');
+    } catch (e) {
+      throw Exception('Failed to load order details: $e');
+    }
+  }
+
   Future<String> _getClientId() async {
     final user = _supabase.auth.currentUser;
     if (user == null) {

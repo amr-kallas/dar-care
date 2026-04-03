@@ -90,4 +90,8 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Stream<AuthUser?> authStateChanges() => _remoteDataSource.authStateChanges();
+
+  @override
+  Future<void> syncFcmToken({required String userId, String? fcmToken}) =>
+      _remoteDataSource.syncFcmToken(userId: userId, fcmToken: fcmToken);
 }

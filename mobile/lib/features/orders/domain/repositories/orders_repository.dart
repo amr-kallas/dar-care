@@ -4,6 +4,7 @@ import 'package:dar_care/features/home/data/models/provider_model.dart';
 abstract class OrdersRepository {
   Future<List<OrderModel>> getClientOrders();
   Future<List<OrderModel>> getProviderOrders();
+  Future<OrderModel> getProviderOrderById({required String orderId});
 
   Future<void> createOrder({
     required ProviderModel provider,

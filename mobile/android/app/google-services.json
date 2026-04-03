@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "491373625352",
+    "project_id": "darcare-b0d24",
+    "storage_bucket": "darcare-b0d24.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:491373625352:android:f660b119d3ee4da61811bd",
+        "android_client_info": {
+          "package_name": "com.example.dar_care"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYommANrbxV_oLy_i8cOPCR75i4_tuonE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

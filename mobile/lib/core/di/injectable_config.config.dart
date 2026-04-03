@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dar_care/core/di/register_module.dart' as _i795;
+import 'package:dar_care/core/services/notification_service.dart' as _i755;
 import 'package:dar_care/features/auth/data/datasources/auth_remote_data_source.dart'
     as _i107;
 import 'package:dar_care/features/auth/data/repositories/auth_repository_impl.dart'
@@ -30,6 +31,8 @@ import 'package:dar_care/features/auth/domain/usecases/sign_out_use_case.dart'
     as _i818;
 import 'package:dar_care/features/auth/domain/usecases/sign_up_use_case.dart'
     as _i547;
+import 'package:dar_care/features/auth/domain/usecases/sync_fcm_token_use_case.dart'
+    as _i619;
 import 'package:dar_care/features/auth/domain/usecases/update_user_profile_use_case.dart'
     as _i839;
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart'
@@ -83,6 +86,9 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final registerModule = _$RegisterModule();
     gh.lazySingleton<_i454.SupabaseClient>(() => registerModule.supabaseClient);
+    gh.lazySingleton<_i755.NotificationService>(
+      () => _i755.NotificationService(),
+    );
     gh.factory<_i107.AuthRemoteDataSource>(
       () => _i107.AuthRemoteDataSourceImpl(),
     );
@@ -148,6 +154,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i547.SignUpUseCase>(
       () => _i547.SignUpUseCase(gh<_i287.AuthRepository>()),
     );
+    gh.factory<_i619.SyncFcmTokenUseCase>(
+      () => _i619.SyncFcmTokenUseCase(gh<_i287.AuthRepository>()),
+    );
     gh.factory<_i839.UpdateUserProfileUseCase>(
       () => _i839.UpdateUserProfileUseCase(gh<_i287.AuthRepository>()),
     );
@@ -158,6 +167,8 @@ extension GetItInjectableX on _i174.GetIt {
         signOutUseCase: gh<_i818.SignOutUseCase>(),
         getCurrentUserUseCase: gh<_i481.GetCurrentUserUseCase>(),
         updateUserProfileUseCase: gh<_i839.UpdateUserProfileUseCase>(),
+        syncFcmTokenUseCase: gh<_i619.SyncFcmTokenUseCase>(),
+        notificationService: gh<_i755.NotificationService>(),
       ),
     );
     return this;
