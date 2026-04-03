@@ -5,6 +5,7 @@ import 'package:dar_care/features/chat/domain/entities/message_entity.dart';
 import 'package:dar_care/features/chat/domain/repositories/chat_repository.dart';
 import 'package:dar_care/features/chat/presentation/cubit/chat_state.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 
@@ -33,7 +34,9 @@ class ChatCubit extends Cubit<ChatState> {
       _currentChat = chat;
       await _subscribeToMessages(chat.id);
       emit(ChatLoaded(chat: chat, messages: _messages));
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Chat initialize failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
       emit(const ChatError(messageKey: LocaleKeys.chat_error_initialize));
     }
   }
@@ -93,7 +96,9 @@ class ChatCubit extends Cubit<ChatState> {
           emit(ChatLoaded(chat: chat, messages: _messages));
         }
       },
-      onError: (_) {
+      onError: (error, stackTrace) {
+        debugPrint('Chat receive stream failed: $error');
+        debugPrintStack(stackTrace: stackTrace);
         emit(
           ChatError(
             messageKey: LocaleKeys.chat_error_receive,

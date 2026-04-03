@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:dar_care/core/services/supabase_service.dart';
@@ -112,8 +113,12 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> signOut() async {
     try {
       emit(const AuthLoading(operation: AuthOperation.signOut));
-      await signOutUseCase();
+      await signOutUseCase().timeout(const Duration(seconds: 12));
       emit(const AuthSignOutSuccess());
+      emit(const AuthUnauthenticated());
+    } on TimeoutException {
+      // Keep UX responsive when network revoke is slow; local session is cleared by datasource fallback.
+      emit(const AuthUnauthenticated());
     } catch (error) {
       emit(AuthError(AuthErrorMapper.signOut(error)));
     }

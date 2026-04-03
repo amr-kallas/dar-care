@@ -35,7 +35,7 @@ class ChatsListView extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => ClientChatScreen(
                           currentUserId: currentUserId!,
-                          providerId: chat.providerUserId ?? chat.providerId,
+                          providerId: chat.providerId,
                           title: chat.providerName,
                         ),
                       ),

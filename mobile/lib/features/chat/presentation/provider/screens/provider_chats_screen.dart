@@ -70,6 +70,10 @@ class _ProviderChatsScreenState extends State<ProviderChatsScreen> {
                 final clientName = chat.clientName?.trim().isNotEmpty == true
                     ? chat.clientName!.trim()
                     : LocaleKeys.home_unknown_user.tr();
+                final hasValidRouteIds =
+                    chat.providerId.trim().isNotEmpty &&
+                    chat.clientId != null &&
+                    chat.clientId!.isNotEmpty;
 
                 return ListTile(
                   shape: RoundedRectangleBorder(
@@ -92,15 +96,14 @@ class _ProviderChatsScreenState extends State<ProviderChatsScreen> {
                   ),
                   onTap: currentUserId == null ||
                           currentUserId.isEmpty ||
-                          chat.clientId == null ||
-                          chat.clientId!.isEmpty
+                          !hasValidRouteIds
                       ? null
                       : () {
                           Navigator.of(context).push(
                             MaterialPageRoute(
                               builder: (_) => ProviderChatScreen(
                                 currentUserId: currentUserId,
-                                providerId: currentUserId,
+                                providerId: chat.providerId,
                                 clientId: chat.clientId!,
                                 title: clientName,
                               ),
@@ -116,4 +119,3 @@ class _ProviderChatsScreenState extends State<ProviderChatsScreen> {
     );
   }
 }
-

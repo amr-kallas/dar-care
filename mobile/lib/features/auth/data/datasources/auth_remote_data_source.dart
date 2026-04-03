@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:typed_data';
 
@@ -6,7 +7,7 @@ import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/features/auth/data/models/auth_user_model.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 import 'package:injectable/injectable.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions;
+import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions, SignOutScope;
 
 /// Abstract data source for authentication
 abstract class AuthRemoteDataSource {
@@ -234,7 +235,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> signOut() async {
     try {
-      await supabaseAuth.signOut();
+      await supabaseAuth.signOut().timeout(
+        const Duration(seconds: 10),
+        onTimeout: () async {
+          // Fallback keeps app responsive even when token revocation is delayed.
+          await supabaseAuth.signOut(scope: SignOutScope.local);
+        },
+      );
     } catch (error, stackTrace) {
       throw _mapAuthException(
         error,

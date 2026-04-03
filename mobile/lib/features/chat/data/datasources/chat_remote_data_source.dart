@@ -33,37 +33,54 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
   }) async {
     final currentUserId = _requireCurrentUserId();
 
-    final resolvedClientId =
-        await _resolveClientProfileIdForCurrentUserOrFallback(
-          currentUserId: currentUserId,
-          fallbackInputId: clientId,
-        );
-    final resolvedProviderId = await _resolveProfileId(
-      table: 'providers',
+    final resolvedClientId = await _resolveClientProfileIdForCurrentUserOrFallback(
+      currentUserId: currentUserId,
+      fallbackInputId: clientId,
+    );
+    final resolvedProviderId = await _resolveProviderProfileId(
+      currentUserId: currentUserId,
       inputId: providerId,
     );
 
-    final existingChat = await _supabase
+    final existingRows = await _supabase
         .from('chats')
         .select()
         .eq('client_id', resolvedClientId)
         .eq('provider_id', resolvedProviderId)
-        .maybeSingle();
+        .order('created_at', ascending: false)
+        .limit(1);
 
-    if (existingChat != null) {
-      return ChatModel.fromJson(Map<String, dynamic>.from(existingChat));
+    if (existingRows.isNotEmpty) {
+      return ChatModel.fromJson(Map<String, dynamic>.from(existingRows.first));
     }
 
-    final createdChat = await _supabase
-        .from('chats')
-        .insert({
-          'client_id': resolvedClientId,
-          'provider_id': resolvedProviderId,
-        })
-        .select()
-        .single();
+    try {
+      final createdChat = await _supabase
+          .from('chats')
+          .insert({
+            'client_id': resolvedClientId,
+            'provider_id': resolvedProviderId,
+          })
+          .select()
+          .single();
 
-    return ChatModel.fromJson(Map<String, dynamic>.from(createdChat));
+      return ChatModel.fromJson(Map<String, dynamic>.from(createdChat));
+    } on PostgrestException {
+      // If another request creates the chat concurrently, return the latest one.
+      final fallbackRows = await _supabase
+          .from('chats')
+          .select()
+          .eq('client_id', resolvedClientId)
+          .eq('provider_id', resolvedProviderId)
+          .order('created_at', ascending: false)
+          .limit(1);
+
+      if (fallbackRows.isNotEmpty) {
+        return ChatModel.fromJson(Map<String, dynamic>.from(fallbackRows.first));
+      }
+
+      rethrow;
+    }
   }
 
   String _requireCurrentUserId() {
@@ -88,39 +105,100 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return byCurrentUser['id'].toString();
     }
 
-    return _resolveProfileId(table: 'clients', inputId: fallbackInputId);
+    final normalizedFallbackId = fallbackInputId.trim();
+    if (normalizedFallbackId.isEmpty) {
+      throw StateError('Missing clients identifier.');
+    }
+
+    final clientIdByFallback = await _resolveClientProfileIdFromAnyIdentifier(
+      normalizedFallbackId,
+    );
+    if (clientIdByFallback != null) {
+      return clientIdByFallback;
+    }
+
+    // When a provider opens chat from an order we may already receive a client profile id,
+    // and RLS can block probing another user's profile rows.
+    if (normalizedFallbackId != currentUserId) {
+      return normalizedFallbackId;
+    }
+
+    throw StateError('No matching clients profile found for id: $fallbackInputId');
   }
 
-  Future<String> _resolveProfileId({
-    required String table,
+  Future<String> _resolveProviderProfileId({
+    required String currentUserId,
     required String inputId,
   }) async {
     final normalized = inputId.trim();
     if (normalized.isEmpty) {
-      throw StateError('Missing $table identifier.');
+      throw StateError('Missing providers identifier.');
     }
 
-    final byId = await _supabase
-        .from(table)
+    // If caller gives a provider profile id or a provider auth user id, normalize to profile id.
+    if (normalized != currentUserId) {
+      final providerIdByInput = await _resolveProviderProfileIdFromAnyIdentifier(
+        normalized,
+      );
+      if (providerIdByInput != null) {
+        return providerIdByInput;
+      }
+      return normalized;
+    }
+
+    final byCurrentUser = await _supabase
+        .from('providers')
         .select('id')
-        .eq('id', normalized)
+        .eq('user_id', currentUserId)
         .maybeSingle();
 
-    if (byId != null && byId['id'] != null) {
-      return byId['id'].toString();
+    if (byCurrentUser != null && byCurrentUser['id'] != null) {
+      return byCurrentUser['id'].toString();
     }
 
-    final byUserId = await _supabase
-        .from(table)
-        .select('id')
-        .eq('user_id', normalized)
-        .maybeSingle();
+    throw StateError('No matching providers profile found for id: $inputId');
+  }
 
-    if (byUserId != null && byUserId['id'] != null) {
-      return byUserId['id'].toString();
+  Future<String?> _resolveClientProfileIdFromAnyIdentifier(String inputId) async {
+    try {
+      final rows = await _supabase
+          .from('clients')
+          .select('id')
+          .or('id.eq.$inputId,user_id.eq.$inputId')
+          .limit(1);
+
+      if (rows.isNotEmpty) {
+        final id = rows.first['id']?.toString();
+        if (id != null && id.isNotEmpty) {
+          return id;
+        }
+      }
+    } on PostgrestException {
+      // Keep fallback behavior for projects where providers cannot read clients directly.
     }
 
-    throw StateError('No matching $table profile found for id: $inputId');
+    return null;
+  }
+
+  Future<String?> _resolveProviderProfileIdFromAnyIdentifier(String inputId) async {
+    try {
+      final rows = await _supabase
+          .from('providers')
+          .select('id')
+          .or('id.eq.$inputId,user_id.eq.$inputId')
+          .limit(1);
+
+      if (rows.isNotEmpty) {
+        final id = rows.first['id']?.toString();
+        if (id != null && id.isNotEmpty) {
+          return id;
+        }
+      }
+    } on PostgrestException {
+      // Keep fallback behavior for projects where clients cannot read providers directly.
+    }
+
+    return null;
   }
 
   @override

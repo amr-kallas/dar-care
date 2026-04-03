@@ -62,7 +62,7 @@ class FavoritesList extends StatelessWidget {
                       MaterialPageRoute(
                         builder: (_) => ClientChatScreen(
                           currentUserId: currentUserId,
-                          providerId: provider.userId,
+                          providerId: provider.id,
                           title: provider.fullName,
                         ),
                       ),
