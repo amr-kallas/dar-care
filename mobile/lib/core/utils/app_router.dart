@@ -26,6 +26,8 @@ import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/features/profile/presentation/provider/screens/provider_edit_profile_screen.dart';
 import 'package:dar_care/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:dar_care/features/notifications_history/presentation/screens/notifications_history_screen.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 abstract class AppRouter {
   static const String splashPath = '/';
@@ -163,7 +165,11 @@ abstract class AppRouter {
           final department = extra is CategoryModel ? extra : null;
           return department != null
               ? SubCategoriesScreen(department: department)
-              : const Scaffold(body: Center(child: Text('Invalid department')));
+              : Scaffold(
+                  body: Center(
+                    child: Text(LocaleKeys.routing_invalid_department.tr()),
+                  ),
+                );
         },
       ),
       GoRoute(
@@ -197,8 +203,8 @@ abstract class AppRouter {
           final title = state.uri.queryParameters['title'];
 
           if (currentUserId == null || providerId == null || clientId == null) {
-            return const Scaffold(
-              body: Center(child: Text('Unable to open this chat.')),
+            return Scaffold(
+              body: Center(child: Text(LocaleKeys.routing_open_chat_error.tr())),
             );
           }
 
@@ -221,8 +227,10 @@ abstract class AppRouter {
         builder: (context, state) {
           final orderId = state.pathParameters['orderId'];
           if (orderId == null || orderId.trim().isEmpty) {
-            return const Scaffold(
-              body: Center(child: Text('Unable to open order details.')),
+            return Scaffold(
+              body: Center(
+                child: Text(LocaleKeys.routing_open_order_details_error.tr()),
+              ),
             );
           }
           return ProviderOrderDetailsEntryScreen(orderId: orderId);

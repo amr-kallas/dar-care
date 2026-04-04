@@ -9,6 +9,8 @@ import 'package:dar_care/features/notifications/domain/usecases/mark_notificatio
 import 'package:dar_care/features/notifications_history/domain/usecases/get_notifications_history_use_case.dart';
 import 'package:dar_care/features/notifications_history/presentation/cubit/notifications_history_cubit.dart';
 import 'package:dar_care/features/notifications_history/presentation/cubit/notifications_history_state.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -38,7 +40,7 @@ class _NotificationsHistoryView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
-      appBar: const CustomAppBar(title: 'Notifications'),
+      appBar: CustomAppBar(title: LocaleKeys.notifications.tr()),
       body: BlocBuilder<NotificationsHistoryCubit, NotificationsHistoryState>(
         builder: (context, state) {
           if (state.status == NotificationsHistoryStatus.loading &&
@@ -49,12 +51,16 @@ class _NotificationsHistoryView extends StatelessWidget {
           if (state.status == NotificationsHistoryStatus.failure &&
               state.notifications.isEmpty) {
             return Center(
-              child: Text(state.errorMessage ?? 'Failed to load notifications.'),
+              child: Text(
+                state.errorMessage ?? LocaleKeys.notifications_history_load_error.tr(),
+              ),
             );
           }
 
           if (state.notifications.isEmpty) {
-            return const Center(child: Text('No notifications yet.'));
+            return Center(
+              child: Text(LocaleKeys.notifications_history_empty.tr()),
+            );
           }
 
           return RefreshIndicator(
@@ -109,7 +115,7 @@ class _NotificationHistoryTile extends StatelessWidget {
             Text(
               notification.title?.trim().isNotEmpty == true
                   ? notification.title!.trim()
-                  : 'Notification',
+                  : LocaleKeys.notifications_history_fallback_title.tr(),
               style: TextStyle(
                 color: isDark ? Colors.white : Colors.black,
                 fontWeight: FontWeight.w700,
@@ -183,13 +189,13 @@ class _NotificationHistoryTile extends StatelessWidget {
       case 'chat':
       case 'chat_message':
       case 'chat_notification':
-        return 'Chat';
+        return LocaleKeys.notifications_history_type_chat.tr();
       case 'new_order':
       case 'provider_new_order':
-        return 'Order';
+        return LocaleKeys.notifications_history_type_order.tr();
       case 'order_update':
       case 'client_order_update':
-        return 'Order update';
+        return LocaleKeys.notifications_history_type_order_update.tr();
       default:
         return type;
     }

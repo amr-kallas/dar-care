@@ -9,6 +9,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dar_care/core/theme/theme_controller.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 
 /// Main application widget
 class DarCareApp extends StatelessWidget {
@@ -47,7 +48,7 @@ class _DarCareRouterView extends StatelessWidget {
       routerConfig: AppRouter.router,
 
       // App metadata
-      title: 'DarCare',
+      title: LocaleKeys.app_name.tr(),
       debugShowCheckedModeBanner: false,
 
       // Localization
@@ -65,4 +66,3 @@ class _DarCareRouterView extends StatelessWidget {
     );
   }
 }
-
