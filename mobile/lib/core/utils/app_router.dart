@@ -25,6 +25,7 @@ import 'package:dar_care/features/search/presentation/screens/search_results_scr
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/features/profile/presentation/provider/screens/provider_edit_profile_screen.dart';
 import 'package:dar_care/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:dar_care/features/notifications_history/presentation/screens/notifications_history_screen.dart';
 
 abstract class AppRouter {
   static const String splashPath = '/';
@@ -46,6 +47,7 @@ abstract class AppRouter {
   static const String chatRoomPath = '/chat-room';
   static const String myOrdersPath = '/my-orders';
   static const String providerOrderDetailsPath = '/provider-order-details/:orderId';
+  static const String notificationsHistoryPath = '/notifications-history';
 
   static String buildChatRoomPath({
     required String providerId,
@@ -225,6 +227,11 @@ abstract class AppRouter {
           }
           return ProviderOrderDetailsEntryScreen(orderId: orderId);
         },
+      ),
+      GoRoute(
+        path: notificationsHistoryPath,
+        name: 'notifications-history',
+        builder: (context, state) => const NotificationsHistoryScreen(),
       ),
     ],
   );

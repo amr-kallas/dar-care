@@ -43,6 +43,12 @@ class ProfileScreenContent extends StatelessWidget {
             title: LocaleKeys.account_tab.tr(),
             children: [
               ProfileMenuItem(
+                title: LocaleKeys.notifications.tr(),
+                icon: SolarLinearIcons.bell,
+                isPrimaryIcon: true,
+                onTap: () => context.push(AppRouter.notificationsHistoryPath),
+              ),
+              ProfileMenuItem(
                 title: LocaleKeys.edit_profile.tr(),
                 icon: SolarLinearIcons.pen,
                 isPrimaryIcon: true,

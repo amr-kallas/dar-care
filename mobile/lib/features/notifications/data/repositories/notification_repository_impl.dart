@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dar_care/features/notifications/data/datasources/notification_remote_data_source.dart';
+import 'package:dar_care/features/notifications/data/models/notification_model.dart';
 import 'package:dar_care/features/notifications/data/models/notification_payload_model.dart';
 import 'package:dar_care/features/notifications/domain/entities/notification_intent.dart';
 import 'package:dar_care/features/notifications/domain/repositories/notification_repository.dart';
@@ -49,6 +50,16 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<String?> getToken() => _remoteDataSource.getToken();
 
   @override
+  Future<List<NotificationModel>> getNotificationsHistory() {
+    return _remoteDataSource.fetchNotificationsByCurrentUser();
+  }
+
+  @override
+  Future<void> markNotificationAsRead(String notificationId) {
+    return _remoteDataSource.markNotificationAsRead(notificationId);
+  }
+
+  @override
   NotificationIntent? takePendingIntent() {
     final intent = _pendingIntent;
     _pendingIntent = null;
@@ -56,7 +67,16 @@ class NotificationRepositoryImpl implements NotificationRepository {
   }
 
   void _handleForegroundMessage(RemoteMessage message) {
-    // Optionally handle foreground messages without causing UI navigation
+    unawaited(_saveForegroundMessage(message));
+  }
+
+  Future<void> _saveForegroundMessage(RemoteMessage message) async {
+    final notification = NotificationModel.fromRemoteMessage(message);
+    if (notification.type.isEmpty) {
+      return;
+    }
+
+    await _remoteDataSource.saveNotificationToDb(notification);
   }
 
   void _handleMessageOpenedApp(RemoteMessage message) {

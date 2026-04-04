@@ -257,6 +257,12 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                       title: 'account_tab'.tr(),
                       children: [
                         ProfileMenuItem(
+                          title: 'notifications'.tr(),
+                          icon: SolarLinearIcons.bell,
+                          isPrimaryIcon: true,
+                          onTap: () => context.push(AppRouter.notificationsHistoryPath),
+                        ),
+                        ProfileMenuItem(
                           title: 'edit_profile'.tr(),
                           icon: SolarLinearIcons.pen,
                           isPrimaryIcon: true,
