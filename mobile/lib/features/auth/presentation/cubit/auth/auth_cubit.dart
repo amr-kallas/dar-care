@@ -1,7 +1,5 @@
 import 'dart:async';
 import 'dart:typed_data';
-
-import 'package:dar_care/core/services/notification_service.dart';
 import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
 import 'package:dar_care/features/auth/domain/usecases/get_current_user_use_case.dart';
@@ -12,6 +10,7 @@ import 'package:dar_care/features/auth/domain/usecases/sync_fcm_token_use_case.d
 import 'package:dar_care/features/auth/domain/usecases/update_user_profile_use_case.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/auth/presentation/utils/auth_error_mapper.dart';
+import 'package:dar_care/features/notifications/domain/repositories/notification_repository.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
@@ -25,7 +24,7 @@ class AuthCubit extends Cubit<AuthState> {
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final UpdateUserProfileUseCase updateUserProfileUseCase;
   final SyncFcmTokenUseCase syncFcmTokenUseCase;
-  final NotificationService notificationService;
+  final NotificationRepository notificationRepository;
 
   StreamSubscription<String>? _fcmTokenRefreshSubscription;
   bool _notificationHandlersInitialized = false;
@@ -37,7 +36,7 @@ class AuthCubit extends Cubit<AuthState> {
     required this.getCurrentUserUseCase,
     required this.updateUserProfileUseCase,
     required this.syncFcmTokenUseCase,
-    required this.notificationService,
+    required this.notificationRepository,
   }) : super(const AuthInitial());
 
   /// Sign up a standard client user
@@ -230,19 +229,19 @@ class AuthCubit extends Cubit<AuthState> {
   Future<void> _initializePushNotificationsForUser(String userId) async {
     try {
       if (!_notificationHandlersInitialized) {
-        await notificationService.initializeHandlers();
+        await notificationRepository.initializeHandlers();
         _notificationHandlersInitialized = true;
       }
 
-      await notificationService.requestPermission();
+      await notificationRepository.requestPermission();
 
-      final token = await notificationService.getToken();
+      final token = await notificationRepository.getToken();
       if (token != null && token.isNotEmpty) {
         await syncFcmTokenUseCase(userId: userId, fcmToken: token);
       }
 
       await _fcmTokenRefreshSubscription?.cancel();
-      _fcmTokenRefreshSubscription = notificationService.onTokenRefresh.listen(
+      _fcmTokenRefreshSubscription = notificationRepository.onTokenRefresh.listen(
         (token) {
           syncFcmTokenUseCase(userId: userId, fcmToken: token);
         },

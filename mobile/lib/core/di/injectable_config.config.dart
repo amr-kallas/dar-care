@@ -10,7 +10,6 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:dar_care/core/di/register_module.dart' as _i795;
-import 'package:dar_care/core/services/notification_service.dart' as _i755;
 import 'package:dar_care/features/auth/data/datasources/auth_remote_data_source.dart'
     as _i107;
 import 'package:dar_care/features/auth/data/repositories/auth_repository_impl.dart'
@@ -61,6 +60,14 @@ import 'package:dar_care/features/home/presentation/client/cubit/home_cubit.dart
     as _i253;
 import 'package:dar_care/features/home/presentation/client/cubit/sub_categories/sub_categories_cubit.dart'
     as _i749;
+import 'package:dar_care/features/notifications/data/datasources/notification_remote_data_source.dart'
+    as _i862;
+import 'package:dar_care/features/notifications/data/repositories/notification_repository_impl.dart'
+    as _i859;
+import 'package:dar_care/features/notifications/domain/repositories/notification_repository.dart'
+    as _i965;
+import 'package:dar_care/features/notifications/domain/usecases/notification_session_use_case.dart'
+    as _i686;
 import 'package:dar_care/features/orders/data/repositories/orders_repository_impl.dart'
     as _i862;
 import 'package:dar_care/features/orders/domain/repositories/orders_repository.dart'
@@ -86,9 +93,6 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final registerModule = _$RegisterModule();
     gh.lazySingleton<_i454.SupabaseClient>(() => registerModule.supabaseClient);
-    gh.lazySingleton<_i755.NotificationService>(
-      () => _i755.NotificationService(),
-    );
     gh.factory<_i107.AuthRemoteDataSource>(
       () => _i107.AuthRemoteDataSourceImpl(),
     );
@@ -107,6 +111,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i118.DepartmentCubit>(
       () => _i118.DepartmentCubit(gh<_i687.GetDepartmentsUseCase>()),
     );
+    gh.lazySingleton<_i862.NotificationRemoteDataSource>(
+      () => _i862.FirebaseNotificationRemoteDataSource(),
+    );
     gh.lazySingleton<_i900.ChatRepository>(
       () => _i78.ChatRepositoryImpl(gh<_i977.ChatRemoteDataSource>()),
     );
@@ -124,6 +131,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i919.FavoritesCubit>(
       () => _i919.FavoritesCubit(gh<_i607.FavoritesRepository>()),
+    );
+    gh.lazySingleton<_i965.NotificationRepository>(
+      () => _i859.NotificationRepositoryImpl(
+        gh<_i862.NotificationRemoteDataSource>(),
+      ),
     );
     gh.factory<_i287.AuthRepository>(
       () => _i192.AuthRepositoryImpl(
@@ -168,7 +180,13 @@ extension GetItInjectableX on _i174.GetIt {
         getCurrentUserUseCase: gh<_i481.GetCurrentUserUseCase>(),
         updateUserProfileUseCase: gh<_i839.UpdateUserProfileUseCase>(),
         syncFcmTokenUseCase: gh<_i619.SyncFcmTokenUseCase>(),
-        notificationService: gh<_i755.NotificationService>(),
+        notificationRepository: gh<_i965.NotificationRepository>(),
+      ),
+    );
+    gh.factory<_i686.NotificationSessionUseCase>(
+      () => _i686.NotificationSessionUseCase(
+        gh<_i965.NotificationRepository>(),
+        gh<_i619.SyncFcmTokenUseCase>(),
       ),
     );
     return this;
