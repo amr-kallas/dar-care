@@ -1,5 +1,6 @@
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/provider_presentation_utils.dart';
+import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
 import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
@@ -12,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-class ClientHomeProvidersSection extends StatelessWidget {
+class ClientHomeProvidersSection extends StatefulWidget {
   const ClientHomeProvidersSection({
     super.key,
     required this.topProviders,
@@ -25,19 +26,37 @@ class ClientHomeProvidersSection extends StatelessWidget {
   final String languageCode;
 
   @override
+  State<ClientHomeProvidersSection> createState() =>
+      _ClientHomeProvidersSectionState();
+}
+
+class _ClientHomeProvidersSectionState
+    extends State<ClientHomeProvidersSection> {
+  void _onBookNowTap(ProviderModel provider) {
+    if (widget.currentUserId == null) {
+      AppSnackbar.showError(context, LocaleKeys.auth_error_generic.tr());
+      return;
+    }
+
+    context.push(AppRouter.orderBookingPath, extra: provider);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         SectionHeader(
           title: LocaleKeys.section_providers_near.tr(),
           actionText: LocaleKeys.see_all.tr(),
-          onTap: () =>
-              context.push(AppRouter.allProvidersPath, extra: topProviders),
+          onTap: () => context.push(
+            AppRouter.allProvidersPath,
+            extra: widget.topProviders,
+          ),
         ),
         const SizedBox(height: 16),
-        if (topProviders.isEmpty)
+        if (widget.topProviders.isEmpty)
           Center(child: Text(LocaleKeys.home_no_providers_found.tr())),
-        if (topProviders.isNotEmpty)
+        if (widget.topProviders.isNotEmpty)
           LayoutBuilder(
             builder: (context, constraints) {
               final cardWidth = (constraints.maxWidth * 0.9).clamp(
@@ -52,11 +71,11 @@ class ClientHomeProvidersSection extends StatelessWidget {
                     return ListView.separated(
                       scrollDirection: Axis.horizontal,
                       clipBehavior: Clip.none,
-                      itemCount: topProviders.length,
+                      itemCount: widget.topProviders.length,
                       separatorBuilder: (context, index) =>
                           const SizedBox(width: 16),
                       itemBuilder: (context, index) {
-                        final provider = topProviders[index];
+                        final provider = widget.topProviders[index];
                         final isFavorite = favoritesState.favorites.any(
                           (p) => p.id == provider.id,
                         );
@@ -70,7 +89,7 @@ class ClientHomeProvidersSection extends StatelessWidget {
                           ),
                           name: provider.fullName,
                           profession: provider.professionForLanguage(
-                            languageCode,
+                            widget.languageCode,
                           ),
                           rating: provider.rating.toStringAsFixed(1),
                           distance: LocaleKeys.distance_from_you.tr(
@@ -88,14 +107,14 @@ class ClientHomeProvidersSection extends StatelessWidget {
                               provider,
                             );
                           },
-                          onTap: () {},
-                          onChatTap: currentUserId == null
+                          onTap: () => _onBookNowTap(provider),
+                          onChatTap: widget.currentUserId == null
                               ? null
                               : () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
                                       builder: (_) => ClientChatScreen(
-                                        currentUserId: currentUserId!,
+                                        currentUserId: widget.currentUserId!,
                                         providerId: provider.id,
                                         title: provider.fullName,
                                       ),

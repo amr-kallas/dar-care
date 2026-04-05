@@ -99,6 +99,8 @@ abstract class  LocaleKeys {
   static const favorites_retry_button = 'favorites_retry_button';
   static const profile_screen_placeholder = 'profile_screen_placeholder';
   static const good_morning = 'good_morning';
+  static const good_afternoon = 'good_afternoon';
+  static const good_evening = 'good_evening';
   static const welcome_back = 'welcome_back';
   static const search_hint = 'search_hint';
   static const section_services = 'section_services';

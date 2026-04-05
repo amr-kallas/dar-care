@@ -12,4 +12,16 @@ class HomePresentationUtils {
     }
     return fullName.split(' ').first;
   }
+
+  static String timeBasedGreetingKey({DateTime? dateTime}) {
+    final hour = (dateTime ?? DateTime.now()).hour;
+
+    if (hour < 12) {
+      return LocaleKeys.good_morning.tr();
+    }
+    if (hour < 18) {
+      return LocaleKeys.good_afternoon.tr();
+    }
+    return LocaleKeys.good_evening.tr();
+  }
 }

@@ -11,10 +11,12 @@ class OrderHistoryCard extends StatelessWidget {
     super.key,
     required this.order,
     this.displayMode = OrderCardDisplayMode.client,
+    this.onChatTap,
   });
 
   final OrderModel order;
   final OrderCardDisplayMode displayMode;
+  final VoidCallback? onChatTap;
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +78,7 @@ class OrderHistoryCard extends StatelessWidget {
             orderStatus: order.status,
             primaryTextColor: primaryTextColor,
             displayMode: displayMode,
+            onChatTap: onChatTap,
           ),
         ],
       ),

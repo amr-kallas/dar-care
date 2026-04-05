@@ -12,7 +12,6 @@ import '../widgets/auth_app_logo.dart';
 import '../widgets/auth_back_scaffold.dart';
 import '../widgets/auth_header.dart';
 import '../widgets/auth_primary_button.dart';
-import '../widgets/auth_social_login_section.dart';
 import '../widgets/auth_text_link_row.dart';
 import '../widgets/login_form_fields_section.dart';
 
@@ -87,8 +86,6 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                const AuthSocialLoginSection(),
-                const SizedBox(height: 32),
                 AuthTextLinkRow(
                   prefixText: LocaleKeys.no_account.tr(),
                   linkText: LocaleKeys.sign_up_link.tr(),

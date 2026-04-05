@@ -16,7 +16,9 @@ import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/core/widgets/app_primary_button.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.initialClientTabIndex});
+
+  final int? initialClientTabIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class HomeScreen extends StatelessWidget {
           if (user.role == UserRole.provider) {
             return const ProviderMainScreen();
           }
-          return const ClientMainScreen();
+          return ClientMainScreen(initialIndex: initialClientTabIndex ?? 0);
         }
 
         if (state is AuthError) {

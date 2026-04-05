@@ -92,7 +92,22 @@ dev_dependencies:
   freezed: ^3.2.5
   flutter_gen_runner: ^5.8.0
 
+  # Branding tools
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.6
 
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path_android: assets/images/png/DareCareLogo.png
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  android: true
+  ios: false
+  web: false
+  android_12:
+    color: "#FFFFFF"
 
 flutter:
 

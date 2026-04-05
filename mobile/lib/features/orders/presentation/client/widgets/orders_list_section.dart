@@ -1,4 +1,7 @@
+import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -42,6 +45,10 @@ class OrdersListSection extends StatelessWidget {
           return const OrdersEmptyState();
         }
 
+        final currentUserId = resolveAuthUser(
+          context.read<AuthCubit>().state,
+        )?.id;
+
         return RefreshIndicator(
           onRefresh: () => context.read<OrdersCubit>().loadOrders(),
           child: ListView.separated(
@@ -49,7 +56,26 @@ class OrdersListSection extends StatelessWidget {
             itemCount: filteredOrders.length,
             separatorBuilder: (context, index) => const SizedBox(height: 12),
             itemBuilder: (context, index) {
-              return OrderHistoryCard(order: filteredOrders[index]);
+              final order = filteredOrders[index];
+              return OrderHistoryCard(
+                order: order,
+                onChatTap:
+                    currentUserId != null &&
+                        order.providerId != null &&
+                        order.providerId!.trim().isNotEmpty
+                    ? () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => ClientChatScreen(
+                              currentUserId: currentUserId,
+                              providerId: order.providerId!,
+                              title: order.providerName,
+                            ),
+                          ),
+                        );
+                      }
+                    : null,
+              );
             },
           ),
         );

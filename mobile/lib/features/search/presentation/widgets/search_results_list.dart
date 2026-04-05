@@ -1,3 +1,4 @@
+import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
 import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
@@ -8,6 +9,7 @@ import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class SearchResultsList extends StatelessWidget {
   const SearchResultsList({
@@ -62,7 +64,9 @@ class SearchResultsList extends StatelessWidget {
           onFavoriteTap: () {
             context.read<FavoritesCubit>().toggleFavorite(provider);
           },
-          onTap: () {},
+          onTap: currentUserId == null
+              ? null
+              : () => context.push(AppRouter.orderBookingPath, extra: provider),
           onChatTap: currentUserId == null
               ? null
               : () {

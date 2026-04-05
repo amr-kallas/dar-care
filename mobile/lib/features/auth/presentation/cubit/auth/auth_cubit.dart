@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 import 'dart:typed_data';
+import 'package:dar_care/core/errors/app_exceptions.dart';
 import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
 import 'package:dar_care/features/auth/domain/usecases/get_current_user_use_case.dart';
@@ -169,12 +171,23 @@ class AuthCubit extends Cubit<AuthState> {
     }
 
     final previousState = state;
+    final avatarOpId = 'avatar-${DateTime.now().microsecondsSinceEpoch}';
 
     try {
+      developer.log(
+        '[AuthCubit][$avatarOpId] Start avatar upload | userId=$userId | bytes=${fileBytes.length}',
+        name: 'avatar.upload',
+      );
+
       emit(const AuthLoading(operation: AuthOperation.uploadAvatar));
       final avatarUrl = await updateUserProfileUseCase.uploadAndUpdateAvatar(
         userId: userId,
         fileBytes: fileBytes,
+      );
+
+      developer.log(
+        '[AuthCubit][$avatarOpId] Upload completed | avatarUrl=$avatarUrl',
+        name: 'avatar.upload',
       );
 
       final previousUser = resolveAuthUser(previousState);
@@ -182,15 +195,54 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthAuthenticated(previousUser.copyWith(avatarUrl: avatarUrl)));
       }
 
-      // Best effort refresh so UI does not fail when read-back is temporarily blocked.
-      final refreshedUser = await getCurrentUserUseCase();
-      if (refreshedUser != null) {
-        emit(AuthAuthenticated(refreshedUser));
-      } else if (previousUser == null) {
-        emit(const AuthError(LocaleKeys.auth_error_generic));
+      // Best effort refresh so a temporary read policy issue does not mask a successful upload.
+      try {
+        final refreshedUser = await getCurrentUserUseCase();
+        if (refreshedUser != null) {
+          emit(AuthAuthenticated(refreshedUser));
+          developer.log(
+            '[AuthCubit][$avatarOpId] Current user refresh succeeded',
+            name: 'avatar.upload',
+          );
+        } else if (previousUser == null) {
+          emit(const AuthError(LocaleKeys.auth_error_generic));
+          developer.log(
+            '[AuthCubit][$avatarOpId] Refresh returned null and no previous user state',
+            name: 'avatar.upload',
+          );
+        }
+      } catch (error, stackTrace) {
+        developer.log(
+          '[AuthCubit][$avatarOpId] Current user refresh failed: $error',
+          name: 'avatar.upload',
+          error: error,
+          stackTrace: stackTrace,
+        );
+        if (previousUser == null) {
+          emit(const AuthError(LocaleKeys.auth_error_generic));
+        }
       }
-    } catch (error) {
+    } catch (error, stackTrace) {
+      final previousUser = resolveAuthUser(previousState);
+      developer.log(
+        '[AuthCubit][$avatarOpId] Avatar upload flow failed: $error',
+        name: 'avatar.upload',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      if (error is AppException && error.cause != null) {
+        developer.log(
+          '[AuthCubit][$avatarOpId] Avatar upload root cause: ${error.cause}',
+          name: 'avatar.upload',
+        );
+      }
+
       emit(AuthError(AuthErrorMapper.updateProfile(error)));
+
+      if (previousUser != null) {
+        // Emit previous authenticated state so HomeScreen does not fall back to full-page error UI.
+        emit(AuthAuthenticated(previousUser));
+      }
     }
   }
 
@@ -241,11 +293,10 @@ class AuthCubit extends Cubit<AuthState> {
       }
 
       await _fcmTokenRefreshSubscription?.cancel();
-      _fcmTokenRefreshSubscription = notificationRepository.onTokenRefresh.listen(
-        (token) {
-          syncFcmTokenUseCase(userId: userId, fcmToken: token);
-        },
-      );
+      _fcmTokenRefreshSubscription = notificationRepository.onTokenRefresh
+          .listen((token) {
+            syncFcmTokenUseCase(userId: userId, fcmToken: token);
+          });
     } catch (_) {
       // Push setup is best effort and should not block authentication.
     }

@@ -33,6 +33,50 @@ class OrdersRepositoryImpl implements OrdersRepository {
   }
 
   @override
+  Future<void> createPendingOrderRequest({required String providerId}) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('You must be signed in to create an order.');
+    }
+
+    final candidateClientIds = <String>[user.id];
+    try {
+      final clientProfileId = await _getClientId();
+      if (!candidateClientIds.contains(clientProfileId)) {
+        candidateClientIds.add(clientProfileId);
+      }
+    } catch (_) {
+      // Ignore profile resolution errors and still try auth user id.
+    }
+
+    PostgrestException? lastPostgrestError;
+    Object? lastUnknownError;
+
+    for (final clientId in candidateClientIds) {
+      try {
+        await _supabase.from('orders').insert({
+          'client_id': clientId,
+          'provider_id': providerId,
+          'status': 'pending',
+        });
+        return;
+      } on PostgrestException catch (e) {
+        lastPostgrestError = e;
+      } catch (e) {
+        lastUnknownError = e;
+      }
+    }
+
+    if (lastPostgrestError != null) {
+      throw Exception(
+        'Failed to create order request: ${lastPostgrestError.message}',
+      );
+    }
+
+    throw Exception('Failed to create order request: $lastUnknownError');
+  }
+
+  @override
   Future<void> createOrder({
     required ProviderModel provider,
     required DateTime serviceDate,
@@ -81,7 +125,8 @@ class OrdersRepositoryImpl implements OrdersRepository {
           .eq('provider_id', providerId)
           .order('created_at', ascending: false);
 
-      final rows = (response as List<dynamic>).whereType<Map<String, dynamic>>();
+      final rows = (response as List<dynamic>)
+          .whereType<Map<String, dynamic>>();
       final orders = <OrderModel>[];
 
       for (final row in rows) {
@@ -174,6 +219,119 @@ class OrdersRepositoryImpl implements OrdersRepository {
     }
   }
 
+  @override
+  Future<void> createBookingOrder({
+    required String providerId,
+    required DateTime scheduledAt,
+    required double latitude,
+    required double longitude,
+    String? notes,
+  }) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) {
+      throw Exception('You must be signed in to create an order.');
+    }
+
+    final clientProfile = await _supabase
+        .from('clients')
+        .select('id, address_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+    if (clientProfile == null || clientProfile['id'] == null) {
+      throw Exception('Client profile not found for current user.');
+    }
+
+    final clientProfileId = clientProfile['id'].toString();
+    final currentAddressId = clientProfile['address_id']?.toString();
+
+    final addressId = await _upsertClientAddressForBooking(
+      clientProfileId: clientProfileId,
+      currentAddressId: currentAddressId,
+      latitude: latitude,
+      longitude: longitude,
+    );
+
+    final candidateClientIds = <String>[user.id];
+    if (!candidateClientIds.contains(clientProfileId)) {
+      candidateClientIds.add(clientProfileId);
+    }
+
+    PostgrestException? lastPostgrestError;
+    Object? lastUnknownError;
+
+    for (final clientId in candidateClientIds) {
+      try {
+        await _supabase.from('orders').insert({
+          'client_id': clientId,
+          'provider_id': providerId,
+          'address_id': addressId,
+          'scheduled_at': scheduledAt.toIso8601String(),
+          'notes': notes != null && notes.trim().isNotEmpty
+              ? notes.trim()
+              : null,
+          'status': 'pending',
+        });
+        return;
+      } on PostgrestException catch (e) {
+        lastPostgrestError = e;
+      } catch (e) {
+        lastUnknownError = e;
+      }
+    }
+
+    if (lastPostgrestError != null) {
+      throw Exception(
+        'Failed to create booking order: ${lastPostgrestError.message}',
+      );
+    }
+
+    throw Exception('Failed to create booking order: $lastUnknownError');
+  }
+
+  Future<String> _upsertClientAddressForBooking({
+    required String clientProfileId,
+    required String? currentAddressId,
+    required double latitude,
+    required double longitude,
+  }) async {
+    final addressPayload = <String, dynamic>{
+      'current_lat': latitude,
+      'current_lang': longitude,
+      'location_updated_at': DateTime.now().toIso8601String(),
+    };
+
+    if (_hasValue(currentAddressId)) {
+      await _supabase
+          .from('addresses')
+          .update(addressPayload)
+          .eq('id', currentAddressId!);
+      return currentAddressId;
+    }
+
+    final insertedAddress = await _supabase
+        .from('addresses')
+        .insert({
+          ...addressPayload,
+          'details': 'Captured from booking map',
+          'client_id': clientProfileId,
+        })
+        .select('id')
+        .single();
+
+    final newAddressId = insertedAddress['id']?.toString();
+    if (!_hasValue(newAddressId)) {
+      throw Exception('Failed to create booking address.');
+    }
+
+    await _supabase
+        .from('clients')
+        .update({'address_id': newAddressId})
+        .eq('id', clientProfileId);
+
+    return newAddressId!;
+  }
+
   Future<Map<String, dynamic>> _enrichProviderOrderRow(
     Map<String, dynamic> row,
   ) async {
@@ -242,7 +400,9 @@ class OrdersRepositoryImpl implements OrdersRepository {
     try {
       final response = await _supabase
           .from('addresses')
-          .select('id, details, current_lat, current_lang, current_lng, cities(name)')
+          .select(
+            'id, details, current_lat, current_lang, current_lng, cities(name)',
+          )
           .eq('id', addressId)
           .maybeSingle();
 
@@ -357,7 +517,8 @@ class OrdersRepositoryImpl implements OrdersRepository {
       }
       if (city is List && city.isNotEmpty) {
         for (final item in city) {
-          if (item is Map<String, dynamic> && _hasValue(item['name']?.toString())) {
+          if (item is Map<String, dynamic> &&
+              _hasValue(item['name']?.toString())) {
             return true;
           }
         }

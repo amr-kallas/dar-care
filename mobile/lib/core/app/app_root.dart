@@ -14,7 +14,7 @@ class AppRoot extends StatelessWidget {
     }
 
     return DevicePreview(
-      enabled: true,
+      enabled: false,
       builder: (context) => const DarCareApp(),
     );
   }

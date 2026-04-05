@@ -1,9 +1,11 @@
 import 'package:dar_care/core/theme/app_colors.dart';
+import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
 
@@ -66,8 +68,7 @@ class AllProvidersScreen extends StatelessWidget {
                       rating: provider.rating.toString(),
                       distance: LocaleKeys.distance_from_you.tr(
                         namedArgs: {
-                          'distance':
-                              ProviderPresentationUtils.mockDistanceKm,
+                          'distance': ProviderPresentationUtils.mockDistanceKm,
                         },
                       ),
                       imageUrl: provider.imageUrl ?? '',
@@ -77,9 +78,12 @@ class AllProvidersScreen extends StatelessWidget {
                       onFavoriteTap: () {
                         context.read<FavoritesCubit>().toggleFavorite(provider);
                       },
-                      onTap: () {
-                        // Navigate to provider details
-                      },
+                      onTap: currentUserId == null
+                          ? null
+                          : () => context.push(
+                              AppRouter.orderBookingPath,
+                              extra: provider,
+                            ),
                       onChatTap: currentUserId == null
                           ? null
                           : () {

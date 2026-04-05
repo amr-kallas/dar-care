@@ -1,3 +1,4 @@
+import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
 import 'package:dar_care/core/utils/provider_presentation_utils.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
@@ -8,6 +9,7 @@ import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class FavoritesList extends StatelessWidget {
   const FavoritesList({
@@ -40,9 +42,7 @@ class FavoritesList extends StatelessWidget {
             profession: provider.professionForLanguage(languageCode),
             rating: provider.rating.toStringAsFixed(1),
             distance: LocaleKeys.distance_from_you.tr(
-              namedArgs: {
-                'distance': ProviderPresentationUtils.mockDistanceKm,
-              },
+              namedArgs: {'distance': ProviderPresentationUtils.mockDistanceKm},
             ),
             imageUrl: provider.imageUrl ?? '',
             hourlyRate: ProviderPresentationUtils.hourlyRateText(
@@ -54,7 +54,10 @@ class FavoritesList extends StatelessWidget {
             onFavoriteTap: () async {
               await onRemoveFavorite(provider.id);
             },
-            onTap: () {},
+            onTap: currentUserId == null
+                ? null
+                : () =>
+                      context.push(AppRouter.orderBookingPath, extra: provider),
             onChatTap: currentUserId == null
                 ? null
                 : () {

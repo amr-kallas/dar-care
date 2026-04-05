@@ -11,11 +11,13 @@ class OrderHistoryCardFooter extends StatelessWidget {
     required this.orderStatus,
     required this.primaryTextColor,
     this.displayMode = OrderCardDisplayMode.client,
+    this.onChatTap,
   });
 
   final String orderStatus;
   final Color primaryTextColor;
   final OrderCardDisplayMode displayMode;
+  final VoidCallback? onChatTap;
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +26,28 @@ class OrderHistoryCardFooter extends StatelessWidget {
 
     return Row(
       children: [
+        if (displayMode == OrderCardDisplayMode.client &&
+            onChatTap != null) ...[
+          Container(
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context).brightness == Brightness.dark
+                  ? Colors.white.withValues(alpha: 0.14)
+                  : Colors.black.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(18),
+            ),
+            child: InkWell(
+              onTap: onChatTap,
+              borderRadius: BorderRadius.circular(16),
+              child: const Padding(
+                padding: EdgeInsets.all(2),
+                child: Icon(Icons.chat_bubble_outline, size: 18),
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+        ],
         Expanded(
           flex: 3,
           child: Container(

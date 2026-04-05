@@ -8,7 +8,7 @@ import 'package:dar_care/features/auth/data/models/auth_user_model.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart'
-    show AuthException, FileOptions, SignOutScope;
+    show AuthException, FileOptions, SignOutScope, StorageException;
 
 /// Abstract data source for authentication
 abstract class AuthRemoteDataSource {
@@ -137,8 +137,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-    @override
-    Future<AuthUserModel> signUpProvider({
+  @override
+  Future<AuthUserModel> signUpProvider({
     required String email,
     required String password,
     required String fullName,
@@ -147,7 +147,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String departmentId,
     required int experienceYears,
     String? bio,
-    }) async {
+  }) async {
     _logProviderSignup(
       step: 'start',
       email: email,
@@ -263,11 +263,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
       }
 
-      _logProviderSignup(
-        step: 'completed',
-        email: email,
-        userId: authUser.id,
-      );
+      _logProviderSignup(step: 'completed', email: email, userId: authUser.id);
 
       return AuthUserModel.fromSupabaseUser(authUser);
     } catch (error, stackTrace) {
@@ -285,7 +281,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         fallbackMessage: 'Failed to create provider account. Please try again.',
       );
     }
-    }
+  }
 
   @override
   Future<AuthUserModel> signIn({
@@ -434,9 +430,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String userId,
     required Uint8List fileBytes,
   }) async {
+    final storagePath = 'users/$userId';
+    const bucketName = 'avatars';
+
     try {
-      final storagePath = 'users/$userId';
-      final bucket = supabaseClient.storage.from('avatars');
+      final bucket = supabaseClient.storage.from(bucketName);
 
       await bucket.uploadBinary(
         storagePath,
@@ -444,28 +442,56 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         fileOptions: const FileOptions(upsert: true),
       );
 
-      final publicUrl = bucket.getPublicUrl(storagePath);
+      final basePublicUrl = bucket.getPublicUrl(storagePath);
+      // Preserve stable storage path while forcing clients to fetch the fresh image.
+      final publicUrl =
+          '$basePublicUrl?v=${DateTime.now().millisecondsSinceEpoch}';
 
-      await supabaseClient
-          .from('providers')
-          .update({'image_url': publicUrl})
-          .eq('user_id', userId);
+      final providersUpdated = await _tryUpdateAvatarReference(
+        table: 'providers',
+        matchColumn: 'user_id',
+        matchValue: userId,
+        avatarColumn: 'image_url',
+        avatarUrl: publicUrl,
+      );
 
-      await supabaseClient
-          .from('clients')
-          .update({'image_url': publicUrl})
-          .eq('user_id', userId);
+      final clientsUpdated = await _tryUpdateAvatarReference(
+        table: 'clients',
+        matchColumn: 'user_id',
+        matchValue: userId,
+        avatarColumn: 'image_url',
+        avatarUrl: publicUrl,
+      );
 
-      // Keep existing user profile reads in sync with role-specific image URLs.
-      await supabaseClient
-          .from('users')
-          .update({'avatar_url': publicUrl})
-          .eq('id', userId);
+      // Optional sync for user profile reads. Some environments may not have users.avatar_url yet.
+      final usersUpdated = await _tryUpdateAvatarReference(
+        table: 'users',
+        matchColumn: 'id',
+        matchValue: userId,
+        avatarColumn: 'avatar_url',
+        avatarUrl: publicUrl,
+      );
+
+      final profileUpdated = providersUpdated || clientsUpdated || usersUpdated;
+      if (!profileUpdated) {
+        throw const DataAppException(
+          'Avatar uploaded but profile reference update was denied. Check users/clients/providers update policies.',
+        );
+      }
 
       return publicUrl;
+    } on StorageException catch (error, stackTrace) {
+      final isNotFound = error.statusCode == '404' || error.statusCode == 404;
+      final message = isNotFound
+          ? 'Avatar upload failed: storage bucket "$bucketName" was not found in the current Supabase project (path=$storagePath). Apply storage migration and verify SUPABASE_URL points to the expected project.'
+          : 'Avatar upload failed in storage (bucket=$bucketName, path=$storagePath): ${error.message}';
+      throw DataAppException(message, cause: error, stackTrace: stackTrace);
     } catch (error, stackTrace) {
+      final details = error is AppException
+          ? '${error.message}${error.cause != null ? ' | cause=${error.cause}' : ''}'
+          : '$error';
       throw DataAppException(
-        'Failed to upload avatar.',
+        'Failed to upload avatar. $details',
         cause: error,
         stackTrace: stackTrace,
       );
@@ -475,10 +501,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<void> syncFcmToken({required String userId, String? fcmToken}) async {
     try {
-      await supabaseClient.from('users').update({
-        'fcm_token': fcmToken,
-        'fcm_token_updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', userId);
+      await supabaseClient
+          .from('users')
+          .update({
+            'fcm_token': fcmToken,
+            'fcm_token_updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', userId);
     } catch (error, stackTrace) {
       throw DataAppException(
         'Failed to sync notification token.',
@@ -566,8 +595,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           message.contains('already registered') ||
           message.contains('already been registered') ||
           message.contains('user already exists');
-      final isDatabaseErrorSavingUser =
-          message.contains('database error saving new user');
+      final isDatabaseErrorSavingUser = message.contains(
+        'database error saving new user',
+      );
 
       // Some projects have strict auth trigger casting rules (often around phone).
       // Retry once with minimal metadata so auth user creation can proceed.
@@ -582,10 +612,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           final retryAuthResponse = await supabaseAuth.signUp(
             email: email,
             password: password,
-            data: {
-              'full_name': fullName,
-              'role': UserRole.provider.value,
-            },
+            data: {'full_name': fullName, 'role': UserRole.provider.value},
           );
 
           if (retryAuthResponse.user != null) {
@@ -742,5 +769,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     return digitsOnly;
+  }
+
+  Future<bool> _tryUpdateAvatarReference({
+    required String table,
+    required String matchColumn,
+    required String matchValue,
+    required String avatarColumn,
+    required String avatarUrl,
+  }) async {
+    try {
+      await supabaseClient
+          .from(table)
+          .update({avatarColumn: avatarUrl})
+          .eq(matchColumn, matchValue);
+      return true;
+    } catch (error, stackTrace) {
+      // Keep upload success path resilient to optional columns/role-table mismatch.
+      log(
+        '[AvatarSync] Failed to update $table.$avatarColumn for $matchColumn=$matchValue: $error',
+        stackTrace: stackTrace,
+      );
+      return false;
+    }
   }
 }

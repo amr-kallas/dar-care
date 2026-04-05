@@ -18,14 +18,16 @@ import '../widgets/client_home_body.dart';
 import 'package:dar_care/features/chat/presentation/client/screens/client_chats_screen.dart';
 
 class ClientMainScreen extends StatefulWidget {
-  const ClientMainScreen({super.key});
+  const ClientMainScreen({super.key, this.initialIndex = 0});
+
+  final int initialIndex;
 
   @override
   State<ClientMainScreen> createState() => _ClientMainScreenState();
 }
 
 class _ClientMainScreenState extends State<ClientMainScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   late final List<Widget> _screens = [
     BlocProvider(
@@ -37,6 +39,12 @@ class _ClientMainScreenState extends State<ClientMainScreen> {
     const FavoritesScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex.clamp(0, _screens.length - 1);
+  }
 
   @override
   Widget build(BuildContext context) {

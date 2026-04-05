@@ -22,7 +22,6 @@ import '../widgets/auth_header.dart';
 import '../widgets/auth_primary_button.dart';
 import '../widgets/auth_role_badge.dart';
 import '../widgets/auth_section_header.dart';
-import '../widgets/auth_social_login_section.dart';
 import '../widgets/auth_terms_checkbox.dart';
 import '../widgets/auth_text_link_row.dart';
 import '../widgets/provider_professional_fields_section.dart';
@@ -182,8 +181,6 @@ class ProviderSignupScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const AuthSocialLoginSection(),
-                    const SizedBox(height: 32),
                     AuthTextLinkRow(
                       prefixText: LocaleKeys.have_account.tr(),
                       linkText: LocaleKeys.sign_in_alt.tr(),

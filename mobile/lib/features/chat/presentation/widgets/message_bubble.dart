@@ -1,3 +1,4 @@
+import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class MessageBubble extends StatelessWidget {
@@ -14,27 +15,40 @@ class MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
 
     final bubbleColor =
-        isMine ? colorScheme.primary : colorScheme.surfaceContainerHighest;
+        isMine ? AppColors.brightGreen: colorScheme.surfaceContainerHighest;
     final textColor = isMine ? colorScheme.onPrimary : colorScheme.onSurface;
-    final maxBubbleWidth = MediaQuery.sizeOf(context).width * 0.78;
+    final maxBubbleWidth = MediaQuery.sizeOf(context).width * 0.74;
 
     return Align(
       alignment:
           isMine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
       child: Container(
         constraints: BoxConstraints(maxWidth: maxBubbleWidth),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
         decoration: BoxDecoration(
           color: bubbleColor,
           borderRadius: BorderRadiusDirectional.only(
-            topStart: const Radius.circular(16),
-            topEnd: const Radius.circular(16),
-            bottomStart: Radius.circular(isMine ? 16 : 4),
-            bottomEnd: Radius.circular(isMine ? 4 : 16),
+            topStart: const Radius.circular(20),
+            topEnd: const Radius.circular(20),
+            bottomStart: Radius.circular(isMine ? 20 : 8),
+            bottomEnd: Radius.circular(isMine ? 8 : 20),
           ),
+          border: Border.all(
+            color: isMine
+                ? colorScheme.primary.withValues(alpha: 0.26)
+                : colorScheme.outlineVariant.withValues(alpha: 0.45),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment:
@@ -43,18 +57,16 @@ class MessageBubble extends StatelessWidget {
           children: [
             Text(
               message,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              style: theme.textTheme.bodyMedium?.copyWith(
                 color: textColor,
+                height: 1.35,
               ),
             ),
-            const SizedBox(height: 4),
-            Align(
-              alignment: AlignmentDirectional.centerEnd,
-              child: Text(
-                _formatTime(timestamp),
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: textColor.withValues(alpha: 0.7),
-                ),
+            const SizedBox(height: 6),
+            Text(
+              _formatTime(timestamp),
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: textColor.withValues(alpha: 0.7),
               ),
             ),
           ],

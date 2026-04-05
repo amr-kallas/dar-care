@@ -7,7 +7,7 @@ import 'package:dar_care/features/auth/presentation/screens/provider_signup_scre
 import 'package:dar_care/features/auth/presentation/screens/signup_screen.dart';
 import 'package:dar_care/features/chat/presentation/client/screens/chat_screen.dart';
 import 'package:dar_care/features/location_setup/presentation/screens/location_setup_screen.dart';
-import 'package:dar_care/features/orders/presentation/client/screens/orders_screen.dart';
+import 'package:dar_care/features/orders/presentation/client/screens/order_booking_screen.dart';
 import 'package:dar_care/features/orders/presentation/provider/screens/provider_order_details_entry_screen.dart';
 import 'package:dar_care/features/splash/presentation/screens/splash_screen.dart';
 import 'package:flutter/material.dart';
@@ -48,7 +48,9 @@ abstract class AppRouter {
   static const String providerEditProfilePath = '/provider-edit-profile';
   static const String chatRoomPath = '/chat-room';
   static const String myOrdersPath = '/my-orders';
-  static const String providerOrderDetailsPath = '/provider-order-details/:orderId';
+  static const String orderBookingPath = '/order-booking';
+  static const String providerOrderDetailsPath =
+      '/provider-order-details/:orderId';
   static const String notificationsHistoryPath = '/notifications-history';
 
   static String buildChatRoomPath({
@@ -204,7 +206,9 @@ abstract class AppRouter {
 
           if (currentUserId == null || providerId == null || clientId == null) {
             return Scaffold(
-              body: Center(child: Text(LocaleKeys.routing_open_chat_error.tr())),
+              body: Center(
+                child: Text(LocaleKeys.routing_open_chat_error.tr()),
+              ),
             );
           }
 
@@ -219,7 +223,24 @@ abstract class AppRouter {
       GoRoute(
         path: myOrdersPath,
         name: 'my-orders',
-        builder: (context, state) => const OrdersScreen(),
+        builder: (context, state) => const HomeScreen(initialClientTabIndex: 1),
+      ),
+      GoRoute(
+        path: orderBookingPath,
+        name: 'order-booking',
+        builder: (context, state) {
+          final provider = state.extra is ProviderModel
+              ? state.extra as ProviderModel
+              : null;
+
+          if (provider == null) {
+            return const Scaffold(
+              body: Center(child: Text('Unable to open booking page.')),
+            );
+          }
+
+          return OrderBookingScreen(provider: provider);
+        },
       ),
       GoRoute(
         path: providerOrderDetailsPath,

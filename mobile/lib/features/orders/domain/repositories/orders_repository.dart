@@ -6,6 +6,16 @@ abstract class OrdersRepository {
   Future<List<OrderModel>> getProviderOrders();
   Future<OrderModel> getProviderOrderById({required String orderId});
 
+  Future<void> createPendingOrderRequest({required String providerId});
+
+  Future<void> createBookingOrder({
+    required String providerId,
+    required DateTime scheduledAt,
+    required double latitude,
+    required double longitude,
+    String? notes,
+  });
+
   Future<void> createOrder({
     required ProviderModel provider,
     required DateTime serviceDate,

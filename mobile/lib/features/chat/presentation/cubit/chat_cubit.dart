@@ -56,6 +56,19 @@ class ChatCubit extends Cubit<ChatState> {
       return;
     }
 
+    final optimisticMessage = MessageEntity(
+      id: 'local-${DateTime.now().microsecondsSinceEpoch}',
+      chatId: chat.id,
+      senderId: senderId,
+      message: normalizedText,
+      isRead: true,
+      createdAt: DateTime.now(),
+    );
+
+    _messages = List<MessageEntity>.unmodifiable([
+      ..._messages,
+      optimisticMessage,
+    ]);
     emit(ChatMessageSending(chat: chat, messages: _messages));
 
     try {
@@ -68,6 +81,11 @@ class ChatCubit extends Cubit<ChatState> {
     } catch (error, stackTrace) {
       debugPrint('Chat send failed: $error');
       debugPrintStack(stackTrace: stackTrace);
+
+      _messages = List<MessageEntity>.unmodifiable(
+        _messages.where((message) => message.id != optimisticMessage.id),
+      );
+
       emit(
         ChatError(
           messageKey: LocaleKeys.chat_error_send,
