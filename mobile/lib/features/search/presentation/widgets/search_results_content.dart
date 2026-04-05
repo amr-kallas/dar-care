@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import 'package:dar_care/core/widgets/custom_app_bar.dart';
 import 'package:dar_care/features/search/presentation/cubit/search_cubit.dart';
 import 'package:dar_care/features/search/presentation/widgets/search_results_body.dart';
-import 'package:dar_care/features/search/presentation/widgets/search_results_header.dart';
 import 'package:dar_care/features/search/presentation/widgets/search_results_search_controls.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -48,10 +49,10 @@ class _SearchResultsContentState extends State<SearchResultsContent> {
     final languageCode = context.locale.languageCode;
 
     return Scaffold(
+      appBar: CustomAppBar(title: LocaleKeys.search_results_title.tr()),
       body: SafeArea(
         child: Column(
           children: [
-            SearchResultsHeader(onBackTap: () => Navigator.of(context).pop()),
             SearchResultsSearchControls(
               controller: _searchController,
               onSubmitSearch: _submitSearch,

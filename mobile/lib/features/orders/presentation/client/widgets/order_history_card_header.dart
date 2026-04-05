@@ -1,4 +1,5 @@
 import 'package:dar_care/core/theme/app_colors.dart';
+import 'package:dar_care/core/utils/localized_db_text.dart';
 import 'package:dar_care/features/orders/data/models/order_model.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
@@ -58,7 +59,7 @@ class OrderHistoryCardHeader extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                LocaleKeys.orders_item_subtitle.tr(namedArgs: {'id': order.id}),
+                _subtitleText(context),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -99,5 +100,20 @@ class OrderHistoryCardHeader extends StatelessWidget {
     }
 
     return LocaleKeys.orders_item_title.tr(namedArgs: {'id': order.id});
+  }
+
+  String _subtitleText(BuildContext context) {
+    if (displayMode == OrderCardDisplayMode.provider) {
+      final service = LocalizedDbText.fromSupabase(order.serviceType).resolve(
+        languageCode: context.locale.languageCode,
+        fallbackLanguageCode: 'en',
+        emptyValue: '',
+      );
+      if (service.trim().isNotEmpty) {
+        return service;
+      }
+    }
+
+    return LocaleKeys.orders_item_subtitle.tr(namedArgs: {'id': order.id});
   }
 }

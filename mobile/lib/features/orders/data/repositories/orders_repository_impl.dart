@@ -81,10 +81,15 @@ class OrdersRepositoryImpl implements OrdersRepository {
           .eq('provider_id', providerId)
           .order('created_at', ascending: false);
 
-      return (response as List<dynamic>)
-          .whereType<Map<String, dynamic>>()
-          .map(OrderModel.fromJson)
-          .toList(growable: false);
+      final rows = (response as List<dynamic>).whereType<Map<String, dynamic>>();
+      final orders = <OrderModel>[];
+
+      for (final row in rows) {
+        final enriched = await _enrichProviderOrderRow(row);
+        orders.add(OrderModel.fromJson(enriched));
+      }
+
+      return orders;
     } on PostgrestException catch (e) {
       throw Exception('Failed to load provider orders: ${e.message}');
     } catch (e) {
@@ -157,12 +162,217 @@ class OrdersRepositoryImpl implements OrdersRepository {
         throw Exception('Order not found.');
       }
 
-      return OrderModel.fromJson(Map<String, dynamic>.from(response));
+      final enriched = await _enrichProviderOrderRow(
+        Map<String, dynamic>.from(response),
+      );
+
+      return OrderModel.fromJson(enriched);
     } on PostgrestException catch (e) {
       throw Exception('Failed to load order details: ${e.message}');
     } catch (e) {
       throw Exception('Failed to load order details: $e');
     }
+  }
+
+  Future<Map<String, dynamic>> _enrichProviderOrderRow(
+    Map<String, dynamic> row,
+  ) async {
+    final enriched = Map<String, dynamic>.from(row);
+
+    final clientId = enriched['client_id']?.toString();
+    if (_hasValue(clientId) &&
+        (_isMissingRelation(enriched['clients']) ||
+            !_hasClientName(enriched['clients']))) {
+      final client = await _tryLoadClient(clientId!);
+      if (client != null) {
+        enriched['clients'] = client;
+      }
+    }
+
+    final addressId = enriched['address_id']?.toString();
+    if (_hasValue(addressId) &&
+        (_isMissingRelation(enriched['addresses']) ||
+            !_hasAddressDetails(enriched['addresses']))) {
+      final address = await _tryLoadAddress(addressId!);
+      if (address != null) {
+        enriched['addresses'] = address;
+      }
+    }
+
+    final serviceId = enriched['service_id']?.toString();
+    if (_isMissingRelation(enriched['services']) && _hasValue(serviceId)) {
+      final service = await _tryLoadService(serviceId!);
+      if (service != null) {
+        enriched['services'] = service;
+      }
+    }
+
+    return enriched;
+  }
+
+  Future<Map<String, dynamic>?> _tryLoadClient(String clientId) async {
+    try {
+      final response = await _supabase
+          .from('clients')
+          .select('id, user_id, address_id, image_url, users(full_name)')
+          .eq('id', clientId)
+          .maybeSingle();
+
+      if (response is Map<String, dynamic>) {
+        final client = Map<String, dynamic>.from(response);
+        final hasJoinedUser = _hasUserName(client['users']);
+        final userId = client['user_id']?.toString();
+
+        if (!hasJoinedUser && _hasValue(userId)) {
+          final user = await _tryLoadUserById(userId!);
+          if (user != null) {
+            client['users'] = user;
+          }
+        }
+
+        return client;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _tryLoadAddress(String addressId) async {
+    try {
+      final response = await _supabase
+          .from('addresses')
+          .select('id, details, current_lat, current_lang, current_lng, cities(name)')
+          .eq('id', addressId)
+          .maybeSingle();
+
+      if (response is Map<String, dynamic>) {
+        return response;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _tryLoadService(String serviceId) async {
+    try {
+      final response = await _supabase
+          .from('services')
+          .select('id, name, categories(name)')
+          .eq('id', serviceId)
+          .maybeSingle();
+
+      if (response is Map<String, dynamic>) {
+        return response;
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _tryLoadUserById(String userId) async {
+    try {
+      final response = await _supabase
+          .from('users')
+          .select('id, full_name')
+          .eq('id', userId)
+          .maybeSingle();
+
+      if (response is Map<String, dynamic>) {
+        return response;
+      }
+
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  bool _isMissingRelation(dynamic value) {
+    if (value == null) {
+      return true;
+    }
+
+    if (value is List) {
+      return value.isEmpty;
+    }
+
+    if (value is Map) {
+      return value.isEmpty;
+    }
+
+    return false;
+  }
+
+  bool _hasValue(String? value) => value != null && value.trim().isNotEmpty;
+
+  bool _hasClientName(dynamic relation) {
+    if (relation is Map<String, dynamic>) {
+      if (_hasValue(relation['name']?.toString())) {
+        return true;
+      }
+      final users = relation['users'] ?? relation['user'];
+      return _hasUserName(users);
+    }
+
+    if (relation is List && relation.isNotEmpty) {
+      for (final item in relation) {
+        if (_hasClientName(item)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool _hasUserName(dynamic usersRelation) {
+    if (usersRelation is Map<String, dynamic>) {
+      return _hasValue(usersRelation['full_name']?.toString()) ||
+          _hasValue(usersRelation['name']?.toString());
+    }
+
+    if (usersRelation is List && usersRelation.isNotEmpty) {
+      for (final item in usersRelation) {
+        if (_hasUserName(item)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  bool _hasAddressDetails(dynamic relation) {
+    if (relation is Map<String, dynamic>) {
+      if (_hasValue(relation['details']?.toString())) {
+        return true;
+      }
+
+      final city = relation['cities'] ?? relation['city'];
+      if (city is Map<String, dynamic>) {
+        return _hasValue(city['name']?.toString());
+      }
+      if (city is List && city.isNotEmpty) {
+        for (final item in city) {
+          if (item is Map<String, dynamic> && _hasValue(item['name']?.toString())) {
+            return true;
+          }
+        }
+      }
+    }
+
+    if (relation is List && relation.isNotEmpty) {
+      for (final item in relation) {
+        if (_hasAddressDetails(item)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   Future<String> _getClientId() async {

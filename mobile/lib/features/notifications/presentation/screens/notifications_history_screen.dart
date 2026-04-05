@@ -6,13 +6,14 @@ import 'package:dar_care/features/notifications/data/models/notification_model.d
 import 'package:dar_care/features/notifications/domain/entities/notification_intent.dart';
 import 'package:dar_care/features/notifications/domain/repositories/notification_repository.dart';
 import 'package:dar_care/features/notifications/domain/usecases/mark_notification_as_read_use_case.dart';
-import 'package:dar_care/features/notifications_history/domain/usecases/get_notifications_history_use_case.dart';
-import 'package:dar_care/features/notifications_history/presentation/cubit/notifications_history_cubit.dart';
-import 'package:dar_care/features/notifications_history/presentation/cubit/notifications_history_state.dart';
+import 'package:dar_care/features/notifications/domain/usecases/get_notifications_history_use_case.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../cubit/notifications_history_cubit.dart';
+import '../cubit/notifications_history_state.dart';
 
 class NotificationsHistoryScreen extends StatelessWidget {
   const NotificationsHistoryScreen({super.key});

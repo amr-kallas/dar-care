@@ -1,5 +1,5 @@
 import 'package:dar_care/features/notifications/domain/usecases/mark_notification_as_read_use_case.dart';
-import 'package:dar_care/features/notifications_history/domain/usecases/get_notifications_history_use_case.dart';
+import 'package:dar_care/features/notifications/domain/usecases/get_notifications_history_use_case.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'notifications_history_state.dart';

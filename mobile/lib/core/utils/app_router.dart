@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../features/notifications/presentation/screens/notifications_history_screen.dart';
 import '../../features/onboarding/presentation/screens/onboarding_screen.dart';
 
 import 'package:dar_care/features/home/presentation/home_screen.dart';
@@ -25,7 +26,6 @@ import 'package:dar_care/features/search/presentation/screens/search_results_scr
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/features/profile/presentation/provider/screens/provider_edit_profile_screen.dart';
 import 'package:dar_care/features/profile/presentation/screens/edit_profile_screen.dart';
-import 'package:dar_care/features/notifications_history/presentation/screens/notifications_history_screen.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 

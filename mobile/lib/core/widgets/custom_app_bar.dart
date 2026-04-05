@@ -1,3 +1,4 @@
+import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:solar_icon_pack/solar_icon_pack.dart';
 
@@ -40,7 +41,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     return AppBar(
-      title: titleWidget ?? (title != null ? Text(title!) : null),
+      title: titleWidget ?? (title != null ? Text(title!,style: TextStyle(
+        color: AppColors.brightGreen
+      ),) : null),
       centerTitle: centerTitle,
       leading: leadingWidget,
       actions: actions,

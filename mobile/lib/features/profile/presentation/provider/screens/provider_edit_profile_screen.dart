@@ -3,6 +3,8 @@ import 'package:dar_care/core/utils/localized_db_text.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/core/widgets/custom_app_bar.dart';
+import 'package:dar_care/core/widgets/app_primary_button.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -91,19 +93,19 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
       setState(() {
         _isLoading = false;
       });
-      AppSnackbar.showError(context, 'provider_profile_load_error'.tr());
+      AppSnackbar.showError(context, LocaleKeys.provider_profile_load_error.tr());
     }
   }
 
   Future<void> _save() async {
     if (_providerId == null) {
-      AppSnackbar.showError(context, 'provider_profile_load_error'.tr());
+      AppSnackbar.showError(context, LocaleKeys.provider_profile_load_error.tr());
       return;
     }
 
     final experience = int.tryParse(_experienceController.text.trim());
     if (experience == null || experience < 0) {
-      AppSnackbar.showError(context, 'validation_invalid_experience'.tr());
+      AppSnackbar.showError(context, LocaleKeys.validation_invalid_experience.tr());
       return;
     }
 
@@ -125,13 +127,13 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
         return;
       }
 
-      AppSnackbar.showSuccess(context, 'provider_profile_save_success'.tr());
+      AppSnackbar.showSuccess(context, LocaleKeys.provider_profile_save_success.tr());
       context.pop(true);
     } catch (_) {
       if (!mounted) {
         return;
       }
-      AppSnackbar.showError(context, 'provider_profile_save_error'.tr());
+      AppSnackbar.showError(context, LocaleKeys.provider_profile_save_error.tr());
     } finally {
       if (mounted) {
         setState(() {
@@ -149,17 +151,7 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: CustomAppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        titleWidget: Text(
-          'edit_profile'.tr(),
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: LocaleKeys.edit_profile.tr(),
       ),
       body: _isLoading
           ? const AppLoadingIndicator()
@@ -178,7 +170,7 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
                       controller: _bioController,
                       maxLines: 3,
                       decoration: InputDecoration(
-                        labelText: 'provider_profile_bio'.tr(),
+                        labelText: LocaleKeys.provider_profile_bio.tr(),
                         border: InputBorder.none,
                       ),
                     ),
@@ -189,7 +181,7 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
                       controller: _experienceController,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'provider_profile_experience_years'.tr(),
+                        labelText: LocaleKeys.provider_profile_experience_years.tr(),
                         border: InputBorder.none,
                       ),
                     ),
@@ -213,24 +205,16 @@ class _ProviderEditProfileScreenState extends State<ProviderEditProfileScreen> {
                         });
                       },
                       decoration: InputDecoration(
-                        labelText: 'provider_profile_department'.tr(),
+                        labelText: LocaleKeys.provider_profile_department.tr(),
                         border: InputBorder.none,
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _isSaving ? null : _save,
-                      child: _isSaving
-                          ? const SizedBox(
-                              height: 18,
-                              width: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : Text('provider_profile_save_changes'.tr()),
-                    ),
+                  AppPrimaryButton(
+                    label: LocaleKeys.provider_profile_save_changes.tr(),
+                    isLoading: _isSaving,
+                    onPressed: _isSaving ? null : _save,
                   ),
                 ],
               ),

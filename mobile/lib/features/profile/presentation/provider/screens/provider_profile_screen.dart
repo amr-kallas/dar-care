@@ -16,6 +16,7 @@ import 'package:dar_care/features/profile/presentation/widgets/profile_language_
 import 'package:dar_care/features/profile/presentation/widgets/profile_menu_item.dart';
 import 'package:dar_care/features/profile/presentation/widgets/profile_menu_section.dart';
 import 'package:dar_care/features/profile/presentation/widgets/profile_theme_sheet.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -225,17 +226,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
     return Scaffold(
       backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
       appBar: CustomAppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-        titleWidget: Text(
-          'provider_profile_title'.tr(),
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        title: LocaleKeys.provider_profile_title.tr(),
       ),
       body: _isLoading
           ? const AppLoadingIndicator()

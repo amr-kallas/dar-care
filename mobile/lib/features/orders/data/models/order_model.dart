@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:dar_care/core/utils/localized_db_text.dart';
+
 class OrderModel {
   final String id;
   final String status;
@@ -15,6 +19,8 @@ class OrderModel {
   final String? serviceType;
   final String? problemDescription;
   final double? quotedPrice;
+  final double? latitude;
+  final double? longitude;
 
   const OrderModel({
     required this.id,
@@ -33,6 +39,8 @@ class OrderModel {
     this.serviceType,
     this.problemDescription,
     this.quotedPrice,
+    this.latitude,
+    this.longitude,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
@@ -56,6 +64,8 @@ class OrderModel {
       serviceType: _extractServiceType(json),
       problemDescription: _extractProblemDescription(json),
       quotedPrice: _extractQuotedPrice(json),
+      latitude: _extractLatitude(json),
+      longitude: _extractLongitude(json),
     );
   }
 
@@ -97,24 +107,28 @@ class OrderModel {
       }
     }
 
-    return null;
+    return _asString(json['provider_name']);
   }
 
   static String? _extractNameFromProviderMap(Map<String, dynamic> providerMap) {
     final dynamic rawUser = providerMap['users'] ?? providerMap['user'];
 
     if (rawUser is Map<String, dynamic>) {
-      return _asString(rawUser['full_name']) ?? _asString(rawUser['name']);
+      return _asString(rawUser['full_name']) ??
+          _asString(rawUser['name']) ??
+          _asString(providerMap['name']);
     }
 
     if (rawUser is List && rawUser.isNotEmpty) {
       final first = rawUser.first;
       if (first is Map<String, dynamic>) {
-        return _asString(first['full_name']) ?? _asString(first['name']);
+        return _asString(first['full_name']) ??
+            _asString(first['name']) ??
+            _asString(providerMap['name']);
       }
     }
 
-    return null;
+    return _asString(providerMap['name']);
   }
 
   static String? _extractClientName(Map<String, dynamic> json) {
@@ -130,20 +144,24 @@ class OrderModel {
       }
     }
 
-    return null;
+    return _asString(json['client_name']) ?? _asString(json['full_name']);
   }
 
   static String? _extractNameFromClientMap(Map<String, dynamic> clientMap) {
     final dynamic rawUser = clientMap['users'] ?? clientMap['user'];
 
     if (rawUser is Map<String, dynamic>) {
-      return _asString(rawUser['full_name']) ?? _asString(rawUser['name']);
+      return _asString(rawUser['full_name']) ??
+          _asString(rawUser['name']) ??
+          _asString(clientMap['name']);
     }
 
     if (rawUser is List && rawUser.isNotEmpty) {
       final first = rawUser.first;
       if (first is Map<String, dynamic>) {
-        return _asString(first['full_name']) ?? _asString(first['name']);
+        return _asString(first['full_name']) ??
+            _asString(first['name']) ??
+            _asString(clientMap['name']);
       }
     }
 
@@ -163,31 +181,34 @@ class OrderModel {
       }
     }
 
-    if (addressMap == null) {
-      return null;
+    if (addressMap != null) {
+      final details = _asString(addressMap['details']);
+      final cityName = _extractCityName(addressMap);
+
+      if (details != null && cityName != null) {
+        return '$details - $cityName';
+      }
+
+      final combined = details ?? cityName;
+      if (combined != null && combined.trim().isNotEmpty) {
+        return combined;
+      }
     }
 
-    final details = _asString(addressMap['details']);
-    final cityName = _extractCityName(addressMap);
-
-    if (details != null && cityName != null) {
-      return '$details - $cityName';
-    }
-
-    return details ?? cityName;
+    return _extractAddressFromNotes(_asString(json['notes']));
   }
 
   static String? _extractCityName(Map<String, dynamic> addressMap) {
     final dynamic rawCity = addressMap['cities'] ?? addressMap['city'];
 
     if (rawCity is Map<String, dynamic>) {
-      return _asString(rawCity['name']);
+      return _localizedText(rawCity['name']);
     }
 
     if (rawCity is List && rawCity.isNotEmpty) {
       final first = rawCity.first;
       if (first is Map<String, dynamic>) {
-        return _asString(first['name']);
+        return _localizedText(first['name']);
       }
     }
 
@@ -211,19 +232,20 @@ class OrderModel {
       return null;
     }
 
-    final category = serviceMap['categories'] ?? serviceMap['category'];
-    if (category is Map<String, dynamic>) {
-      return _asString(category['name']);
-    }
+    final serviceName = _localizedPayload(serviceMap['name']);
 
-    if (category is List && category.isNotEmpty) {
+    final category = serviceMap['categories'] ?? serviceMap['category'];
+    String? categoryName;
+    if (category is Map<String, dynamic>) {
+      categoryName = _localizedPayload(category['name']);
+    } else if (category is List && category.isNotEmpty) {
       final first = category.first;
       if (first is Map<String, dynamic>) {
-        return _asString(first['name']);
+        categoryName = _localizedPayload(first['name']);
       }
     }
 
-    return _asString(serviceMap['name']);
+    return serviceName ?? categoryName;
   }
 
   static String? _extractProblemDescription(Map<String, dynamic> json) {
@@ -254,5 +276,106 @@ class OrderModel {
     }
 
     return double.tryParse(raw.toString());
+  }
+
+  static double? _extractLatitude(Map<String, dynamic> json) {
+    final addressMap = _extractAddressMap(json);
+    return _asDouble(addressMap?['current_lat'] ?? addressMap?['lat']);
+  }
+
+  static double? _extractLongitude(Map<String, dynamic> json) {
+    final addressMap = _extractAddressMap(json);
+    // DB uses current_lang as longitude in existing schema.
+    return _asDouble(
+      addressMap?['current_lng'] ??
+          addressMap?['current_lang'] ??
+          addressMap?['lng'] ??
+          addressMap?['longitude'],
+    );
+  }
+
+  static Map<String, dynamic>? _extractAddressMap(Map<String, dynamic> json) {
+    final dynamic rawAddress = json['addresses'] ?? json['address'];
+
+    if (rawAddress is Map<String, dynamic>) {
+      return rawAddress;
+    }
+
+    if (rawAddress is List && rawAddress.isNotEmpty) {
+      final first = rawAddress.first;
+      if (first is Map<String, dynamic>) {
+        return first;
+      }
+    }
+
+    return null;
+  }
+
+  static double? _asDouble(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is num) {
+      return value.toDouble();
+    }
+
+    return double.tryParse(value.toString());
+  }
+
+  static String? _extractAddressFromNotes(String? notes) {
+    if (notes == null || notes.trim().isEmpty) {
+      return null;
+    }
+
+    final lines = notes
+        .split(RegExp(r'\r?\n'))
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty);
+
+    for (final line in lines) {
+      final lower = line.toLowerCase();
+      if (lower.startsWith('address:')) {
+        final value = line.substring('address:'.length).trim();
+        if (value.isNotEmpty) {
+          return value;
+        }
+      }
+      if (line.startsWith('العنوان:')) {
+        final value = line.substring('العنوان:'.length).trim();
+        if (value.isNotEmpty) {
+          return value;
+        }
+      }
+    }
+
+    return null;
+  }
+
+  static String? _localizedText(dynamic value) {
+    final resolved = LocalizedDbText.fromSupabase(value).resolve(
+      languageCode: 'en',
+      fallbackLanguageCode: 'en',
+      emptyValue: '',
+    );
+    return resolved.trim().isEmpty ? null : resolved.trim();
+  }
+
+  static String? _localizedPayload(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is Map) {
+      return jsonEncode(value);
+    }
+
+    if (value is String) {
+      final text = value.trim();
+      return text.isEmpty ? null : text;
+    }
+
+    final text = value.toString().trim();
+    return text.isEmpty ? null : text;
   }
 }

@@ -41,7 +41,7 @@ class _ProviderChatsScreenState extends State<ProviderChatsScreen> {
     final currentUserId = _actionsHelper.currentUserId(_supabase);
 
     return Scaffold(
-      appBar: CustomAppBar(titleWidget: Text(LocaleKeys.chats_title.tr())),
+      appBar: CustomAppBar(title: LocaleKeys.chats_title.tr()),
       body: FutureBuilder<List<ChatListItem>>(
         future: _chatsFuture,
         builder: (context, snapshot) {

@@ -3,10 +3,13 @@ import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/core/widgets/custom_app_bar.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/widgets/custom_tabs/custom_tab_item.dart';
+import '../../../../../core/widgets/custom_tabs/custom_tabs.dart';
 import '../../client/widgets/order_card_display_mode.dart';
 import '../../client/widgets/order_history_card.dart';
 import '../../client/widgets/orders_empty_state.dart';
@@ -14,7 +17,7 @@ import '../../client/widgets/orders_error_state.dart';
 import '../../client/widgets/orders_loading_state.dart';
 import '../cubit/provider_orders_cubit.dart';
 import '../cubit/provider_orders_state.dart';
-import 'provider_order_details_screen.dart';
+import 'provider_order_details_entry_screen.dart';
 
 class ProviderOrdersScreen extends StatelessWidget {
   const ProviderOrdersScreen({super.key});
@@ -28,73 +31,66 @@ class ProviderOrdersScreen extends StatelessWidget {
   }
 }
 
-class _ProviderOrdersView extends StatelessWidget {
+class _ProviderOrdersView extends StatefulWidget {
   const _ProviderOrdersView();
+
+  @override
+  State<_ProviderOrdersView> createState() => _ProviderOrdersViewState();
+}
+
+class _ProviderOrdersViewState extends State<_ProviderOrdersView> {
+  _ProviderOrdersTab _selectedTab = _ProviderOrdersTab.newRequests;
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return DefaultTabController(
-      length: 3,
-      child: BlocListener<ProviderOrdersCubit, ProviderOrdersState>(
-        listenWhen: (previous, current) =>
-            previous.errorMessageKey != current.errorMessageKey &&
-            current.errorMessageKey != null,
-        listener: (context, state) {
-          AppSnackbar.showError(context, state.errorMessageKey!.tr());
-        },
-        child: Scaffold(
-          backgroundColor: isDark
-              ? AppColors.backgroundDark
-              : AppColors.backgroundLight,
-          appBar: CustomAppBar(
-            showBackButton: false,
-            title: 'provider_jobs_tab'.tr(),
-          ),
-          body: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColors.surfaceDark : Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isDark
-                          ? AppColors.borderDark
-                          : AppColors.cardBorderLight,
-                    ),
+    return BlocListener<ProviderOrdersCubit, ProviderOrdersState>(
+      listenWhen: (previous, current) =>
+          previous.errorMessageKey != current.errorMessageKey &&
+          current.errorMessageKey != null,
+      listener: (context, state) {
+        AppSnackbar.showError(context, state.errorMessageKey!.tr());
+      },
+      child: Scaffold(
+        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        appBar: CustomAppBar(
+          showBackButton: false,
+          title: LocaleKeys.provider_jobs_tab.tr(),
+        ),
+        body: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: CustomTabs(
+                items: [
+                  CustomTabItem(
+                    value: _ProviderOrdersTab.newRequests.name,
+                    label: LocaleKeys.provider_orders_new_requests.tr(),
                   ),
-                  child: TabBar(
-                    dividerColor: Colors.transparent,
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    indicator: BoxDecoration(
-                      color: AppColors.brightGreen,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    labelColor: Colors.white,
-                    unselectedLabelColor:
-                        isDark ? Colors.white70 : AppColors.mediumGrey,
-                    tabs: [
-                      Tab(text: 'provider_orders_new_requests'.tr()),
-                      Tab(text: 'provider_orders_active_jobs'.tr()),
-                      Tab(text: 'provider_orders_history'.tr()),
-                    ],
+                  CustomTabItem(
+                    value: _ProviderOrdersTab.activeJobs.name,
+                    label: LocaleKeys.provider_orders_active_jobs.tr(),
                   ),
-                ),
+                  CustomTabItem(
+                    value: _ProviderOrdersTab.history.name,
+                    label: LocaleKeys.provider_orders_history.tr(),
+                  ),
+                ],
+                selectedValue: _selectedTab.name,
+                onChanged: (value) {
+                  setState(() {
+                    _selectedTab = _ProviderOrdersTab.values.firstWhere(
+                      (tab) => tab.name == value,
+                    );
+                  });
+                },
               ),
-              const Expanded(
-                child: TabBarView(
-                  children: [
-                    _ProviderOrdersTabContent(tab: _ProviderOrdersTab.newRequests),
-                    _ProviderOrdersTabContent(tab: _ProviderOrdersTab.activeJobs),
-                    _ProviderOrdersTabContent(tab: _ProviderOrdersTab.history),
-                  ],
-                ),
-              ),
-            ],
-          ),
+            ),
+            Expanded(
+              child: _ProviderOrdersTabContent(tab: _selectedTab),
+            ),
+          ],
         ),
       ),
     );
@@ -145,7 +141,7 @@ class _ProviderOrdersTabContent extends StatelessWidget {
                 onTap: () async {
                   final changed = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(
-                      builder: (_) => ProviderOrderDetailsScreen(order: order),
+                      builder: (_) => ProviderOrderDetailsEntryScreen(orderId: order.id),
                     ),
                   );
 

@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
 
     const { data: notification, error: nErr } = await supabase
       .from("notifications")
-      .select("id, user_id, sender_id, chat_id, title, body, type, data")
+      .select("id, user_id, sender_id, chat_id, title, body, type")
       .eq("id", notification_id)
       .single();
 
@@ -181,9 +181,6 @@ Deno.serve(async (req) => {
               notification_id: String(notification.id),
               chat_id: String(notification.chat_id ?? ""),
               sender_id: String(notification.sender_id ?? ""),
-              ...Object.fromEntries(
-                Object.entries(notification.data ?? {}).map(([k, v]) => [k, String(v)]),
-              ),
               click_action: "FLUTTER_NOTIFICATION_CLICK",
             },
             android: {

@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:dar_care/features/chat/data/models/chat_model.dart';
 import 'package:dar_care/features/chat/data/models/message_model.dart';
 import 'package:injectable/injectable.dart';
@@ -130,22 +129,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
     required String currentUserId,
     required String inputId,
   }) async {
-    final normalized = inputId.trim();
-    if (normalized.isEmpty) {
-      throw StateError('Missing providers identifier.');
-    }
-
-    // If caller gives a provider profile id or a provider auth user id, normalize to profile id.
-    if (normalized != currentUserId) {
-      final providerIdByInput = await _resolveProviderProfileIdFromAnyIdentifier(
-        normalized,
-      );
-      if (providerIdByInput != null) {
-        return providerIdByInput;
-      }
-      return normalized;
-    }
-
+    // Prefer the signed-in user's provider profile when available.
     final byCurrentUser = await _supabase
         .from('providers')
         .select('id')
@@ -156,7 +140,21 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return byCurrentUser['id'].toString();
     }
 
-    throw StateError('No matching providers profile found for id: $inputId');
+    final normalized = inputId.trim();
+    if (normalized.isEmpty) {
+      throw StateError('Missing providers identifier.');
+    }
+
+    // For client-side chat openings, normalize provider profile id from either profile id or auth user id.
+    final providerIdByInput = await _resolveProviderProfileIdFromAnyIdentifier(
+      normalized,
+    );
+    if (providerIdByInput != null) {
+      return providerIdByInput;
+    }
+
+    // Keep compatibility when RLS blocks provider probes and caller already has provider profile id.
+    return normalized;
   }
 
   Future<String?> _resolveClientProfileIdFromAnyIdentifier(String inputId) async {
@@ -237,7 +235,7 @@ class ChatRemoteDataSourceImpl implements ChatRemoteDataSource {
       return;
     }
 
-    final senderUserId = _supabase.auth.currentUser?.id ?? senderId;
+    final senderUserId = _requireCurrentUserId();
 
     await _supabase.from('messages').insert({
       'chat_id': chatId,

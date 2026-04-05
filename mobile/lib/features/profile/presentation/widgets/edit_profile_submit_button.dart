@@ -1,3 +1,4 @@
+import 'package:dar_care/core/widgets/app_primary_button.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -16,19 +17,14 @@ class EditProfileSubmitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
+    return AppPrimaryButton(
+      label: LocaleKeys.edit_profile.tr(),
+      isLoading: isSaving,
       onPressed: isDisabled
           ? null
           : () async {
               await onPressed();
             },
-      child: isSaving
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            )
-          : Text(LocaleKeys.edit_profile.tr()),
     );
   }
 }

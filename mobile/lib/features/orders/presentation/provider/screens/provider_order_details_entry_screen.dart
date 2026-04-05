@@ -1,4 +1,5 @@
 import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/core/widgets/custom_app_bar.dart';
 import 'package:dar_care/features/orders/data/models/order_model.dart';
 import 'package:dar_care/features/orders/domain/repositories/orders_repository.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
@@ -44,7 +45,7 @@ class _ProviderOrderDetailsEntryScreenState
 
         if (snapshot.hasError || snapshot.data == null) {
           return Scaffold(
-            appBar: AppBar(title: Text(LocaleKeys.provider_order_details_title.tr())),
+            appBar: CustomAppBar(title: LocaleKeys.provider_order_details_title.tr()),
             body: Center(
               child: Text(LocaleKeys.provider_order_open_error.tr()),
             ),

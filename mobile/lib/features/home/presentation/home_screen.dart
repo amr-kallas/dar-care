@@ -13,6 +13,7 @@ import 'package:dar_care/generated/locale_keys.g.dart';
 import 'client/screens/client_main_screen.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
+import 'package:dar_care/core/widgets/app_primary_button.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -44,10 +45,14 @@ class HomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(LocaleKeys.auth_error_generic.tr()),
-                  ElevatedButton(
-                    onPressed: () =>
-                        context.read<AuthCubit>().checkAuthStatus(),
-                    child: Text(LocaleKeys.orders_retry_button.tr()),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: AppPrimaryButton(
+                      label: LocaleKeys.orders_retry_button.tr(),
+                      onPressed: () =>
+                          context.read<AuthCubit>().checkAuthStatus(),
+                    ),
                   ),
                 ],
               ),

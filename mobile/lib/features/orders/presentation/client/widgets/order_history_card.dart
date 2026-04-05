@@ -1,7 +1,6 @@
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/features/orders/data/models/order_model.dart';
 import 'package:flutter/material.dart';
-
 import 'order_card_display_mode.dart';
 import 'order_history_card_details.dart';
 import 'order_history_card_footer.dart';
@@ -76,6 +75,7 @@ class OrderHistoryCard extends StatelessWidget {
           OrderHistoryCardFooter(
             orderStatus: order.status,
             primaryTextColor: primaryTextColor,
+            displayMode: displayMode,
           ),
         ],
       ),

@@ -65,7 +65,9 @@ class ChatCubit extends Cubit<ChatState> {
         text: normalizedText,
       );
       emit(ChatLoaded(chat: chat, messages: _messages));
-    } catch (_) {
+    } catch (error, stackTrace) {
+      debugPrint('Chat send failed: $error');
+      debugPrintStack(stackTrace: stackTrace);
       emit(
         ChatError(
           messageKey: LocaleKeys.chat_error_send,

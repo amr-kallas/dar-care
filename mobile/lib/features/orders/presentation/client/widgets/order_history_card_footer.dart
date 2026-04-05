@@ -1,16 +1,21 @@
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+
+import 'order_card_display_mode.dart';
 
 class OrderHistoryCardFooter extends StatelessWidget {
   const OrderHistoryCardFooter({
     super.key,
     required this.orderStatus,
     required this.primaryTextColor,
+    this.displayMode = OrderCardDisplayMode.client,
   });
 
   final String orderStatus;
   final Color primaryTextColor;
+  final OrderCardDisplayMode displayMode;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +58,7 @@ class OrderHistoryCardFooter extends StatelessWidget {
               borderRadius: BorderRadius.circular(18),
             ),
             child: Text(
-              OrderPresentationUtils.actionLocaleKey(orderStatus).tr(),
+              _actionText(orderStatus),
               style: TextStyle(
                 color: primaryTextColor,
                 fontSize: 12,
@@ -67,5 +72,13 @@ class OrderHistoryCardFooter extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  String _actionText(String orderStatus) {
+    if (displayMode == OrderCardDisplayMode.provider) {
+      return LocaleKeys.orders_action_view_details.tr();
+    }
+
+    return OrderPresentationUtils.actionLocaleKey(orderStatus).tr();
   }
 }
