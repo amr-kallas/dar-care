@@ -39,6 +39,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
   String _bio = '';
   int? _experienceYears;
   double _walletBalance = 0;
+  String? _providerImageUrl;
 
   List<_DepartmentOption> _departments = const <_DepartmentOption>[];
   List<_ProviderReview> _reviews = const <_ProviderReview>[];
@@ -67,7 +68,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
 
       final providerRow = await _supabase
           .from('providers')
-          .select('id, bio, experience_years, department_id')
+          .select('id, bio, experience_years, department_id, image_url')
           .eq('user_id', userId)
           .maybeSingle();
 
@@ -129,6 +130,7 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
         _bio = (providerRow['bio'] as String?) ?? '';
         _experienceYears = providerRow['experience_years'] as int?;
         _selectedDepartmentId = providerRow['department_id']?.toString();
+        _providerImageUrl = (providerRow['image_url'] as String?)?.trim();
         _departments = departmentOptions;
         _walletBalance = balance;
         _reviews = reviews;
@@ -242,7 +244,10 @@ class _ProviderProfileScreenState extends State<ProviderProfileScreen> {
                 ),
                 child: Column(
                   children: [
-                    ProfileHeader(user: user),
+                    ProfileHeader(
+                      user: user,
+                      imageUrl: _providerImageUrl,
+                    ),
                     const SizedBox(height: 24),
                     ProfileMenuSection(
                       title: 'account_tab'.tr(),

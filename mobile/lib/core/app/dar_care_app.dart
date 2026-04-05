@@ -17,29 +17,33 @@ class DarCareApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: ThemeController.instance,
-      builder: (context, _) {
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create: (context) => getIt<AuthCubit>()..checkAuthStatus(),
-            ),
-            BlocProvider(
-              create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
-            ),
-          ],
-          child: const NotificationIntentListener(
-            child: _DarCareRouterView(),
-          ),
-        );
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (context) => getIt<AuthCubit>()..checkAuthStatus(),
+        ),
+        BlocProvider(
+          create: (context) => getIt<FavoritesCubit>()..loadFavorites(),
+        ),
+      ],
+      child: NotificationIntentListener(
+        child: AnimatedBuilder(
+          animation: ThemeController.instance,
+          builder: (context, _) {
+            return _DarCareRouterView(
+              themeMode: ThemeController.instance.themeMode,
+            );
+          },
+        ),
+      ),
     );
   }
 }
 
 class _DarCareRouterView extends StatelessWidget {
-  const _DarCareRouterView();
+  const _DarCareRouterView({required this.themeMode});
+
+  final ThemeMode themeMode;
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +63,7 @@ class _DarCareRouterView extends StatelessWidget {
       // Theme
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeController.instance.themeMode,
+      themeMode: themeMode,
 
       // DevicePreview integration
       builder: DevicePreview.appBuilder,

@@ -98,8 +98,7 @@ class ProviderModel {
         departmentData['name'] ?? 'Service Provider',
       ),
       rating: ((json['avg_rating'] as num?) ?? 0.0).toDouble(),
-      imageUrl:
-          json['image_url'] as String? ?? userData['avatar_url'] as String?,
+      imageUrl: json['image_url'] as String?,
       hourlyRate: (rawHourlyRate as num?)?.toDouble(),
       experienceYears:
           json['experience_years'] as int? ?? json['experience'] as int?,

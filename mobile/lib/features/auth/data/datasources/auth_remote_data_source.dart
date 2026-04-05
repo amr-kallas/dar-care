@@ -7,7 +7,8 @@ import 'package:dar_care/core/services/supabase_service.dart';
 import 'package:dar_care/features/auth/data/models/auth_user_model.dart';
 import 'package:dar_care/features/auth/domain/entities/user_role.dart';
 import 'package:injectable/injectable.dart';
-import 'package:supabase_flutter/supabase_flutter.dart' show FileOptions, SignOutScope;
+import 'package:supabase_flutter/supabase_flutter.dart'
+    show AuthException, FileOptions, SignOutScope;
 
 /// Abstract data source for authentication
 abstract class AuthRemoteDataSource {
@@ -86,6 +87,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String? phone,
   }) async {
     try {
+      final normalizedPhone = _normalizePhoneForPersistence(phone);
+
       // Sign up user with Supabase Auth
       final authResponse = await supabaseAuth.signUp(
         email: email,
@@ -93,7 +96,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         data: {
           'full_name': fullName,
           'role': UserRole.client.value,
-          'phone': phone,
+          if (normalizedPhone != null) 'phone': normalizedPhone,
           'city_id': cityId,
         },
       );
@@ -107,7 +110,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'id': authResponse.user!.id,
         'email': email,
         'full_name': fullName,
-        'phone': phone,
+        'phone': normalizedPhone,
         'role': UserRole.client.value,
         'created_at': DateTime.now().toIso8601String(),
       });
@@ -134,8 +137,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
-  @override
-  Future<AuthUserModel> signUpProvider({
+    @override
+    Future<AuthUserModel> signUpProvider({
     required String email,
     required String password,
     required String fullName,
@@ -144,64 +147,145 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String departmentId,
     required int experienceYears,
     String? bio,
-  }) async {
-    try {
-      // Sign up user with Supabase Auth
-      final authResponse = await supabaseAuth.signUp(
-        email: email,
-        password: password,
-        data: {
-          'full_name': fullName,
-          'role': UserRole.provider.value,
-          'phone': phone,
-          'city_id': cityId,
-          'department_id': departmentId,
-          'experience_years': experienceYears,
-          'bio': bio,
-        },
-      );
+    }) async {
+    _logProviderSignup(
+      step: 'start',
+      email: email,
+      cityId: cityId,
+      departmentId: departmentId,
+      experienceYears: experienceYears,
+    );
 
-      if (authResponse.user == null) {
-        throw const AuthAppException('Sign up failed. Please try again.');
+    try {
+      String? departmentImageUrl;
+      try {
+        departmentImageUrl = await _getDepartmentImageUrl(departmentId);
+        _logProviderSignup(
+          step: 'department-image-loaded',
+          email: email,
+          departmentId: departmentId,
+          details: departmentImageUrl == null ? 'image=none' : 'image=found',
+        );
+      } catch (error, stackTrace) {
+        // Department image is optional for account creation.
+        _logProviderSignup(
+          step: 'department-image-failed',
+          email: email,
+          departmentId: departmentId,
+          error: error,
+          stackTrace: stackTrace,
+        );
       }
 
-      // Create or update user profile in the users table
-      await supabaseClient.from('users').upsert({
-        'id': authResponse.user!.id,
-        'email': email,
-        'full_name': fullName,
-        'phone': phone,
-        'role': UserRole.provider.value,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+      final normalizedPhone = _normalizePhoneForPersistence(phone);
 
-      // Create provider profile and attach an address carrying the selected city.
-      final insertedProvider = await supabaseClient
-          .from('providers')
-          .insert({
-            'user_id': authResponse.user!.id,
-            'department_id': departmentId,
-            'experience_years': experienceYears,
-            'bio': bio,
-            'status': 'pending',
-          })
-          .select('id')
-          .single();
-
-      await _attachAddressToProvider(
-        providerId: insertedProvider['id'] as String,
+      final authUser = await _signUpOrResumeProviderUser(
+        email: email,
+        password: password,
+        fullName: fullName,
+        phone: normalizedPhone,
         cityId: cityId,
+        departmentId: departmentId,
+        experienceYears: experienceYears,
+        bio: bio,
       );
 
-      return AuthUserModel.fromSupabaseUser(authResponse.user!);
+      _logProviderSignup(
+        step: 'auth-user-ready',
+        email: email,
+        userId: authUser.id,
+      );
+
+      final userUpsertData = <String, dynamic>{
+        'id': authUser.id,
+        'email': email,
+        'full_name': fullName,
+        'phone': normalizedPhone,
+        'role': UserRole.provider.value,
+        'created_at': DateTime.now().toIso8601String(),
+      };
+
+      // Keep users upsert schema-safe: some environments do not have users.avatar_url.
+      await supabaseClient.from('users').upsert(userUpsertData);
+      _logProviderSignup(
+        step: 'users-upsert-success',
+        email: email,
+        userId: authUser.id,
+      );
+
+      final providerUpsertData = <String, dynamic>{
+        'user_id': authUser.id,
+        'department_id': departmentId,
+        'experience_years': experienceYears,
+        'bio': bio,
+        'status': 'pending',
+      };
+      if (departmentImageUrl != null) {
+        providerUpsertData['image_url'] = departmentImageUrl;
+      }
+
+      final providerRow = await supabaseClient
+          .from('providers')
+          .upsert(providerUpsertData, onConflict: 'user_id')
+          .select('id')
+          .maybeSingle();
+
+      _logProviderSignup(
+        step: 'providers-upsert-success',
+        email: email,
+        userId: authUser.id,
+        details: providerRow == null
+            ? 'providerRow=null'
+            : 'providerId=${providerRow['id']}',
+      );
+
+      if (providerRow != null && providerRow['id'] is String) {
+        try {
+          await _attachAddressToProvider(
+            providerId: providerRow['id'] as String,
+            cityId: cityId,
+          );
+          _logProviderSignup(
+            step: 'provider-address-attached',
+            email: email,
+            userId: authUser.id,
+            details: 'providerId=${providerRow['id']}',
+          );
+        } catch (error, stackTrace) {
+          // Keep provider signup successful even if address linking fails.
+          _logProviderSignup(
+            step: 'provider-address-attach-failed',
+            email: email,
+            userId: authUser.id,
+            error: error,
+            stackTrace: stackTrace,
+          );
+        }
+      }
+
+      _logProviderSignup(
+        step: 'completed',
+        email: email,
+        userId: authUser.id,
+      );
+
+      return AuthUserModel.fromSupabaseUser(authUser);
     } catch (error, stackTrace) {
+      _logProviderSignup(
+        step: 'failed',
+        email: email,
+        cityId: cityId,
+        departmentId: departmentId,
+        error: error,
+        stackTrace: stackTrace,
+      );
       throw _mapAuthException(
         error,
         stackTrace,
         fallbackMessage: 'Failed to create provider account. Please try again.',
       );
     }
-  }
+    }
 
   @override
   Future<AuthUserModel> signIn({
@@ -315,10 +399,27 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     try {
       final updateData = <String, dynamic>{};
       if (fullName != null) updateData['full_name'] = fullName;
-      if (phone != null) updateData['phone'] = phone;
+      if (phone != null) {
+        updateData['phone'] = _normalizePhoneForPersistence(phone);
+      }
       if (avatarUrl != null) updateData['avatar_url'] = avatarUrl;
 
+      if (updateData.isEmpty) {
+        return;
+      }
+
       await supabaseClient.from('users').update(updateData).eq('id', userId);
+
+      if (avatarUrl != null) {
+        await supabaseClient
+            .from('providers')
+            .update({'image_url': avatarUrl})
+            .eq('user_id', userId);
+        await supabaseClient
+            .from('clients')
+            .update({'image_url': avatarUrl})
+            .eq('user_id', userId);
+      }
     } catch (error, stackTrace) {
       throw DataAppException(
         'Failed to update profile.',
@@ -346,11 +447,16 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       final publicUrl = bucket.getPublicUrl(storagePath);
 
       await supabaseClient
+          .from('providers')
+          .update({'image_url': publicUrl})
+          .eq('user_id', userId);
+
+      await supabaseClient
           .from('clients')
           .update({'image_url': publicUrl})
           .eq('user_id', userId);
 
-      // Keep existing user profile reads in sync with the client image URL.
+      // Keep existing user profile reads in sync with role-specific image URLs.
       await supabaseClient
           .from('users')
           .update({'avatar_url': publicUrl})
@@ -424,6 +530,122 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         .eq('id', providerId);
   }
 
+  Future<dynamic> _signUpOrResumeProviderUser({
+    required String email,
+    required String password,
+    required String fullName,
+    required String? phone,
+    required String cityId,
+    required String departmentId,
+    required int experienceYears,
+    String? bio,
+  }) async {
+    try {
+      final authResponse = await supabaseAuth.signUp(
+        email: email,
+        password: password,
+        data: {
+          'full_name': fullName,
+          'role': UserRole.provider.value,
+          if (phone != null) 'phone': phone,
+          'city_id': cityId,
+          'department_id': departmentId,
+          'experience_years': experienceYears,
+          'bio': bio,
+        },
+      );
+
+      if (authResponse.user == null) {
+        throw const AuthAppException('Sign up failed. Please try again.');
+      }
+
+      return authResponse.user!;
+    } on AuthException catch (error, stackTrace) {
+      final message = error.message.toLowerCase();
+      final isAlreadyRegistered =
+          message.contains('already registered') ||
+          message.contains('already been registered') ||
+          message.contains('user already exists');
+      final isDatabaseErrorSavingUser =
+          message.contains('database error saving new user');
+
+      // Some projects have strict auth trigger casting rules (often around phone).
+      // Retry once with minimal metadata so auth user creation can proceed.
+      if (isDatabaseErrorSavingUser && phone != null) {
+        _logProviderSignup(
+          step: 'auth-signup-retry-minimal-metadata',
+          email: email,
+          details: 'reason=database-error-saving-new-user',
+        );
+
+        try {
+          final retryAuthResponse = await supabaseAuth.signUp(
+            email: email,
+            password: password,
+            data: {
+              'full_name': fullName,
+              'role': UserRole.provider.value,
+            },
+          );
+
+          if (retryAuthResponse.user != null) {
+            return retryAuthResponse.user!;
+          }
+        } on AuthException {
+          // Keep original error handling below to preserve user-facing behavior.
+        }
+      }
+
+      if (!isAlreadyRegistered) {
+        if (isDatabaseErrorSavingUser) {
+          throw AuthAppException(
+            'Could not create account due to server profile validation. Please verify the phone format and try again.',
+            cause: error,
+            stackTrace: stackTrace,
+          );
+        }
+
+        throw AuthAppException(
+          'Auth signup failed: ${error.message}',
+          cause: error,
+          stackTrace: stackTrace,
+        );
+      }
+
+      final signInResponse = await supabaseAuth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (signInResponse.user == null) {
+        throw const AuthAppException(
+          'Email is already registered. Please sign in instead.',
+        );
+      }
+
+      return signInResponse.user!;
+    }
+  }
+
+  Future<String?> _getDepartmentImageUrl(String departmentId) async {
+    final department = await supabaseClient
+        .from('departments')
+        .select('image_url')
+        .eq('id', departmentId)
+        .maybeSingle();
+
+    if (department == null) {
+      return null;
+    }
+
+    final imageUrl = department['image_url'] as String?;
+    if (imageUrl == null || imageUrl.trim().isEmpty) {
+      return null;
+    }
+
+    return imageUrl.trim();
+  }
+
   @override
   Stream<AuthUserModel?> authStateChanges() {
     return supabaseAuth.onAuthStateChange.asyncMap((event) async {
@@ -450,6 +672,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     StackTrace stackTrace, {
     required String fallbackMessage,
   }) {
+    log(
+      '[AuthRemoteDataSource] $fallbackMessage | ${error.runtimeType}: $error',
+      stackTrace: stackTrace,
+    );
+
     if (error is AppException && error is AuthAppException) {
       return error;
     }
@@ -459,5 +686,61 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       cause: error,
       stackTrace: stackTrace,
     );
+  }
+
+  void _logProviderSignup({
+    required String step,
+    String? email,
+    String? userId,
+    String? cityId,
+    String? departmentId,
+    int? experienceYears,
+    String? details,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    final context = <String>[
+      'step=$step',
+      if (email != null) 'email=${_maskEmail(email)}',
+      if (userId != null) 'userId=$userId',
+      if (cityId != null) 'cityId=$cityId',
+      if (departmentId != null) 'departmentId=$departmentId',
+      if (experienceYears != null) 'experienceYears=$experienceYears',
+      if (details != null && details.isNotEmpty) details,
+      if (error != null) 'errorType=${error.runtimeType}',
+      if (error != null) 'error=$error',
+    ].join(' | ');
+
+    log('[ProviderSignup] $context', stackTrace: stackTrace);
+  }
+
+  String _maskEmail(String email) {
+    final atIndex = email.indexOf('@');
+    if (atIndex <= 1) {
+      return '***';
+    }
+
+    final namePart = email.substring(0, atIndex);
+    final domainPart = email.substring(atIndex);
+
+    if (namePart.length <= 2) {
+      return '${namePart[0]}***$domainPart';
+    }
+
+    return '${namePart.substring(0, 2)}***$domainPart';
+  }
+
+  String? _normalizePhoneForPersistence(String? phone) {
+    final trimmed = phone?.trim();
+    if (trimmed == null || trimmed.isEmpty) {
+      return null;
+    }
+
+    final digitsOnly = trimmed.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitsOnly.isEmpty) {
+      return null;
+    }
+
+    return digitsOnly;
   }
 }

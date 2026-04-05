@@ -7,9 +7,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../generated/locale_keys.g.dart';
 
 class ProfileHeader extends StatelessWidget {
-  const ProfileHeader({super.key, this.user});
+  const ProfileHeader({super.key, this.user, this.imageUrl});
 
   final AuthUser? user;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -17,6 +18,13 @@ class ProfileHeader extends StatelessWidget {
     final displayName = user?.fullName?.trim().isNotEmpty == true
         ? user!.fullName!.trim()
         : user?.email.split('@').first ?? LocaleKeys.profile_title.tr();
+
+    final resolvedImageUrl =
+        (imageUrl?.trim().isNotEmpty == true)
+            ? imageUrl!.trim()
+            : (user?.avatarUrl?.trim().isNotEmpty == true)
+            ? user!.avatarUrl!.trim()
+            : null;
 
     return Column(
       children: [
@@ -33,13 +41,7 @@ class ProfileHeader extends StatelessWidget {
               end: Alignment.bottomCenter,
             ),
           ),
-          child: CircleAvatar(
-            radius: 46,
-            backgroundImage: (user?.avatarUrl != null &&
-                    user!.avatarUrl!.trim().isNotEmpty)
-                ? NetworkImage(user!.avatarUrl!.trim())
-                : Assets.images.png.defaultAvatar.provider(),
-          ),
+          child: _ProfileAvatar(imageUrl: resolvedImageUrl),
         ),
         const SizedBox(height: 20),
         Text(
@@ -81,6 +83,53 @@ class ProfileHeader extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({this.imageUrl});
+
+  final String? imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = imageUrl?.trim().isNotEmpty == true;
+
+    return CircleAvatar(
+      radius: 46,
+      backgroundColor: Colors.transparent,
+      child: ClipOval(
+        child: hasImage
+            ? Image.network(
+                imageUrl!,
+                fit: BoxFit.cover,
+                width: 92,
+                height: 92,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+                  return Assets.images.png.defaultAvatar.image(
+                    fit: BoxFit.cover,
+                    width: 92,
+                    height: 92,
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Assets.images.png.defaultAvatar.image(
+                    fit: BoxFit.cover,
+                    width: 92,
+                    height: 92,
+                  );
+                },
+              )
+            : Assets.images.png.defaultAvatar.image(
+                fit: BoxFit.cover,
+                width: 92,
+                height: 92,
+              ),
+      ),
     );
   }
 }

@@ -310,10 +310,31 @@ class _ProviderAvatar extends StatelessWidget {
             ? Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) =>
-                    Assets.images.png.defaultAvatar.image(fit: BoxFit.cover),
+                width: 60,
+                height: 60,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) {
+                    return child;
+                  }
+                  return Assets.images.png.defaultAvatar.image(
+                    fit: BoxFit.cover,
+                    width: 60,
+                    height: 60,
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Assets.images.png.defaultAvatar.image(
+                    fit: BoxFit.cover,
+                    width: 60,
+                    height: 60,
+                  );
+                },
               )
-            : Assets.images.png.defaultAvatar.image(fit: BoxFit.cover),
+            : Assets.images.png.defaultAvatar.image(
+                fit: BoxFit.cover,
+                width: 60,
+                height: 60,
+              ),
       ),
     );
   }
