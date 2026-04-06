@@ -1,7 +1,7 @@
 import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/utils/chats_actions_helper.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_state.dart';
-import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
@@ -38,6 +38,7 @@ class SearchResultsList extends StatelessWidget {
           cubit.state.favorites.map((item) => item.id).toSet(),
     );
     final currentUserId = _resolveCurrentUserId(context);
+    const actionsHelper = ChatsActionsHelper();
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -69,17 +70,12 @@ class SearchResultsList extends StatelessWidget {
               : () => context.push(AppRouter.orderBookingPath, extra: provider),
           onChatTap: currentUserId == null
               ? null
-              : () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ClientChatScreen(
-                        currentUserId: currentUserId,
-                        providerId: provider.id,
-                        title: provider.fullName,
-                      ),
-                    ),
-                  );
-                },
+              : () => actionsHelper.openClientChat(
+                    context: context,
+                    currentUserId: currentUserId,
+                    providerId: provider.id,
+                    title: provider.fullName,
+                  ),
         );
       },
     );

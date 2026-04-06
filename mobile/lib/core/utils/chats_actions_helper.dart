@@ -1,4 +1,8 @@
+import 'package:dar_care/core/utils/app_refresh_notifier.dart';
 import 'package:dar_care/features/chat/data/models/chat_list_item.dart';
+import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
+import 'package:dar_care/features/chat/presentation/provider/screens/provider_chat_screen.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ChatsActionsHelper {
@@ -6,6 +10,54 @@ class ChatsActionsHelper {
 
   String? currentUserId(SupabaseClient supabase) {
     return supabase.auth.currentUser?.id;
+  }
+
+  Future<void> openClientChat({
+    required BuildContext context,
+    required String currentUserId,
+    required String providerId,
+    String? title,
+    String? explicitClientId,
+    bool markAsStale = true,
+  }) async {
+    if (markAsStale) {
+      appRefreshNotifier.markChatsStale();
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ClientChatScreen(
+          currentUserId: currentUserId,
+          providerId: providerId,
+          explicitClientId: explicitClientId,
+          title: title,
+        ),
+      ),
+    );
+  }
+
+  Future<void> openProviderChat({
+    required BuildContext context,
+    required String currentUserId,
+    required String providerId,
+    required String clientId,
+    String? title,
+    bool markAsStale = true,
+  }) async {
+    if (markAsStale) {
+      appRefreshNotifier.markChatsStale();
+    }
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ProviderChatScreen(
+          currentUserId: currentUserId,
+          providerId: providerId,
+          clientId: clientId,
+          title: title,
+        ),
+      ),
+    );
   }
 
   Future<List<ChatListItem>> loadChats(SupabaseClient supabase) {

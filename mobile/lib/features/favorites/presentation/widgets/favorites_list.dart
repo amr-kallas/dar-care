@@ -1,8 +1,8 @@
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
+import 'package:dar_care/core/utils/chats_actions_helper.dart';
 import 'package:dar_care/core/utils/provider_presentation_utils.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
-import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
@@ -27,6 +27,7 @@ class FavoritesList extends StatelessWidget {
   Widget build(BuildContext context) {
     final languageCode = context.locale.languageCode;
     final currentUserId = resolveAuthUser(context.read<AuthCubit>().state)?.id;
+    const actionsHelper = ChatsActionsHelper();
 
     return RefreshIndicator(
       onRefresh: onRefresh,
@@ -60,17 +61,12 @@ class FavoritesList extends StatelessWidget {
                       context.push(AppRouter.orderBookingPath, extra: provider),
             onChatTap: currentUserId == null
                 ? null
-                : () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ClientChatScreen(
-                          currentUserId: currentUserId,
-                          providerId: provider.id,
-                          title: provider.fullName,
-                        ),
-                      ),
-                    );
-                  },
+                : () => actionsHelper.openClientChat(
+                      context: context,
+                      currentUserId: currentUserId,
+                      providerId: provider.id,
+                      title: provider.fullName,
+                    ),
           );
         },
       ),

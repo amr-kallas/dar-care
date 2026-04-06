@@ -1,5 +1,6 @@
 import 'package:dar_care/core/di/injection.dart';
 import 'package:dar_care/core/theme/app_colors.dart';
+import 'package:dar_care/core/utils/app_refresh_notifier.dart';
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
 import 'package:dar_care/core/widgets/custom_app_bar.dart';
 import 'package:dar_care/generated/locale_keys.g.dart';
@@ -31,6 +32,33 @@ class _OrdersScreenContent extends StatefulWidget {
 
 class _OrdersScreenContentState extends State<_OrdersScreenContent> {
   String _selectedFilter = OrderFilterValues.all;
+  int _lastOrdersVersion = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastOrdersVersion = appRefreshNotifier.ordersVersion;
+    appRefreshNotifier.addListener(_onGlobalRefresh);
+  }
+
+  @override
+  void dispose() {
+    appRefreshNotifier.removeListener(_onGlobalRefresh);
+    super.dispose();
+  }
+
+  void _onGlobalRefresh() {
+    if (!mounted) {
+      return;
+    }
+
+    if (_lastOrdersVersion == appRefreshNotifier.ordersVersion) {
+      return;
+    }
+
+    _lastOrdersVersion = appRefreshNotifier.ordersVersion;
+    context.read<OrdersCubit>().loadOrders();
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,4 +1,5 @@
 import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/core/utils/app_refresh_notifier.dart';
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
@@ -40,6 +41,33 @@ class _ProviderOrdersView extends StatefulWidget {
 
 class _ProviderOrdersViewState extends State<_ProviderOrdersView> {
   _ProviderOrdersTab _selectedTab = _ProviderOrdersTab.newRequests;
+  int _lastOrdersVersion = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastOrdersVersion = appRefreshNotifier.ordersVersion;
+    appRefreshNotifier.addListener(_onGlobalRefresh);
+  }
+
+  @override
+  void dispose() {
+    appRefreshNotifier.removeListener(_onGlobalRefresh);
+    super.dispose();
+  }
+
+  void _onGlobalRefresh() {
+    if (!mounted) {
+      return;
+    }
+
+    if (_lastOrdersVersion == appRefreshNotifier.ordersVersion) {
+      return;
+    }
+
+    _lastOrdersVersion = appRefreshNotifier.ordersVersion;
+    context.read<ProviderOrdersCubit>().loadOrders();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +81,9 @@ class _ProviderOrdersViewState extends State<_ProviderOrdersView> {
         AppSnackbar.showError(context, state.errorMessageKey!.tr());
       },
       child: Scaffold(
-        backgroundColor: isDark ? AppColors.backgroundDark : AppColors.backgroundLight,
+        backgroundColor: isDark
+            ? AppColors.backgroundDark
+            : AppColors.backgroundLight,
         appBar: CustomAppBar(
           showBackButton: false,
           title: LocaleKeys.provider_jobs_tab.tr(),
@@ -87,9 +117,7 @@ class _ProviderOrdersViewState extends State<_ProviderOrdersView> {
                 },
               ),
             ),
-            Expanded(
-              child: _ProviderOrdersTabContent(tab: _selectedTab),
-            ),
+            Expanded(child: _ProviderOrdersTabContent(tab: _selectedTab)),
           ],
         ),
       ),
@@ -108,11 +136,13 @@ class _ProviderOrdersTabContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ProviderOrdersCubit, ProviderOrdersState>(
       builder: (context, state) {
-        if (state.status == ProviderOrdersStatus.loading && state.orders.isEmpty) {
+        if (state.status == ProviderOrdersStatus.loading &&
+            state.orders.isEmpty) {
           return const OrdersLoadingState();
         }
 
-        if (state.status == ProviderOrdersStatus.failure && state.orders.isEmpty) {
+        if (state.status == ProviderOrdersStatus.failure &&
+            state.orders.isEmpty) {
           return OrdersErrorState(
             messageKey: state.errorMessageKey,
             onRetry: () => context.read<ProviderOrdersCubit>().loadOrders(),
@@ -141,7 +171,8 @@ class _ProviderOrdersTabContent extends StatelessWidget {
                 onTap: () async {
                   final changed = await Navigator.of(context).push<bool>(
                     MaterialPageRoute(
-                      builder: (_) => ProviderOrderDetailsEntryScreen(orderId: order.id),
+                      builder: (_) =>
+                          ProviderOrderDetailsEntryScreen(orderId: order.id),
                     ),
                   );
 

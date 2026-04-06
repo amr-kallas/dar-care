@@ -1,8 +1,8 @@
 import 'package:dar_care/core/utils/app_router.dart';
+import 'package:dar_care/core/utils/chats_actions_helper.dart';
 import 'package:dar_care/core/utils/provider_presentation_utils.dart';
 import 'package:dar_care/core/widgets/app_snackbar.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
-import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
 import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
 import 'package:dar_care/features/home/data/models/provider_model.dart';
@@ -32,6 +32,8 @@ class ClientHomeProvidersSection extends StatefulWidget {
 
 class _ClientHomeProvidersSectionState
     extends State<ClientHomeProvidersSection> {
+  static const _actionsHelper = ChatsActionsHelper();
+
   void _onBookNowTap(ProviderModel provider) {
     if (widget.currentUserId == null) {
       AppSnackbar.showError(context, LocaleKeys.auth_error_generic.tr());
@@ -110,17 +112,12 @@ class _ClientHomeProvidersSectionState
                           onTap: () => _onBookNowTap(provider),
                           onChatTap: widget.currentUserId == null
                               ? null
-                              : () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: (_) => ClientChatScreen(
-                                        currentUserId: widget.currentUserId!,
-                                        providerId: provider.id,
-                                        title: provider.fullName,
-                                      ),
-                                    ),
-                                  );
-                                },
+                              : () => _actionsHelper.openClientChat(
+                                    context: context,
+                                    currentUserId: widget.currentUserId!,
+                                    providerId: provider.id,
+                                    title: provider.fullName,
+                                  ),
                         );
                       },
                     );

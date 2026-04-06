@@ -1,58 +1,28 @@
+import 'package:dar_care/core/utils/chat_presentation_utils.dart';
 import 'package:dar_care/core/utils/chats_actions_helper.dart';
-import 'package:dar_care/core/widgets/custom_app_bar.dart';
-import 'package:dar_care/features/chat/data/models/chat_list_item.dart';
-import 'package:dar_care/features/chat/presentation/widgets/chats_empty_state.dart';
-import 'package:dar_care/features/chat/presentation/widgets/chats_error_state.dart';
-import 'package:dar_care/features/chat/presentation/widgets/chats_list_view.dart';
-import 'package:dar_care/generated/locale_keys.g.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:dar_care/features/chat/presentation/widgets/chats_overview_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-class ClientChatsScreen extends StatefulWidget {
+
+class ClientChatsScreen extends StatelessWidget {
   const ClientChatsScreen({super.key});
-  @override
-  State<ClientChatsScreen> createState() => _ClientChatsScreenState();
-}
-class _ClientChatsScreenState extends State<ClientChatsScreen> {
-  final SupabaseClient _supabase = Supabase.instance.client;
-  final ChatsActionsHelper _actionsHelper = const ChatsActionsHelper();
-  late Future<List<ChatListItem>> _chatsFuture;
-  @override
-  void initState() {
-    super.initState();
-    _chatsFuture = _actionsHelper.loadClientChats(_supabase);
-  }
-  Future<void> _refreshChats() async {
-    final future = _actionsHelper.loadClientChats(_supabase);
-    setState(() {
-      _chatsFuture = future;
-    });
-    await future;
-  }
+
   @override
   Widget build(BuildContext context) {
-    final userId = _actionsHelper.currentUserId(_supabase);
-    return Scaffold(
-      appBar: CustomAppBar(titleWidget: Text(LocaleKeys.chats_title.tr())),
-      body: FutureBuilder<List<ChatListItem>>(
-        future: _chatsFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return ChatsErrorState(onRetry: _refreshChats);
-          }
-          final chats = snapshot.data ?? const <ChatListItem>[];
-          if (chats.isEmpty) {
-            return ChatsEmptyState(onRefresh: _refreshChats);
-          }
-          return ChatsListView(
-            chats: chats,
-            currentUserId: userId,
-            onRefresh: _refreshChats,
-          );
-        },
+    final supabase = Supabase.instance.client;
+    const actionsHelper = ChatsActionsHelper();
+    final userId = actionsHelper.currentUserId(supabase);
+
+    return ChatsOverviewScaffold(
+      currentUserId: userId,
+      loadChats: () => actionsHelper.loadClientChats(supabase),
+      resolveDisplayName: (chat) => resolveProviderName(chat.providerName),
+      onOpenChat: (context, chat) => actionsHelper.openClientChat(
+        context: context,
+        currentUserId: userId!,
+        providerId: chat.providerId,
+        title: resolveProviderName(chat.providerName),
+        markAsStale: false,
       ),
     );
   }

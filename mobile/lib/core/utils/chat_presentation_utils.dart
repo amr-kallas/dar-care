@@ -30,3 +30,21 @@ String resolveChatTitle(String? title) {
 
   return LocaleKeys.chat_title.tr();
 }
+
+String resolveProviderName(String? value) {
+  final normalized = value?.trim() ?? '';
+  if (normalized.isNotEmpty) {
+    return normalized;
+  }
+
+  return LocaleKeys.chat_provider_fallback.tr();
+}
+
+String resolveClientName(String? value) {
+  final normalized = value?.trim() ?? '';
+  if (normalized.isNotEmpty) {
+    return normalized;
+  }
+
+  return LocaleKeys.home_unknown_user.tr();
+}

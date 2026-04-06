@@ -1,20 +1,19 @@
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/core/utils/app_router.dart';
-import 'package:dar_care/features/home/data/models/provider_model.dart';
+import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
+import 'package:dar_care/core/utils/chats_actions_helper.dart';
+import 'package:dar_care/core/utils/provider_presentation_utils.dart';
+import 'package:dar_care/core/widgets/custom_app_bar.dart';
 import 'package:dar_care/core/widgets/provider_card.dart';
+import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
+import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
+import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
+import 'package:dar_care/features/home/data/models/provider_model.dart';
+import 'package:dar_care/generated/locale_keys.g.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:dar_care/features/favorites/presentation/cubit/favorites_cubit.dart';
-import 'package:dar_care/features/favorites/presentation/cubit/favorites_state.dart';
-
-import '../../../../../generated/locale_keys.g.dart';
-import '../../../../../core/widgets/custom_app_bar.dart';
-import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
-import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
-import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
-import 'package:dar_care/core/utils/provider_presentation_utils.dart';
 
 class AllProvidersScreen extends StatelessWidget {
   const AllProvidersScreen({super.key, required this.providers});
@@ -26,6 +25,7 @@ class AllProvidersScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final currentUserId = resolveAuthUser(context.read<AuthCubit>().state)?.id;
+    const actionsHelper = ChatsActionsHelper();
 
     return Scaffold(
       backgroundColor: isDark
@@ -86,17 +86,12 @@ class AllProvidersScreen extends StatelessWidget {
                             ),
                       onChatTap: currentUserId == null
                           ? null
-                          : () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (_) => ClientChatScreen(
-                                    currentUserId: currentUserId,
-                                    providerId: provider.id,
-                                    title: provider.fullName,
-                                  ),
-                                ),
-                              );
-                            },
+                          : () => actionsHelper.openClientChat(
+                                context: context,
+                                currentUserId: currentUserId,
+                                providerId: provider.id,
+                                title: provider.fullName,
+                              ),
                     );
                   },
                 );

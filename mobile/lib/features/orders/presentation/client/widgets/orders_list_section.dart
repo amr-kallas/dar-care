@@ -1,7 +1,7 @@
 import 'package:dar_care/core/utils/auth_state_user_resolver.dart';
+import 'package:dar_care/core/utils/chats_actions_helper.dart';
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
 import 'package:dar_care/features/auth/presentation/cubit/auth/auth_cubit.dart';
-import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -48,6 +48,7 @@ class OrdersListSection extends StatelessWidget {
         final currentUserId = resolveAuthUser(
           context.read<AuthCubit>().state,
         )?.id;
+        const actionsHelper = ChatsActionsHelper();
 
         return RefreshIndicator(
           onRefresh: () => context.read<OrdersCubit>().loadOrders(),
@@ -63,17 +64,12 @@ class OrdersListSection extends StatelessWidget {
                     currentUserId != null &&
                         order.providerId != null &&
                         order.providerId!.trim().isNotEmpty
-                    ? () {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (_) => ClientChatScreen(
-                              currentUserId: currentUserId,
-                              providerId: order.providerId!,
-                              title: order.providerName,
-                            ),
-                          ),
-                        );
-                      }
+                    ? () => actionsHelper.openClientChat(
+                          context: context,
+                          currentUserId: currentUserId,
+                          providerId: order.providerId!,
+                          title: order.providerName,
+                        )
                     : null,
               );
             },

@@ -1,3 +1,4 @@
+import 'package:dar_care/core/utils/app_refresh_notifier.dart';
 import 'package:dar_care/core/theme/app_colors.dart';
 import 'package:dar_care/core/utils/order_presentation_utils.dart';
 import 'package:dar_care/core/widgets/app_loading_indicator.dart';
@@ -12,8 +13,41 @@ import 'package:solar_icon_pack/solar_icon_pack.dart';
 import '../cubit/provider_home_cubit.dart';
 import '../cubit/provider_home_state.dart';
 
-class ProviderHomeScreen extends StatelessWidget {
+class ProviderHomeScreen extends StatefulWidget {
   const ProviderHomeScreen({super.key});
+
+  @override
+  State<ProviderHomeScreen> createState() => _ProviderHomeScreenState();
+}
+
+class _ProviderHomeScreenState extends State<ProviderHomeScreen> {
+  int _lastProviderHomeVersion = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _lastProviderHomeVersion = appRefreshNotifier.providerHomeVersion;
+    appRefreshNotifier.addListener(_onGlobalRefresh);
+  }
+
+  @override
+  void dispose() {
+    appRefreshNotifier.removeListener(_onGlobalRefresh);
+    super.dispose();
+  }
+
+  void _onGlobalRefresh() {
+    if (!mounted) {
+      return;
+    }
+
+    if (_lastProviderHomeVersion == appRefreshNotifier.providerHomeVersion) {
+      return;
+    }
+
+    _lastProviderHomeVersion = appRefreshNotifier.providerHomeVersion;
+    context.read<ProviderHomeCubit>().loadDashboard();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,9 +110,9 @@ class _ProviderHomeBody extends StatelessWidget {
               Expanded(
                 child: Text(
                   state.isAvailable ? 'available_now'.tr() : 'unavailable'.tr(),
-                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
                 ),
               ),
               Switch.adaptive(
@@ -98,15 +132,17 @@ class _ProviderHomeBody extends StatelessWidget {
         const SizedBox(height: 20),
         Text(
           'provider_latest_orders'.tr(),
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         if (state.pendingOrders.isEmpty)
           _NoPendingOrdersCard()
         else
-          ...state.pendingOrders.map((order) => _PendingOrderCard(order: order)),
+          ...state.pendingOrders.map(
+            (order) => _PendingOrderCard(order: order),
+          ),
       ],
     );
   }
@@ -269,9 +305,9 @@ class _PendingOrderCard extends StatelessWidget {
               children: [
                 Text(
                   'orders_item_title'.tr(namedArgs: {'id': order.id}),
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
                 Text(

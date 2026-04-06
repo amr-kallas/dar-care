@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:dar_care/core/di/injection.dart';
+import 'package:dar_care/core/utils/app_refresh_notifier.dart';
 import 'package:dar_care/core/utils/app_router.dart';
 import 'package:dar_care/core/utils/location_permission_utils.dart';
 import 'package:dar_care/core/utils/location_setup_error_utils.dart';
@@ -165,6 +166,7 @@ class _OrderBookingScreenState extends State<OrderBookingScreen> {
       }
 
       AppSnackbar.showSuccess(context, 'Booking confirmed successfully.');
+      appRefreshNotifier.markAllForOrderUpdate();
       context.go(AppRouter.myOrdersPath);
     } catch (_) {
       if (!mounted) {

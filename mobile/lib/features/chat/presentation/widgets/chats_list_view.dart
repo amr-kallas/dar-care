@@ -1,4 +1,3 @@
-import 'package:dar_care/features/chat/presentation/client/screens/client_chat_screen.dart';
 import 'package:dar_care/features/chat/data/models/chat_list_item.dart';
 import 'package:dar_care/features/chat/presentation/widgets/chat_list_item_tile.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +6,17 @@ class ChatsListView extends StatelessWidget {
   const ChatsListView({
     super.key,
     required this.chats,
-    required this.currentUserId,
     required this.onRefresh,
+    required this.titleBuilder,
+    required this.subtitleBuilder,
+    required this.onTapBuilder,
   });
 
   final List<ChatListItem> chats;
-  final String? currentUserId;
   final Future<void> Function() onRefresh;
+  final String Function(ChatListItem chat) titleBuilder;
+  final String Function(ChatListItem chat) subtitleBuilder;
+  final VoidCallback? Function(ChatListItem chat) onTapBuilder;
 
   @override
   Widget build(BuildContext context) {
@@ -27,20 +30,9 @@ class ChatsListView extends StatelessWidget {
         itemBuilder: (context, index) {
           final chat = chats[index];
           return ChatListItemTile(
-            chat: chat,
-            onTap: currentUserId == null
-                ? null
-                : () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ClientChatScreen(
-                          currentUserId: currentUserId!,
-                          providerId: chat.providerId,
-                          title: chat.providerName,
-                        ),
-                      ),
-                    );
-                  },
+            title: titleBuilder(chat),
+            subtitle: subtitleBuilder(chat),
+            onTap: onTapBuilder(chat),
           );
         },
       ),

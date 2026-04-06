@@ -1,3 +1,4 @@
+import 'package:dar_care/core/utils/app_refresh_notifier.dart';
 import 'package:dar_care/core/utils/orders_error_utils.dart';
 import 'package:dar_care/features/orders/domain/repositories/orders_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -42,6 +43,7 @@ class ProviderOrderDetailsCubit extends Cubit<ProviderOrderDetailsState> {
           clearError: true,
         ),
       );
+      appRefreshNotifier.markAllForOrderUpdate();
     } catch (e) {
       emit(
         state.copyWith(
@@ -68,6 +70,7 @@ class ProviderOrderDetailsCubit extends Cubit<ProviderOrderDetailsState> {
           clearError: true,
         ),
       );
+      appRefreshNotifier.markAllForOrderUpdate();
     } catch (e) {
       emit(
         state.copyWith(
