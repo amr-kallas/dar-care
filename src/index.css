@@ -1,0 +1,31 @@
+body {
+  margin: 0;
+  overflow-x: hidden;
+  background-color: #f1f1f1;
+}
+fieldset {
+  border: none;
+}
+@font-face {
+  font-family: "MontserratArabic";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("./fonts/Arabic.ttf") format("truetype");
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 5px;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #406450;
+  border-radius: 5px;
+}
