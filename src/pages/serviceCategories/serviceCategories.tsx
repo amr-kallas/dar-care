@@ -78,7 +78,9 @@ const ServiceCategories = () => {
   const tableQuery = useMemo(
     () =>
       ({
-        data: list,
+        // Stays undefined until the request resolves — PaginationTable keys its
+        // skeleton off a falsy `data`, and `list` is never falsy.
+        data: categoriesQuery.data ? list : undefined,
         isFetching: categoriesQuery.isFetching,
         isSuccess: categoriesQuery.isSuccess,
         isError: categoriesQuery.isError,

@@ -1,8 +1,8 @@
 import { Box, Slide, Stack, Typography } from "@mui/material";
 import BottomRightWavesIcon from "@components/icons/BottomRightWavesIcon";
-import { FC } from "react";
+import logo from "@assets/logo-removebg-preview.png";
 import LoginForm from ".";
-export const LoginPage: FC<{}> = ({}) => {
+export const LoginPage = () => {
   return (
     <Box
       sx={{
@@ -21,8 +21,7 @@ export const LoginPage: FC<{}> = ({}) => {
         },
       }}
     >
-      
-      <BottomRightWavesIcon/>
+      <BottomRightWavesIcon />
       <Stack
         direction={"row"}
         alignItems={"center"}
@@ -35,13 +34,28 @@ export const LoginPage: FC<{}> = ({}) => {
           right: { xs: "50%", md: 100 },
         }}
       >
-        <Typography color={"primary"} fontSize={72} mt={1} fontFamily={"cursive"}>
-          <Typography color="text.primary" component={"span"} fontSize={84} fontFamily={"cursive"}>
-            Butter
+        <Typography
+          color={"primary"}
+          fontSize={72}
+          mt={1}
+          fontFamily={"cursive"}
+        >
+          <Typography
+            color="text.primary"
+            component={"span"}
+            fontSize={84}
+            fontFamily={"cursive"}
+          >
+            Dar
           </Typography>
-          Fly
+          Care
         </Typography>
-        <Box component="img" src='src\assets\logo.png' width={{ xs: 100, md: 200 }} />
+        <Box
+          component="img"
+          src={logo}
+          alt="Dar Care"
+          width={{ xs: 100, md: 200 }}
+        />
       </Stack>
       <Slide in={true} direction="right" timeout={300}>
         <Box

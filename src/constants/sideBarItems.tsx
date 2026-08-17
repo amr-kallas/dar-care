@@ -36,11 +36,6 @@ export const createSideBarItems = [
       text: "الإشعارات",
     },
     {
-      href: "support",
-      icon: <SupportAgentIcon />,
-      text: "الدعم الفني",
-    },
-    {
       href: "orders",
       icon: <ReceiptLongOutlinedIcon />,
       text: "الطلبات",
@@ -54,6 +49,11 @@ export const createSideBarItems = [
       href: "reviews",
       icon: <ReviewsOutlinedIcon />,
       text: "التقييمات",
+    },
+    {
+      href: "support",
+      icon: <SupportAgentIcon />,
+      text: "الدعم الفني",
     },
   ],
 ].filter((section) => section.length !== 0);

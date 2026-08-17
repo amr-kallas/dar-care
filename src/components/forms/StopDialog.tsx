@@ -20,6 +20,11 @@ type Props = {
   isPending: boolean;
   /** URL `mode` value that opens this dialog (default: stop). */
   stopModeKey?: string;
+  title?: string;
+  confirmLabel?: string;
+  successMessage?: string;
+  /** Palette key used for the confirm button (default: warning). */
+  confirmColor?: "warning" | "success";
 };
 
 const StopDialog: FC<Props> = ({
@@ -27,6 +32,10 @@ const StopDialog: FC<Props> = ({
   invalidateQueryKey,
   isPending,
   stopModeKey = "stop",
+  title = "هل أنت متأكد من إيقاف هذا الحرفي؟",
+  confirmLabel = "إيقاف",
+  successMessage = "تم الإيقاف بنجاح",
+  confirmColor = "warning",
 }) => {
   const queryClient = useQueryClient();
   const { id, isActive, clearStopParams } = useStopSearchParams(
@@ -47,7 +56,7 @@ const StopDialog: FC<Props> = ({
             invalidateQueryKey as InvalidateQueryFilters
           );
         }
-        successSnackbar("تم الإيقاف بنجاح");
+        successSnackbar(successMessage);
         handleClose();
       },
     });
@@ -57,9 +66,7 @@ const StopDialog: FC<Props> = ({
     <form>
       <Dialog open={isActive} onClose={handleClose}>
         <Stack width={500} maxWidth="100%">
-          <DialogTitle onClose={handleClose}>
-            هل أنت متأكد من إيقاف هذا الحرفي؟
-          </DialogTitle>
+          <DialogTitle onClose={handleClose}>{title}</DialogTitle>
           <DialogContent>{isPending && <Loading />}</DialogContent>
           <DialogActions>
             <Button
@@ -81,15 +88,15 @@ const StopDialog: FC<Props> = ({
               onClick={handleStop}
               disabled={isPending}
               sx={{
-                bgcolor: "warning.main",
+                bgcolor: `${confirmColor}.main`,
                 color: "white",
                 "&:hover": {
-                  bgcolor: "warning.dark",
+                  bgcolor: `${confirmColor}.dark`,
                   color: "white",
                 },
               }}
             >
-              إيقاف
+              {confirmLabel}
             </Button>
           </DialogActions>
         </Stack>

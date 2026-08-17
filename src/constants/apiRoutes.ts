@@ -1,48 +1,13 @@
 let API_ROUTES = {
   AUTH: {
-    root: "CpAccount",
-    LOGIN: "Login",
-  },
-  USER: {
-    root: "CpTeacher",
-    GET_USERS: "GetAllTeachers",
-    GET_USER: "GetScanReccords",
-    ADD_USER: "AddTeacher",
-    Delete_USER: "DeleteTeacher",
-    GET_CHAT_USER: "GetAllChatsTeacher",
-    GET_ALL_CHAT: "GetChatsCp",
-    GET_USERS_COUNT: "GetTeachersCount",
+    root: "v1/auth",
+    LOGIN: "admin/login",
   },
   NOTIFICATION: {
     root: "Notification",
     GET_ALL: "GetAllNotificationsCp",
     SEND_NOTIFICATION: "SendNotificationCp",
     REMOVE_NOTIFICATION: "RemoveNotification",
-  },
-  SETTING: {
-    root: "Setting",
-    GET_SETTING: "GetAllSettings",
-    ADD_SETTING: "UpdateSetting",
-  },
-  QUESTIONS_GENERATOR: {
-    root: "QuestionsGenerator",
-    UPLOAD_FILE: "UploadFile",
-    GET_ALL_BOOKS: "GetAllBooks",
-    GET_BOOK_DETAILS: "GetBookDetails",
-    UPDATE_BOOK: "UpdateBook",
-    REMOVE_BOOK: "RemoveBook",
-    GENERATE_QUESTIONS: "GenerateQuestions",
-    GET_ALL_QUESTIONS: "GetAllQuestions",
-    GET_QUESTION_DETAILS: "GetQuestionDetails",
-    UPDATE_QUESTION: "UpdateQuestion",
-    REMOVE_QUESTION: "RemoveQuestion",
-    GENERATE_EXAM: "GenerateExam",
-  },
-  CLASS: {
-    root: "Class",
-    GET_ALL_CLASS: "GetAllClass",
-    GET_CLASS: 'GetClass',
-    SET_CLASS:'SetClass'
   },
   ADMIN: {
     root: "v1",
@@ -56,10 +21,27 @@ let API_ROUTES = {
     DELETE_CATEGORY: (id: string) => `admin/categories/${id}`,
     GET_RATINGS: "admin/ratings",
     GET_SERVICE_REQUESTS: "admin/service-requests",
+    GET_NOTIFICATIONS: "notifications",
+    SEND_BULK_NOTIFICATION: "admin/notifications/send-bulk",
+  },
+  CHAT: {
+    root: "v1",
+    // Admin-only: auth:sanctum + admin middleware.
+    GET_CONVERSATIONS: "admin/chat/conversations",
+    GET_CONVERSATION: (id: number) => `admin/chat/conversations/${id}`,
+    GET_MESSAGES: (id: number) => `admin/chat/conversations/${id}/messages`,
+    SEND_MESSAGE: (id: number) => `admin/chat/conversations/${id}/messages`,
+    CLOSE_CONVERSATION: (id: number) => `admin/chat/conversations/${id}/close`,
+    REOPEN_CONVERSATION: (id: number) =>
+      `admin/chat/conversations/${id}/reopen`,
+    // Shared actor endpoints (not admin-prefixed).
+    MARK_READ: (id: number) => `chat/conversations/${id}/read`,
   },
   DASHBOARD: {
-    root: "admin",
+    root: "v1/admin",
     GET_STATS: "dashboard/stats",
+    GET_OVERVIEW: "dashboard/overview",
+    GET_MONTHLY_STATISTICS: "dashboard/request-statistics/monthly",
   },
 };
 const controllersArr = Object.entries(API_ROUTES).map(

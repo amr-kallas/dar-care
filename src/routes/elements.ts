@@ -18,14 +18,6 @@ export const NOTIFICATION_PAGES = {
     SUPPORT: lazy(() => import("../pages/support/support")),
     MESSAGES: lazy(() => import("../pages/support/messages")),
 };
-  
-export const BOOKS_PAGES = {
-    BOOKS:lazy(()=>import('../pages/Books/Books')),
-  QUES: lazy(() => import("../pages/Questions/Ques")),
-  }
-export const QUES_PAGES = {
-  QUES: lazy(() => import("../pages/Questions/Ques")),
-};
 
 export const ORDERS_PAGES = {
   ORDERS: lazy(() => import("../pages/orders/orders")),

@@ -1,4 +1,9 @@
-import type { IDashboardStats } from "@apis/dashboard/type";
+import type {
+  IDashboardOverview,
+  IDashboardStats,
+  IMonthlyStatistics,
+  IRequestStatus,
+} from "@apis/dashboard/type";
 
 export interface KPICard {
   id: string;
@@ -48,13 +53,45 @@ export function mapDashboardStatsToKpiCards(stats: IDashboardStats): KPICard[] {
   ];
 }
 
-export function mapDashboardStatsToRequestStatus(stats: IDashboardStats) {
-  return [
-    { name: "معلقة", count: stats.pending_requests, color: "#fb8c00" },
-    { name: "مكتملة", count: stats.completed_requests, color: "#2d5a3d" },
-    { name: "عاجلة معلقة", count: stats.urgent_pending_requests, color: "#c62828" },
-  ];
-}
+export const STATUS_LABELS_AR: Record<IRequestStatus, string> = {
+  pending: "معلقة",
+  accepted: "مقبولة",
+  rejected: "مرفوضة",
+  delayed: "مؤجلة",
+  completed: "مكتملة",
+  cancelled: "ملغاة",
+};
+
+export const STATUS_COLORS: Record<IRequestStatus, string> = {
+  pending: "#fb8c00",
+  accepted: "#1565c0",
+  rejected: "#8d6e63",
+  delayed: "#6a1b9a",
+  completed: "#2d5a3d",
+  cancelled: "#c62828",
+};
+
+const STATUS_ORDER: IRequestStatus[] = [
+  "pending",
+  "accepted",
+  "completed",
+  "delayed",
+  "rejected",
+  "cancelled",
+];
+
+const CATEGORY_PALETTE = [
+  "#2e7d32",
+  "#1565c0",
+  "#e65100",
+  "#6a1b9a",
+  "#00695c",
+  "#c62828",
+  "#546e7a",
+  "#ad1457",
+  "#4527a0",
+  "#00838f",
+];
 
 export interface OrderTrend {
   period: string;
@@ -66,6 +103,7 @@ export interface OrderTrend {
 export interface CategoryDistribution {
   name: string;
   count: number;
+  percentage: number;
   color: string;
 }
 
@@ -75,107 +113,126 @@ export interface RatingDistribution {
 }
 
 export interface RecentOrder {
-  id: string;
+  id: number;
   clientName: string;
   craftsmanName: string;
   service: string;
-  status: "completed" | "pending" | "cancelled" | "in_progress";
+  status: IRequestStatus;
+  urgency: string | null;
   date: string;
-  amount: number;
 }
 
 export interface TopCraftsman {
-  id: string;
+  id: number;
   name: string;
   specialty: string;
   completedOrders: number;
   rating: number;
   reviewsCount: number;
-  status: "active" | "inactive";
   avatarInitials: string;
+  avatarUrl: string | null;
 }
 
 export interface RecentReview {
-  id: string;
+  id: number;
   clientName: string;
   craftsmanName: string;
   rating: number;
   comment: string;
   date: string;
-  service: string;
+  requestId: number | null;
 }
 
-export const MOCK_KPI_CARDS: KPICard[] = [
-  { id: "users", labelAr: "إجمالي المستخدمين", value: 12480, change: 8.2, changePositive: true, icon: "People", color: "#2e7d32", bgColor: "#e8f5e9" },
-  { id: "craftsmen", labelAr: "إجمالي الحرفيين", value: 3241, change: 5.1, changePositive: true, icon: "Build", color: "#1565c0", bgColor: "#e3f2fd" },
-  { id: "orders", labelAr: "إجمالي الطلبات", value: 28954, change: 12.7, changePositive: true, icon: "Assignment", color: "#e65100", bgColor: "#fff3e0" },
-  { id: "reviews", labelAr: "إجمالي التقييمات", value: 19320, change: -2.3, changePositive: false, icon: "Star", color: "#6a1b9a", bgColor: "#f3e5f5" },
-  { id: "active_craftsmen", labelAr: "حرفيون نشطون", value: 2876, change: 3.4, changePositive: true, icon: "CheckCircle", color: "#00695c", bgColor: "#e0f2f1" },
-  { id: "stopped_craftsmen", labelAr: "حرفيون متوقفون", value: 365, change: -1.8, changePositive: false, icon: "Block", color: "#c62828", bgColor: "#ffebee" },
-];
+const initialsOf = (name: string) =>
+  name
+    .trim()
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => word.charAt(0))
+    .join("");
 
-export const MOCK_ORDER_TREND: OrderTrend[] = [
-  { period: "يوليو", orders: 1820, completed: 1540, cancelled: 280 },
-  { period: "أغسطس", orders: 2100, completed: 1830, cancelled: 270 },
-  { period: "سبتمبر", orders: 1950, completed: 1680, cancelled: 270 },
-  { period: "أكتوبر", orders: 2400, completed: 2050, cancelled: 350 },
-  { period: "نوفمبر", orders: 2800, completed: 2420, cancelled: 380 },
-  { period: "ديسمبر", orders: 3200, completed: 2780, cancelled: 420 },
-  { period: "يناير", orders: 2950, completed: 2560, cancelled: 390 },
-  { period: "فبراير", orders: 3100, completed: 2710, cancelled: 390 },
-  { period: "مارس", orders: 3450, completed: 3010, cancelled: 440 },
-  { period: "أبريل", orders: 3800, completed: 3310, cancelled: 490 },
-  { period: "مايو", orders: 4100, completed: 3580, cancelled: 520 },
-  { period: "يونيو", orders: 4350, completed: 3800, cancelled: 550 },
-];
+/** Monthly totals per status, shaped for the trend area chart. */
+export function mapMonthlyToOrderTrend(
+  monthly: IMonthlyStatistics
+): OrderTrend[] {
+  return monthly.months.map((month) => ({
+    period: month.month_name_ar,
+    orders: month.total,
+    completed: month.statuses.completed.count,
+    cancelled: month.statuses.cancelled.count,
+  }));
+}
 
-export const MOCK_CATEGORY_DISTRIBUTION: CategoryDistribution[] = [
-  { name: "سباكة", count: 5420, color: "#2e7d32" },
-  { name: "كهرباء", count: 4870, color: "#1565c0" },
-  { name: "نجارة", count: 3980, color: "#e65100" },
-  { name: "دهان", count: 3210, color: "#6a1b9a" },
-  { name: "تكييف", count: 2760, color: "#00695c" },
-  { name: "أخرى", count: 2890, color: "#546e7a" },
-];
+/** Yearly totals per status, shaped for the status bar chart. */
+export function mapYearTotalsToRequestStatus(monthly: IMonthlyStatistics) {
+  return STATUS_ORDER.map((status) => ({
+    name: STATUS_LABELS_AR[status],
+    count: monthly.year_totals[status] ?? 0,
+    color: STATUS_COLORS[status],
+  }));
+}
 
-export const MOCK_RATING_DISTRIBUTION: RatingDistribution[] = [
-  { stars: 5, count: 9820 },
-  { stars: 4, count: 5410 },
-  { stars: 3, count: 2380 },
-  { stars: 2, count: 980 },
-  { stars: 1, count: 730 },
-];
+export function mapCategoryDistribution(
+  overview: IDashboardOverview
+): CategoryDistribution[] {
+  return overview.category_distribution.categories.map((category, idx) => ({
+    name: category.name,
+    count: category.requests_count,
+    percentage: category.percentage,
+    color: CATEGORY_PALETTE[idx % CATEGORY_PALETTE.length],
+  }));
+}
 
-export const MOCK_RECENT_ORDERS: RecentOrder[] = [
-  { id: "ORD-7821", clientName: "أحمد محمد", craftsmanName: "خالد العمري", service: "سباكة", status: "completed", date: "2024-06-15", amount: 450 },
-  { id: "ORD-7822", clientName: "فاطمة علي", craftsmanName: "محمود سالم", service: "كهرباء", status: "in_progress", date: "2024-06-15", amount: 320 },
-  { id: "ORD-7823", clientName: "سارة حسن", craftsmanName: "يوسف كمال", service: "دهان", status: "pending", date: "2024-06-14", amount: 780 },
-  { id: "ORD-7824", clientName: "محمد عبدالله", craftsmanName: "أحمد فاروق", service: "نجارة", status: "completed", date: "2024-06-14", amount: 1200 },
-  { id: "ORD-7825", clientName: "نورا إبراهيم", craftsmanName: "كريم عادل", service: "تكييف", status: "cancelled", date: "2024-06-13", amount: 550 },
-  { id: "ORD-7826", clientName: "عمر مصطفى", craftsmanName: "طارق منصور", service: "سباكة", status: "completed", date: "2024-06-13", amount: 290 },
-  { id: "ORD-7827", clientName: "ريم الشمري", craftsmanName: "حسام وليد", service: "كهرباء", status: "in_progress", date: "2024-06-12", amount: 410 },
-];
+export function mapLatestRequests(overview: IDashboardOverview): RecentOrder[] {
+  return overview.latest_requests.map((request) => ({
+    id: request.id,
+    clientName: request.customer?.name ?? "—",
+    craftsmanName: request.artisan?.name ?? "—",
+    service: request.category?.name ?? "—",
+    status: request.status,
+    urgency: request.urgency,
+    date: request.created_at,
+  }));
+}
 
-export const MOCK_TOP_CRAFTSMEN: TopCraftsman[] = [
-  { id: "C001", name: "خالد العمري", specialty: "سباكة", completedOrders: 342, rating: 4.9, reviewsCount: 318, status: "active", avatarInitials: "خع" },
-  { id: "C002", name: "محمود سالم", specialty: "كهرباء", completedOrders: 298, rating: 4.8, reviewsCount: 275, status: "active", avatarInitials: "مس" },
-  { id: "C003", name: "يوسف كمال", specialty: "دهان", completedOrders: 271, rating: 4.7, reviewsCount: 254, status: "active", avatarInitials: "يك" },
-  { id: "C004", name: "أحمد فاروق", specialty: "نجارة", completedOrders: 258, rating: 4.8, reviewsCount: 241, status: "active", avatarInitials: "أف" },
-  { id: "C005", name: "كريم عادل", specialty: "تكييف", completedOrders: 234, rating: 4.6, reviewsCount: 220, status: "active", avatarInitials: "كع" },
-];
+export function mapTopArtisans(overview: IDashboardOverview): TopCraftsman[] {
+  return overview.top_artisans.map((artisan) => ({
+    id: artisan.id,
+    name: artisan.name,
+    specialty:
+      artisan.categories.map((category) => category.name).join("، ") || "—",
+    completedOrders: artisan.completed_requests_count,
+    rating: artisan.average_rating,
+    reviewsCount: artisan.ratings_count,
+    avatarInitials: initialsOf(artisan.name),
+    avatarUrl: artisan.profile_image,
+  }));
+}
 
-export const MOCK_RECENT_REVIEWS: RecentReview[] = [
-  { id: "R001", clientName: "أحمد محمد", craftsmanName: "خالد العمري", rating: 5, comment: "عمل ممتاز وسريع، أنصح به بشدة", date: "2024-06-15", service: "سباكة" },
-  { id: "R002", clientName: "فاطمة علي", craftsmanName: "محمود سالم", rating: 4, comment: "خدمة جيدة جداً وسعر مناسب", date: "2024-06-14", service: "كهرباء" },
-  { id: "R003", clientName: "سارة حسن", craftsmanName: "يوسف كمال", rating: 5, comment: "دقيق في العمل ومحترف", date: "2024-06-14", service: "دهان" },
-  { id: "R004", clientName: "محمد عبدالله", craftsmanName: "أحمد فاروق", rating: 3, comment: "الخدمة مقبولة لكن التأخير كان ملحوظاً", date: "2024-06-13", service: "نجارة" },
-  { id: "R005", clientName: "نورا إبراهيم", craftsmanName: "كريم عادل", rating: 5, comment: "ممتاز جداً، سيتم التعامل معه مجدداً", date: "2024-06-13", service: "تكييف" },
-];
+export function mapLatestRatings(overview: IDashboardOverview): RecentReview[] {
+  return overview.latest_ratings.map((rating) => ({
+    id: rating.id,
+    clientName: rating.customer?.name ?? "—",
+    craftsmanName: rating.artisan?.name ?? "—",
+    rating: rating.rating,
+    comment: rating.comment ?? "",
+    date: rating.created_at,
+    requestId: rating.service_request?.id ?? null,
+  }));
+}
 
-export type DateRangePreset = "7d" | "30d" | "90d" | "12m";
-export const DATE_RANGE_OPTIONS: { value: DateRangePreset; labelAr: string }[] = [
-  { value: "7d", labelAr: "آخر 7 أيام" },
-  { value: "30d", labelAr: "آخر 30 يوم" },
-  { value: "90d", labelAr: "آخر 3 أشهر" },
-  { value: "12m", labelAr: "آخر 12 شهر" },
-];
+/**
+ * Star breakdown of the ratings returned by the overview endpoint. The API
+ * only exposes the latest ratings, so this reflects that sample — not every
+ * rating on record.
+ */
+export function mapRatingDistribution(
+  overview: IDashboardOverview
+): RatingDistribution[] {
+  return [5, 4, 3, 2, 1].map((stars) => ({
+    stars,
+    count: overview.latest_ratings.filter(
+      (rating) => Math.round(rating.rating) === stars
+    ).length,
+  }));
+}

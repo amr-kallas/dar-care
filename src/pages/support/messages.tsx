@@ -1,434 +1,519 @@
+import { keys, queries } from "@apis/chat/queries";
+import type { IChatMessageView } from "@apis/chat/type";
+import Skeleton from "@components/feedbacks/skeleton";
+import { useSnackbar } from "@context/snackbarContext";
 import {
+  useConversationChannel,
+  usePusherReconnect,
+} from "@hooks/useChatChannels";
+import { getAdminId } from "@lib/session";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import SendIcon from "@mui/icons-material/Send";
+import {
+  Alert,
   AppBar,
   Avatar,
   Box,
   Button,
+  Chip,
   IconButton,
+  Stack,
   TextField,
   Toolbar,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import SendIcon from "@mui/icons-material/Send";
-import { useEffect, useRef, useState } from "react";
-import { useSideBar } from "@context/sideBarContext";
 import { useTheme } from "@mui/material/styles";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { VariableSizeList as VirtualizedList } from "react-window";
-import { queries } from "@apis/support/queries";
-import { BACKEND_REALTIME_URL } from "@lib/axios";
-import { SUPPORT_PATH } from "../../../src/routes/path";
-
-/** Mock-only: set false to use live API + WebSocket again. */
-const USE_MOCK_SUPPORT_MESSAGES = true;
-
-type MockApiMessage = {
-  message: string;
-  fromAdmin: boolean;
-  date: string;
-};
-
-const MOCK_CONVERSATIONS: Record<string, MockApiMessage[]> = {
-  "mock-support-1": [
-    {
-      message: "مرحباً، أحتاج مساعدة في تفعيل الحساب.",
-      fromAdmin: false,
-      date: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
-    },
-    {
-      message: "وعليكم السلام، سأساعدك الآن. ما البريد المستخدم في التسجيل؟",
-      fromAdmin: true,
-      date: new Date(Date.now() - 1000 * 60 * 118).toISOString(),
-    },
-    {
-      message: "sara@example.com",
-      fromAdmin: false,
-      date: new Date(Date.now() - 1000 * 60 * 115).toISOString(),
-    },
-    {
-      message: "تم التحقق. جرّب تسجيل الدخول مرة أخرى بعد دقيقة.",
-      fromAdmin: true,
-      date: new Date(Date.now() - 1000 * 60 * 110).toISOString(),
-    },
-  ],
-  "mock-support-2": [
-    {
-      message: "السلام عليكم، التطبيق يتوقف عند فتح الكتب.",
-      fromAdmin: false,
-      date: new Date(Date.now() - 1000 * 60 * 200).toISOString(),
-    },
-    {
-      message: "عليكم السلام، ما إصدار النظام على جهازك؟",
-      fromAdmin: true,
-      date: new Date(Date.now() - 1000 * 60 * 198).toISOString(),
-    },
-    {
-      message: "Android 13",
-      fromAdmin: false,
-      date: new Date(Date.now() - 1000 * 60 * 195).toISOString(),
-    },
-  ],
-  "mock-support-3": [
-    {
-      message: "كيف أغير كلمة المرور؟",
-      fromAdmin: false,
-      date: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    },
-    {
-      message: "من الإعدادات > الأمان > تغيير كلمة المرور.",
-      fromAdmin: true,
-      date: new Date(Date.now() - 1000 * 60 * 42).toISOString(),
-    },
-  ],
-};
-
-const mapMockToUi = (rows: MockApiMessage[]) =>
-  rows.map((message) => ({
-    ...message,
-    message: message.message ? message.message : "",
-    timestamp: message.date
-      ? new Date(message.date).toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-        })
-      : "",
-  }));
-
-type VirtualizedListType = {
-  index: number;
-  style: React.CSSProperties;
-};
-
-type MessageType = {
-  message: string;
-  timestamp: string;
-  fromAdmin: boolean;
-};
-
-let socket: WebSocket | undefined;
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { SUPPORT_PATH } from "../../routes/path";
+import {
+  CONVERSATION_STATUS_LABEL,
+  CONVERSATION_TYPE_LABEL,
+  canAdminSend,
+  counterpartName,
+  eventToMessage,
+  formatTime,
+  isOwnMessage,
+  isSupport,
+  mergeMessages,
+  messageKey,
+  newClientMessageId,
+} from "./chatHelpers";
 
 const Messages = () => {
   const { id = "" } = useParams();
-  const { state, pathname } = useLocation();
-  const { isOpen } = useSideBar();
-  const theme = useTheme();
+  const conversationId = Number(id);
   const navigate = useNavigate();
-  const [message, setMessage] = useState("");
-  const [chatMessages, setChatMessages] = useState<MessageType[]>([]);
-  const [page, setPage] = useState(0);
-  console.log(page);
-  const listRef = useRef<any | null>(null);
-  const { data, fetchNextPage } = queries.GetChatsUser({
-    TeacherId: id,
-    PageSize: 25,
-  });
-  const name = localStorage.getItem("userName");
+  const theme = useTheme();
+  const snackbar = useSnackbar();
+  const queryClient = useQueryClient();
+  const adminId = getAdminId();
 
+  const [draft, setDraft] = useState("");
+  /** Optimistic sends plus broadcasts that the REST pages have not caught up to. */
+  const [local, setLocal] = useState<IChatMessageView[]>([]);
+  const [sendBlockedUntil, setSendBlockedUntil] = useState(0);
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const stickToBottom = useRef(true);
+
+  const conversationQuery = queries.GetConversation(conversationId);
+  const conversation = conversationQuery.data;
+
+  const {
+    data,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    refetch,
+  } = queries.GetMessages(conversationId);
+
+  const sendMessage = queries.SendMessage();
+  const closeConversation = queries.CloseConversation();
+  const reopenConversation = queries.ReopenConversation();
+  const markRead = queries.MarkRead();
+
+  const serverMessages = useMemo(
+    () => (data?.pages ?? []).flatMap((page) => page.data),
+    [data]
+  );
+
+  const messages = useMemo(
+    () => mergeMessages(serverMessages, local),
+    [serverMessages, local]
+  );
+
+  const composerEnabled = canAdminSend(conversation);
+  const lastMessageId = serverMessages.length
+    ? Math.max(...serverMessages.map((message) => message.id))
+    : null;
+
+  // Reset per-conversation local state when navigating between threads.
   useEffect(() => {
-    if (USE_MOCK_SUPPORT_MESSAGES) return;
-    if (data?.pages?.[page]?.data) {
-      const reversedData = data.pages[page].data.length
-        ? data.pages[page].data.reverse().map((message) => ({
-            ...message,
-            message: message.message ? message.message : "",
-            timestamp: message.date
-              ? new Date(message.date).toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "numeric",
-                })
-              : "",
-          }))
-        : [];
-      setChatMessages((prev) => [...reversedData, ...prev]);
-      setPage((prev) => prev + 1);
-    }
-  }, [data]);
+    setLocal([]);
+    setDraft("");
+    stickToBottom.current = true;
+  }, [conversationId]);
 
+  /**
+   * Events are ShouldBroadcastNow, so a broadcast can land before the POST that
+   * caused it resolves. Merging by key makes arrival order irrelevant.
+   */
+  useConversationChannel(
+    Number.isFinite(conversationId) && conversationId ? conversationId : null,
+    useCallback((event) => {
+      setLocal((prev) => mergeMessages([eventToMessage(event)], prev));
+    }, [])
+  );
+
+  // No "messages since id" endpoint exists, so resync by refetching and deduping.
+  usePusherReconnect(
+    useCallback(() => {
+      refetch();
+      conversationQuery.refetch();
+    }, [refetch, conversationQuery])
+  );
+
+  // Keep the newest message in view unless the admin has scrolled up to read.
   useEffect(() => {
-    if (USE_MOCK_SUPPORT_MESSAGES) {
-      const rows = MOCK_CONVERSATIONS[id] ?? [];
-      setChatMessages(mapMockToUi(rows));
-      setPage(0);
-      return;
-    }
-    setPage(0);
-    setChatMessages([]);
-  }, [id]);
+    const node = scrollRef.current;
+    if (!node || !stickToBottom.current) return;
+    node.scrollTop = node.scrollHeight;
+  }, [messages]);
 
-  useEffect(() => {
-    if (state) {
-      localStorage.setItem("userName", state);
-    }
-    if (listRef.current) {
-      window.scrollTo({
-        top: listRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-      listRef.current.scrollTop = listRef.current.scrollHeight;
-    }
-  }, [state]);
-
-  const getItemSize = (index: number) => {
-    const { message } = chatMessages[index];
-    const baseHeight = 60;
-    const additionalHeightPerLine = 20;
-    const lineCount = Math.ceil(message?.length / 40);
-    return baseHeight + lineCount * additionalHeightPerLine;
+  const handleScroll = () => {
+    const node = scrollRef.current;
+    if (!node) return;
+    const distanceFromBottom =
+      node.scrollHeight - node.scrollTop - node.clientHeight;
+    stickToBottom.current = distanceFromBottom < 80;
   };
 
-  const renderRow = ({ index, style }: VirtualizedListType) => {
-    const msg = chatMessages[index];
-    return (
-      <div
-        style={{
-          ...style,
-          display: "flex",
-          justifyContent: msg.fromAdmin ? "flex-start" : "flex-end",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: msg.fromAdmin ? "#CDDFD5" : "white",
-            padding: "10px",
-            margin: "10px",
-            maxWidth: "400px",
-            borderRadius: msg.fromAdmin
-              ? "10px 10px 10px 0"
-              : "10px 10px 0px 10px",
-            wordBreak: "break-word",
-          }}
-        >
-          <Typography>{msg.message}</Typography>
-          <Typography
-            variant="caption"
-            color="textSecondary"
-            sx={{ display: "block", textAlign: "left" }}
-          >
-            {msg.timestamp}
-          </Typography>
-        </div>
-      </div>
+  const loadOlder = async () => {
+    const node = scrollRef.current;
+    const previousHeight = node?.scrollHeight ?? 0;
+    stickToBottom.current = false;
+    await fetchNextPage();
+    // Preserve the reading position after older messages are prepended.
+    requestAnimationFrame(() => {
+      if (!node) return;
+      node.scrollTop = node.scrollHeight - previousHeight;
+    });
+  };
+
+  /** Debounced, and skipped while the tab is hidden. */
+  useEffect(() => {
+    if (!conversationId || !lastMessageId || document.hidden) return;
+    const timer = setTimeout(() => {
+      markRead.mutate({ id: conversationId, lastMessageId });
+    }, 800);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, lastMessageId]);
+
+  const submit = (body: string, clientMessageId: string) => {
+    setLocal((prev) =>
+      mergeMessages(
+        [],
+        prev.map((message) =>
+          message.client_message_id === clientMessageId
+            ? { ...message, status: "pending" }
+            : message
+        )
+      )
+    );
+
+    sendMessage.mutate(
+      { id: conversationId, body: { body, client_message_id: clientMessageId } },
+      {
+        onSuccess: (message) => {
+          setLocal((prev) =>
+            mergeMessages([{ ...message, status: "sent" }], prev)
+          );
+          queryClient.invalidateQueries({
+            queryKey: keys.conversations._def,
+          });
+        },
+        onError: (error: {
+          response?: { status?: number; data?: { message?: string } };
+        }) => {
+          const status = error.response?.status;
+          setLocal((prev) =>
+            prev.map((message) =>
+              message.client_message_id === clientMessageId
+                ? { ...message, status: "failed" }
+                : message
+            )
+          );
+
+          if (status === 429) {
+            // Backend limit is 30 sends/min per actor.
+            setSendBlockedUntil(Date.now() + 15000);
+            snackbar({
+              severity: "warning",
+              message: "تم تجاوز حد الإرسال. حاول مرة أخرى بعد قليل.",
+            });
+            return;
+          }
+          if (status === 403) {
+            conversationQuery.refetch();
+            snackbar({
+              severity: "error",
+              message: "لا يمكن الإرسال في هذه المحادثة.",
+            });
+            return;
+          }
+          if (status === 404) {
+            snackbar({ severity: "error", message: "المحادثة غير موجودة." });
+            navigate(SUPPORT_PATH.SUPPORT);
+            return;
+          }
+          snackbar({
+            severity: "error",
+            message: error.response?.data?.message ?? "تعذر إرسال الرسالة.",
+          });
+        },
+      }
     );
   };
 
   const handleSend = () => {
-    if (message.trim()) {
-      const messageWithTime = {
-        message: message,
-        timestamp: new Date().toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-        }),
-        fromAdmin: true,
-      };
-      setChatMessages([...chatMessages, messageWithTime]);
-      if (socket && socket.readyState === WebSocket.OPEN) {
-        socket.send(
-          JSON.stringify({
-            Message: message,
-            TeacherId: id,
-          })
-        );
-      }
-      setMessage("");
-      setTimeout(() => {
-        if (listRef.current) {
-          listRef.current.scrollToItem(chatMessages.length + 1);
-        }
-      }, 0);
+    const body = draft.trim();
+    if (!body || !composerEnabled) return;
+    if (Date.now() < sendBlockedUntil) {
+      snackbar({
+        severity: "warning",
+        message: "تم تجاوز حد الإرسال. حاول مرة أخرى بعد قليل.",
+      });
+      return;
     }
-  };
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === "Enter") {
-      if (message.trim() !== "") {
-        event.preventDefault();
-        const messageWithTime = {
-          message: message,
-          timestamp: new Date().toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "numeric",
-          }),
-          fromAdmin: true,
-        };
-        setChatMessages([...chatMessages, messageWithTime]);
-        handleSend();
-      } else {
-        event.preventDefault();
-      }
-    }
-  };
-
-  const handleScroll = () => {
-    if (listRef.current) {
-      const { scrollTop } = listRef.current._outerRef;
-      if (scrollTop === 0) {
-        console.log("top");
-        if (!USE_MOCK_SUPPORT_MESSAGES) {
-          fetchNextPage();
-        }
-      }
-    }
-  };
-
-  useEffect(() => {
-    if (USE_MOCK_SUPPORT_MESSAGES || !id) return;
-    socket = new WebSocket(
-      `${BACKEND_REALTIME_URL}/Chat?token=${localStorage.getItem(
-        "token"
-      )}&TeacherId=${id}`
+    const clientMessageId = newClientMessageId();
+    setLocal((prev) =>
+      mergeMessages(
+        [
+          {
+            // Negative id keeps optimistic rows sorted last and out of the way
+            // of real ids until the server row replaces them.
+            id: -Date.now(),
+            conversation_id: conversationId,
+            service_request_id: null,
+            client_message_id: clientMessageId,
+            type: "text",
+            body,
+            deleted: false,
+            sender: {
+              type: "user",
+              id: adminId ?? 0,
+              display_role: "support",
+            },
+            reply_to_message_id: null,
+            created_at: new Date().toISOString(),
+            status: "pending",
+          },
+        ],
+        prev
+      )
     );
-    return () => {
-      if (socket) {
-        socket.onclose = (event) => {
-          console.log("WebSocket closed: ", event);
-        };
-        socket.close();
-      }
-      socket = undefined;
-    };
-  }, [id]);
 
-  useEffect(() => {
-    if (USE_MOCK_SUPPORT_MESSAGES) return;
-    if (!socket) return;
-    socket.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      const messageWithTime = {
-        message: message.Message,
-        timestamp: new Date().toLocaleTimeString("en-US", {
-          hour: "numeric",
-          minute: "numeric",
-        }),
-        fromAdmin: false,
-      };
-      setChatMessages((prev) => [...prev, messageWithTime]);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current.resetAfterIndex(0, true);
-      if (page <= 1) {
-        listRef.current.scrollToItem(chatMessages.length);
-      }
-    }
-  }, [chatMessages, page]);
-
-  useEffect(() => {
-    if (listRef.current) {
-      listRef.current._outerRef.addEventListener("scroll", handleScroll);
-    }
-
-    return () => {
-      if (listRef.current) {
-        listRef.current._outerRef.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [chatMessages]);
-
-  const closeSocketAndLeave = () => {
-    if (socket) {
-      socket.onclose = (event) => {
-        console.log("WebSocket closed: ", event);
-      };
-      socket.close();
-    }
-    socket = undefined;
-    navigate(SUPPORT_PATH.SUPPORT);
+    setDraft("");
+    stickToBottom.current = true;
+    submit(body, clientMessageId);
   };
+
+  /** Retrying reuses the same client_message_id, which the backend treats as idempotent. */
+  const retry = (message: IChatMessageView) => {
+    if (!message.body || !message.client_message_id) return;
+    submit(message.body, message.client_message_id);
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+      event.preventDefault();
+      handleSend();
+    }
+  };
+
+  const refreshAfterStatusChange = () => {
+    conversationQuery.refetch();
+    queryClient.invalidateQueries({ queryKey: keys.conversations._def });
+  };
+
+  if (conversationQuery.isError) {
+    return (
+      <Stack flex={1} alignItems="center" justifyContent="center" gap={2} p={3}>
+        <Typography color="text.secondary">
+          تعذر فتح المحادثة. قد تكون محذوفة أو لا تملك صلاحية الوصول إليها.
+        </Typography>
+        <Button onClick={() => navigate(SUPPORT_PATH.SUPPORT)}>
+          العودة للقائمة
+        </Button>
+      </Stack>
+    );
+  }
 
   return (
     <Box
       sx={{
         height: "calc(100vh - 64px)",
         flex: 1,
-        width: isOpen ? "calc(100vw - 543px)" : "calc(100vw - 360px)",
-        [theme.breakpoints.down("md")]: {
-          width: pathname.includes(SUPPORT_PATH.MESSAGES) && "100%",
-        },
+        display: "flex",
+        flexDirection: "column",
+        minWidth: 0,
       }}
     >
-      <AppBar
-        position="static"
-        sx={{
-          backgroundColor: "white",
-          ".MuiAppBar-root": {
-            boxShadow: "none",
-          },
-        }}
-      >
-        <Toolbar sx={{ flex: 1 }}>
-          <Avatar alt={"state"} src="" sx={{ marginRight: 2 }} />
-          <Typography variant="h6" sx={{ flexGrow: 1, color: "text.primary" }}>
-            {name}
-          </Typography>
+      <AppBar position="static" sx={{ backgroundColor: "white", boxShadow: 1 }}>
+        <Toolbar sx={{ gap: 1 }}>
           <IconButton
             edge="start"
             color="inherit"
-            aria-label="back"
-            onClick={() => {
-              if (USE_MOCK_SUPPORT_MESSAGES) {
-                navigate(SUPPORT_PATH.SUPPORT);
-                return;
-              }
-              closeSocketAndLeave();
+            aria-label="رجوع"
+            onClick={() => navigate(SUPPORT_PATH.SUPPORT)}
+            sx={{
+              color: "text.primary",
+              [theme.breakpoints.up("md")]: { display: "none" },
             }}
           >
             <ArrowBackIcon />
           </IconButton>
+          <Avatar>{counterpartName(conversation).charAt(0)}</Avatar>
+          <Stack flexGrow={1} minWidth={0}>
+            <Typography variant="h6" color="text.primary" noWrap>
+              {counterpartName(conversation)}
+            </Typography>
+            <Stack direction="row" gap={0.5} alignItems="center">
+              {conversation && (
+                <>
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={
+                      CONVERSATION_TYPE_LABEL[conversation.type] ??
+                      conversation.type
+                    }
+                  />
+                  <Chip
+                    size="small"
+                    color={conversation.status === "open" ? "success" : "default"}
+                    label={
+                      CONVERSATION_STATUS_LABEL[conversation.status] ??
+                      conversation.status
+                    }
+                  />
+                  {conversation.service_request && (
+                    <Chip
+                      size="small"
+                      variant="outlined"
+                      label={`طلب #${conversation.service_request.id}`}
+                    />
+                  )}
+                </>
+              )}
+            </Stack>
+          </Stack>
+
+          {isSupport(conversation) &&
+            (conversation?.status === "open" ? (
+              <Button
+                size="small"
+                color="error"
+                variant="outlined"
+                disabled={closeConversation.isPending}
+                onClick={() =>
+                  closeConversation.mutate(conversationId, {
+                    onSuccess: refreshAfterStatusChange,
+                    onError: () =>
+                      snackbar({
+                        severity: "error",
+                        message: "تعذر إغلاق المحادثة.",
+                      }),
+                  })
+                }
+              >
+                إغلاق
+              </Button>
+            ) : (
+              <Button
+                size="small"
+                color="primary"
+                variant="outlined"
+                disabled={reopenConversation.isPending}
+                onClick={() =>
+                  reopenConversation.mutate(conversationId, {
+                    onSuccess: refreshAfterStatusChange,
+                    onError: () =>
+                      snackbar({
+                        severity: "error",
+                        message: "تعذر إعادة فتح المحادثة.",
+                      }),
+                  })
+                }
+              >
+                إعادة فتح
+              </Button>
+            ))}
         </Toolbar>
       </AppBar>
+
       <Box
-        sx={{
-          width: "100%",
-          background: "#f1f1f1",
-          height: "calc(100vh - 180px)",
-          overflow: "hidden",
-        }}
+        ref={scrollRef}
+        onScroll={handleScroll}
+        sx={{ flex: 1, overflowY: "auto", background: "#f1f1f1", p: 2 }}
       >
-        <VirtualizedList
-          ref={listRef}
-          height={window.innerHeight - 196}
-          itemCount={chatMessages.length + 1}
-          itemSize={(index: number) =>
-            index != 0 ? getItemSize(index - 1) : 10
-          }
-          width={"100%"}
-          style={{ overflow: "hidden auto" }}
+        {hasNextPage && (
+          <Stack alignItems="center" mb={2}>
+            <Button size="small" onClick={loadOlder} disabled={isFetchingNextPage}>
+              {isFetchingNextPage ? "جارٍ التحميل..." : "تحميل الرسائل الأقدم"}
+            </Button>
+          </Stack>
+        )}
+
+        {isLoading &&
+          Array.from({ length: 6 }).map((_, index) => (
+            <Stack key={index} alignItems={index % 2 ? "flex-start" : "flex-end"} mb={1}>
+              <Skeleton variant="rounded" widthRange={{ min: 140, max: 260 }} height={48} />
+            </Stack>
+          ))}
+
+        {!isLoading && !messages.length && (
+          <Stack alignItems="center" mt={8}>
+            <Typography color="text.secondary">لا توجد رسائل بعد</Typography>
+          </Stack>
+        )}
+
+        {messages.map((message) => {
+          const own = isOwnMessage(message, adminId);
+          return (
+            <Stack
+              key={messageKey(message)}
+              alignItems={own ? "flex-end" : "flex-start"}
+              mb={1}
+            >
+              <Box
+                sx={{
+                  backgroundColor: own ? "#CDDFD5" : "white",
+                  opacity: message.status === "pending" ? 0.6 : 1,
+                  border: message.status === "failed" ? "1px solid" : "none",
+                  borderColor: "error.main",
+                  p: 1.25,
+                  maxWidth: "min(70%, 460px)",
+                  borderRadius: own ? "10px 10px 0 10px" : "10px 10px 10px 0",
+                  wordBreak: "break-word",
+                }}
+              >
+                {/* Rendered as text — never as HTML. */}
+                <Typography whiteSpace="pre-wrap">
+                  {message.deleted ? "(رسالة محذوفة)" : message.body}
+                </Typography>
+                <Stack
+                  direction="row"
+                  alignItems="center"
+                  gap={0.5}
+                  justifyContent="flex-end"
+                >
+                  <Typography variant="caption" color="textSecondary">
+                    {formatTime(message.created_at)}
+                  </Typography>
+                  {message.status === "pending" && (
+                    <Typography variant="caption" color="textSecondary">
+                      • يُرسل
+                    </Typography>
+                  )}
+                  {message.status === "failed" && (
+                    <Tooltip title="إعادة المحاولة">
+                      <IconButton size="small" onClick={() => retry(message)}>
+                        <RefreshIcon fontSize="inherit" color="error" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </Stack>
+              </Box>
+            </Stack>
+          );
+        })}
+      </Box>
+
+      {composerEnabled ? (
+        <Stack
+          direction="row"
+          alignItems="flex-end"
+          gap={1}
+          p={1}
+          bgcolor="white"
         >
-          {({ index, style }: VirtualizedListType) => {
-            if (index === 0) {
-              return;
-            }
-            return renderRow({ index: index - 1, style });
-          }}
-        </VirtualizedList>
-      </Box>
-      <Box
-        sx={{
-          position: "sticky",
-          bottom: 0,
-          width: "100%",
-          margin: "0",
-          background: "white",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <Button onClick={handleSend}>
-          <SendIcon sx={{ fontSize: "2.5rem" }} />
-        </Button>
-        <TextField
-          sx={{ width: "95%" }}
-          placeholder="اكتب رسالة"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          multiline
-        />
-      </Box>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="اكتب رسالة"
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={handleKeyDown}
+            multiline
+            maxRows={5}
+            inputProps={{ maxLength: 5000 }}
+          />
+          <IconButton
+            color="primary"
+            onClick={handleSend}
+            disabled={!draft.trim()}
+            aria-label="إرسال"
+          >
+            {/* الأيقونة بتأشر لليمين افتراضياً — منعكسها حتى تناسب الواجهة العربية */}
+            <SendIcon sx={{ transform: "scaleX(-1)" }} />
+          </IconButton>
+        </Stack>
+      ) : (
+        <Alert severity="info" icon={<LockOutlinedIcon />} sx={{ borderRadius: 0 }}>
+          {isSupport(conversation)
+            ? "هذه المحادثة مغلقة. أعد فتحها للرد."
+            : "محادثات الطلبات للاطلاع فقط — لا يمكن للمشرف الإرسال فيها."}
+        </Alert>
+      )}
     </Box>
   );
 };

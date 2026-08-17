@@ -17,11 +17,6 @@ export const AUTH_PATH = {
     SUPPORT: "/support",
     MESSAGES: "messages/:id"
 };
-export const BOOKS_PATH = {
-  BOOKS: '/books',
-  QUES:'Ques'
-  }
-
 export const ORDERS_PATH = {
   ORDERS: "/orders",
 };

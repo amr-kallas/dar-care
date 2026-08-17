@@ -1,157 +1,154 @@
 import { keys, queries } from "@apis/notification/queries";
-import { queries as userQuery } from "@apis/user/queries";
+import { queries as userQueries } from "@apis/user/queries";
 import Submit from "@components/buttons/Submit";
 import DialogTitle from "@components/forms/dialogTitle";
-import AutocompleteControl from "@components/inputs/autoComplete";
 import Checkbox from "@components/inputs/checkBox";
 import TextField from "@components/inputs/textField";
 import { useSnackbar } from "@context/snackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import useAddSearchParams from "@hooks/useAddSearchParams";
 import useSuccessSnackbar from "@hooks/useSuccessSnackbar";
-import { Autocomplete, Dialog, DialogContent, Fade, Grid } from "@mui/material";
+import { Dialog, DialogContent, Fade, Grid, MenuItem } from "@mui/material";
 import { InvalidateQueryFilters, useQueryClient } from "@tanstack/react-query";
-import { FC, useState } from "react";
-import { Resolver, useForm } from "react-hook-form";
+import { FC } from "react";
+import { Resolver, useForm, useWatch } from "react-hook-form";
 import {
-  IAddNotification,
-  addNotificationDefaultValue,
-  addNotificationValidation,
+  ISendNotificationForm,
+  sendNotificationDefaultValue,
+  sendNotificationValidation,
 } from "./validation";
-export type AddFormProps = {};
-export const AddNotification: FC<AddFormProps> = ({}) => {
-  const [isCheck, setIsCheck] = useState(false);
 
+/** كبيرة عن قصد حتى تنزل كل المستخدمين بطلب واحد للسلكت. */
+const USERS_PAGE_SIZE = 1000;
+
+export const AddNotification: FC = () => {
   const { isActive, clearAddParams } = useAddSearchParams();
+
   const { control, handleSubmit, reset, setValue } = useForm({
-    defaultValues: addNotificationDefaultValue,
+    defaultValues: sendNotificationDefaultValue,
     resolver: yupResolver(
-      addNotificationValidation(isCheck)
-    ) as unknown as Resolver<IAddNotification>,
+      sendNotificationValidation,
+    ) as unknown as Resolver<ISendNotificationForm>,
   });
+
+  const toAll = useWatch({ control, name: "toAll" });
+
+  const { data: usersPage, isLoading: usersLoading } =
+    userQueries.GetAdminUsers({
+      search: "",
+      page: 0,
+      per_page: USERS_PAGE_SIZE,
+    });
+  const users = usersPage?.data ?? [];
 
   const queryClient = useQueryClient();
   const snackbar = useSnackbar();
   const successSnackbar = useSuccessSnackbar();
-  const { data: allUser } = userQuery.GetAllUsers({ PageSize: 0 });
-  const { mutate, isPending } = queries.SendNotification();
+  const { mutate, isPending } = queries.SendBulkNotification();
+
   const handleClose = () => {
     clearAddParams();
-    reset(addNotificationDefaultValue);
+    reset(sendNotificationDefaultValue);
   };
-  const onSubmit = async (data: IAddNotification) => {
-    const body = {
-      userIds: (!isCheck
-        ? data?.userIds?.map(({ id }) => id)
-        : allUser?.data.map(({ id }) => id) ?? []) as string[],
-      title: {
-        en: data.title,
-        ar: data.title,
-      },
-      body: {
-        en: data.body,
-        ar: data.body,
-      },
-    };
-    mutate(body, {
+
+  const onSubmit = (formData: ISendNotificationForm) => {
+    // "all" ما بيروح معها user_id، و"specific" لازم يروح معها.
+    const payload = formData.toAll
+      ? {
+          target: "all" as const,
+          title: formData.title,
+          message: formData.message,
+        }
+      : {
+          target: "specific" as const,
+          user_id: Number(formData.user_id),
+          title: formData.title,
+          message: formData.message,
+        };
+
+    mutate(payload, {
       onSuccess: () => {
         queryClient.invalidateQueries(
-          keys.getAllNotification._def as InvalidateQueryFilters
+          keys.getNotifications._def as InvalidateQueryFilters,
         );
         handleClose();
         successSnackbar("تم إرسال الإشعار بنجاح");
       },
-      onError: (error) => {
+      onError: (error: { response?: { data?: { message?: string } } }) => {
         snackbar({
-          message: error.response.data.errorMessage,
+          message:
+            error.response?.data?.message ?? "حدث خطأ أثناء إرسال الإشعار",
           severity: "error",
         });
       },
     });
   };
 
-  const changeValue = (check: boolean) => {
-    setIsCheck(check);
-    if (check) {
-      setValue("userIds", []);
-    }
-  };
-
   return (
-    <Dialog open={isActive} onClose={handleClose} fullWidth maxWidth={"sm"}>
-      <Fade in={isActive} timeout={0}>
-        <DialogTitle onClose={handleClose} fontSize={30} color="primary">
-          إرسال إشعار
-        </DialogTitle>
-      </Fade>
+    <Dialog open={isActive} onClose={handleClose} fullWidth maxWidth="sm">
+      <DialogTitle onClose={handleClose}>إرسال إشعار</DialogTitle>
       <DialogContent>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid
-            container
-            spacing={3}
-            justifyContent={"center"}
-            alignItems={"start"}
-          >
-            <Grid item container spacing={3} xs={10} justifyContent={"center"}>
+        <Fade in={isActive}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Grid container spacing={2} mt={0.5}>
               <Grid item xs={12}>
-                <AutocompleteControl
+                <TextField
                   control={control}
-                  label={"المرسل إليه"}
-                  name={"userIds"}
-                  required={false}
-                  disabled={isCheck}
+                  name="user_id"
+                  label="المستخدم"
+                  select
+                  fullWidth
+                  disabled={toAll || usersLoading}
+                  required={!toAll}
+                  helperText={
+                    usersLoading ? "جارٍ تحميل المستخدمين..." : undefined
+                  }
                 >
-                  <Autocomplete
-                    options={allUser?.data ?? []}
-                    getOptionLabel={(option) => option.firstName}
-                    renderInput={() => null}
-                    multiple
-                    sx={{ mt: "6px" }}
-                    renderOption={(props, option) => (
-                      <li
-                        {...props}
-                        key={option.id}
-                        style={{
-                          borderBottom: "1px solid #ddd",
-                          padding: "12px 8px",
-                        }}
-                      >
-                        {option.firstName}
-                      </li>
-                    )}
-                  />
-                </AutocompleteControl>
+                  {users.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              </Grid>
+              <Grid item xs={12}>
                 <Checkbox
-                  onChangeValue={changeValue}
                   control={control}
-                  name="check"
-                  label="تحديد كل المستخدمين"
-                  sx={{
-                    ".MuiFormControlLabel-root": {
-                      marginRight: "0px !important",
-                    },
+                  name="toAll"
+                  label="إرسال لكل المستخدمين"
+                  checked={toAll}
+                  onChangeValue={(checked) => {
+                    // تفريغ الاختيار حتى ما ينبعت user_id قديم بالغلط
+                    if (checked) setValue("user_id", "");
                   }}
                 />
-              </Grid>
-              <Grid item xs={12} mt={1}>
-                <TextField control={control} name="title" label={"العنوان"} />
               </Grid>
               <Grid item xs={12}>
                 <TextField
                   control={control}
-                  name="body"
-                  multiline
-                  rows={5}
-                  label={"الوصف"}
+                  name="title"
+                  label="العنوان"
+                  fullWidth
+                  required
                 />
               </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  control={control}
+                  name="message"
+                  label="الوصف"
+                  fullWidth
+                  multiline
+                  rows={5}
+                  required
+                />
+              </Grid>
+              <Grid item xs={12} display="flex" justifyContent="flex-end">
+                <Submit isSubmitting={isPending}>إرسال</Submit>
+              </Grid>
             </Grid>
-
-            <Grid item xs={12} justifyContent="center" display="flex" mt={0}>
-              <Submit isSubmitting={isPending} />
-            </Grid>
-          </Grid>
-        </form>
+          </form>
+        </Fade>
       </DialogContent>
     </Dialog>
   );

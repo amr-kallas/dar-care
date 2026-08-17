@@ -10,7 +10,6 @@ import NotAuth from "@components/routes/NotAuth";
 import Auth from "@components/routes/Auth";
 import {
   AUTH_PATH,
-  BOOKS_PATH,
   CRAFTSMEN_PATH,
   NOTIFICATION_PATH,
   ORDERS_PATH,
@@ -20,12 +19,10 @@ import {
   USER_PATH,
 } from "./path";
 import {
-  BOOKS_PAGES,
   CRAFTSMEN_PAGES,
   HOME_PAGES,
   NOTIFICATION_PAGES,
   ORDERS_PAGES,
-  QUES_PAGES,
   REVIEWS_PAGES,
   SERVICE_CATEGORIES_PAGES,
   SUPPORT_PAGES,
@@ -78,11 +75,6 @@ export default createBrowserRouter(
             path={REVIEWS_PATH.REVIEWS}
             element={<REVIEWS_PAGES.REVIEWS />}
           />
-          {/* books page */}
-          <Route path={BOOKS_PATH.BOOKS}>
-            <Route index element={<BOOKS_PAGES.BOOKS />} />
-            <Route path={BOOKS_PATH.QUES + "/:id"} element={<QUES_PAGES.QUES/>} />
-          </Route>
           <Route path="*" element={<SomethingWentWrong />} />
         </Route>
       </Route>

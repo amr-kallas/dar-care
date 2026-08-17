@@ -1,7 +1,6 @@
 import { keys, queries } from "@apis/user/queries";
 import type { IAdminUser } from "@apis/user/type";
 import RemoveIconButton from "@components/buttons/RemoveIconButton";
-import ShowIconButton from "@components/buttons/ShowIconButton";
 import RemoveDialog from "@components/forms/RemoveDialog";
 import SearchFilter from "@components/inputs/searchFilter";
 import ButtonsStack from "@components/layout/buttonStack";
@@ -22,8 +21,6 @@ import { toisoString } from "@utils/function-helper";
 import type { UseInfiniteQueryResult } from "@tanstack/react-query";
 import type { APIList } from "../../types/apiType";
 import { useEffect } from "react";
-import { AddSubscription } from "./addSubscription";
-import { Details } from "./details";
 
 const PAGE_SIZE = 10;
 
@@ -39,7 +36,7 @@ const columns = [
 const UsersList = () => {
   const search = useQuerySearchParam();
   const { page, clearPageParams } = usePageNumberSearchParam();
-  const { remove, details } = useEventSearchParams();
+  const { remove } = useEventSearchParams();
   const { mutate, isPending } = queries.deleteUser();
   const usersQuery = queries.GetAdminUsers({
     search,
@@ -126,9 +123,6 @@ const UsersList = () => {
               </TableCell>
               <TableCell>
                 <ButtonsStack>
-                  <ShowIconButton
-                    onClick={() => details(String(user.id))}
-                  />
                   <RemoveIconButton
                     onClick={() => remove(String(user.id))}
                   />
@@ -138,13 +132,11 @@ const UsersList = () => {
           ))}
         </TableBody>
       </PaginationTable>
-      <Details />
       <RemoveDialog
         mutateFn={mutate}
         invalidateQueryKey={keys.getAdminUsers._def}
         isPending={isPending}
       />
-      <AddSubscription />
     </Stack>
   );
 };

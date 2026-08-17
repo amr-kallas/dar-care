@@ -1,5 +1,6 @@
 import { keys, queries } from "@apis/provider/queries";
 import type { IAdminProvider } from "@apis/provider/type";
+import ActivateIconButton from "@components/buttons/ActivateIconButton";
 import RemoveIconButton from "@components/buttons/RemoveIconButton";
 import ShowIconButton from "@components/buttons/ShowIconButton";
 import StopIconButton from "@components/buttons/StopIconButton";
@@ -22,13 +23,17 @@ import {
   TableRow,
 } from "@mui/material";
 import { toisoString } from "@utils/function-helper";
-import type { UseInfiniteQueryResult } from "@tanstack/react-query";
+import type {
+  UseInfiniteQueryResult,
+  UseMutateFunction,
+} from "@tanstack/react-query";
 import type { APIList } from "../../types/apiType";
 import { useEffect } from "react";
 import { CraftsmenDetails } from "./craftsmenDetails";
 
 const PAGE_SIZE = 10;
 const STOPPED_STATUS = "suspended";
+const ACTIVE_STATUS = "available";
 
 const columns = [
   "#",
@@ -52,6 +57,7 @@ function isProviderActive(status: string) {
 function statusLabel(status: string) {
   if (status === "available") return "نشط";
   if (status === "unavailable") return "متوقف";
+  if (status === "suspended") return "متوقف";
   return status;
 }
 
@@ -59,6 +65,7 @@ const Craftsmen = () => {
   const search = useQuerySearchParam();
   const { page, clearPageParams } = usePageNumberSearchParam();
   const { remove, details, stop } = useEventSearchParams();
+  const { stop: activate } = useEventSearchParams({ stopKey: "activate" });
 
   const providersQuery = queries.GetAdminProviders({
     status: "",
@@ -71,6 +78,21 @@ const Craftsmen = () => {
     queries.deleteAdminProvider();
   const { mutate: updateStatus, isPending: isStopPending } =
     queries.updateProviderStatus();
+
+  // StopDialog mutates by id only, so bind the target status here and forward
+  // its callbacks with the id as the reported variables.
+  const setStatus =
+    (status: string): UseMutateFunction<unknown, Error, string, unknown> =>
+    (id, options) =>
+      updateStatus(
+        { id, status },
+        {
+          onSuccess: (data, _variables, context) =>
+            options?.onSuccess?.(data, id, context),
+          onError: (error, _variables, context) =>
+            options?.onError?.(error, id, context),
+        }
+      );
 
   const activeQuery =
     providersQuery as unknown as UseInfiniteQueryResult<
@@ -155,10 +177,13 @@ const Craftsmen = () => {
                   <RemoveIconButton
                     onClick={() => remove(String(row.id))}
                   />
-                  <StopIconButton
-                    disabled={!isProviderActive(row.status)}
-                    onClick={() => stop(String(row.id))}
-                  />
+                  {isProviderActive(row.status) ? (
+                    <StopIconButton onClick={() => stop(String(row.id))} />
+                  ) : (
+                    <ActivateIconButton
+                      onClick={() => activate(String(row.id))}
+                    />
+                  )}
                 </ButtonsStack>
               </TableCell>
             </TableRowStriped>
@@ -172,9 +197,17 @@ const Craftsmen = () => {
         isPending={isDeletePending}
       />
       <StopDialog
-        mutateFn={(id, options) =>
-          updateStatus({ id, status: STOPPED_STATUS }, options)
-        }
+        mutateFn={setStatus(STOPPED_STATUS)}
+        invalidateQueryKey={keys.getAdminProviders._def}
+        isPending={isStopPending}
+      />
+      <StopDialog
+        stopModeKey="activate"
+        title="هل أنت متأكد من تفعيل هذا الحرفي؟"
+        confirmLabel="تفعيل"
+        successMessage="تم التفعيل بنجاح"
+        confirmColor="success"
+        mutateFn={setStatus(ACTIVE_STATUS)}
         invalidateQueryKey={keys.getAdminProviders._def}
         isPending={isStopPending}
       />

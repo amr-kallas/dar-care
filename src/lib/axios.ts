@@ -1,31 +1,40 @@
 import ax from "axios";
-// const BACKEND_BASE_URL = "http://3.223.131.190:96";
-const BACKEND_BASE_URL = "http://127.0.0.1:8000";
-// const BACKEND_BASE_URL = "http://testapi.butterfly-flight.com"
-// const BACKEND_BASE_URL = "http://api.butterfly-flight.com"
-// export const BACKEND_REALTIME_URL = "ws://3.223.131.190:96";
-export const BACKEND_REALTIME_URL = "ws://testapi.butterfly-flight.com";
-// export const BACKEND_REALTIME_URL = "ws://api.butterfly-flight.com";
+import API_ROUTES from "@constants/apiRoutes";
+import { BACKEND_BASE_URL } from "@constants/env";
+import { disconnectEcho } from "./echo";
+import { clearSession, getToken } from "./session";
+
+const LOGIN_PATH = API_ROUTES.AUTH.LOGIN;
 const API_BASE_URL = BACKEND_BASE_URL + "/api";
+
 const axios = ax.create({
   baseURL: API_BASE_URL,
+  headers: {
+    Accept: "application/json",
+  },
 });
+
 axios.interceptors.request.use(
   (config) => {
-    config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
 
     return config;
   },
-  (error) => {
-    Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 axios.interceptors.response.use(
   (response) => response,
   async (errors) => {
-    if (errors?.response.status == 401) {
-      localStorage.clear();
+    const isLoginRequest = errors?.config?.url?.includes(LOGIN_PATH);
+    if (errors?.response?.status == 401 && !isLoginRequest) {
+      // Drop the realtime socket too, otherwise it keeps retrying channel auth
+      // with a token the server has already rejected.
+      disconnectEcho();
+      clearSession();
       window.location.href = `login`;
     }
     return Promise.reject(errors);

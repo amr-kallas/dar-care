@@ -1,34 +1,24 @@
+import API_ROUTES from "@constants/apiRoutes";
 import axios from "@lib/axios";
 import {
-  IGetAllNotification,
-  IGetAllNotificationParams,
-  ISendNotification,
+  INotification,
+  INotificationsResponse,
+  ISendBulkNotification,
+  ISendBulkNotificationResponse,
 } from "./type";
-import API_ROUTES from "@constants/apiRoutes";
 
 const API = {
-  getAll: async (params: IGetAllNotificationParams) => {
-    const { data } = await axios<IGetAllNotification>(
-      API_ROUTES.NOTIFICATION.GET_ALL,
-      {
-        params: { ...params, PageNumber: params.PageNumber ?? 0 },
-      }
+  getNotifications: async (): Promise<INotification[]> => {
+    const { data } = await axios.get<INotificationsResponse>(
+      API_ROUTES.ADMIN.GET_NOTIFICATIONS
     );
-    return data;
+    const payload = data.data;
+    return Array.isArray(payload) ? payload : payload?.data ?? [];
   },
-  sendNotification: async (body: ISendNotification) => {
-    const { data } = await axios.post(
-      API_ROUTES.NOTIFICATION.SEND_NOTIFICATION,
+  sendBulkNotification: async (body: ISendBulkNotification) => {
+    const { data } = await axios.post<ISendBulkNotificationResponse>(
+      API_ROUTES.ADMIN.SEND_BULK_NOTIFICATION,
       body
-    );
-    return data;
-  },
-  deleteNotification: async (Id: string) => {
-    const { data } = await axios.delete(
-      API_ROUTES.NOTIFICATION.REMOVE_NOTIFICATION,
-      {
-        params: { Id },
-      }
     );
     return data;
   },

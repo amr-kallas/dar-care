@@ -1,15 +1,20 @@
-
 import queries from "../../apis/auth/queries";
 import Submit from "@components/buttons/Submit";
 import { PasswordInput } from "@components/inputs/PasswordInput";
 import TextField from "@components/inputs/textField";
 import { Box, Paper, Typography } from "@mui/material";
 import { Stack } from "@mui/system";
-import { ILoginForm, LoginDefaultValues, loginValidation } from "./logInValidation";
+import {
+  ILoginForm,
+  LoginDefaultValues,
+  loginValidation,
+} from "./logInValidation";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useSnackbar } from "@context/snackbarContext";
+import { setSession } from "@lib/session";
+
 export const LoginForm = () => {
   const snackbar = useSnackbar();
   const { control, handleSubmit } = useForm<ILoginForm>({
@@ -18,19 +23,29 @@ export const LoginForm = () => {
   });
   const navigate = useNavigate();
   const { mutate, isPending } = queries.Login();
-  const submitHandler = (data:any) => {
-    mutate(data, {
+
+  const submitHandler = (formData: ILoginForm) => {
+    mutate(formData, {
       onSuccess: (body) => {
-        localStorage.setItem("token", body.token);
+        // The admin id is persisted so the app can subscribe to the private
+        // inbox channel `user.user.{adminId}`.
+        setSession(body.token, body.user);
         snackbar({
           message: "تم تسجيل الدخول بنجاح",
           severity: "success",
         });
         navigate("/");
       },
-      onError: (error) => {
+      onError: (error: {
+        message?: string;
+        response?: { data?: { message?: string; errorMessage?: string } };
+      }) => {
         snackbar({
-          message: error.response.data.errorMessage,
+          message:
+            error.response?.data?.message ??
+            error.response?.data?.errorMessage ??
+            error.message ??
+            "فشل تسجيل الدخول",
           severity: "error",
         });
       },
@@ -40,7 +55,6 @@ export const LoginForm = () => {
   return (
     <Paper
       onSubmit={handleSubmit(submitHandler)}
-      // elevation={2}
       component={Stack}
       gap={5}
       sx={{
@@ -53,8 +67,12 @@ export const LoginForm = () => {
         تسجيل الدخول
       </Typography>
       <Stack gap={2} component={"form"} width="80%" mx="auto">
-        {/* <EmailInput control={control} name="email" /> */}
-        <TextField control={control} name="userName" label="اسم المتسخدم" />
+        <TextField
+          control={control}
+          name="email"
+          label="البريد الإلكتروني"
+          type="email"
+        />
         <PasswordInput control={control} name="password" />
         <Box m="auto" width="fit-content">
           <Submit
@@ -69,9 +87,9 @@ export const LoginForm = () => {
             تسجيل الدخول
           </Submit>
         </Box>
-      </Stack>  
-
+      </Stack>
     </Paper>
   );
 };
+
 export default LoginForm;
