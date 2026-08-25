@@ -91,14 +91,13 @@ const Craftsmen = () => {
             options?.onSuccess?.(data, id, context),
           onError: (error, _variables, context) =>
             options?.onError?.(error, id, context),
-        }
+        },
       );
 
-  const activeQuery =
-    providersQuery as unknown as UseInfiniteQueryResult<
-      APIList<unknown>,
-      unknown
-    >;
+  const activeQuery = providersQuery as unknown as UseInfiniteQueryResult<
+    APIList<unknown>,
+    unknown
+  >;
   const { data } = activeQuery;
 
   useEffect(() => {
@@ -164,19 +163,22 @@ const Craftsmen = () => {
               </TableCell>
               <TableCell>
                 {isProviderActive(row.status) ? (
-                  <Chip label={statusLabel(row.status)} color="success" size="small" />
+                  <Chip
+                    label={statusLabel(row.status)}
+                    color="success"
+                    size="small"
+                  />
                 ) : (
-                  <Chip label={statusLabel(row.status)} color="warning" size="small" />
+                  <Chip
+                    label={statusLabel(row.status)}
+                    color="warning"
+                    size="small"
+                  />
                 )}
               </TableCell>
               <TableCell>
                 <ButtonsStack>
-                  <ShowIconButton
-                    onClick={() => details(String(row.id))}
-                  />
-                  <RemoveIconButton
-                    onClick={() => remove(String(row.id))}
-                  />
+                  <ShowIconButton onClick={() => details(String(row.id))} />
                   {isProviderActive(row.status) ? (
                     <StopIconButton onClick={() => stop(String(row.id))} />
                   ) : (

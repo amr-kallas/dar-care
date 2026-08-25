@@ -81,13 +81,15 @@ function urgencyLabel(urgency: string) {
 
 const OrderDetailsDialog = ({ rows }: { rows: IAdminServiceRequest[] }) => {
   const { id, isActive, clearDetailsParams } = useDetailsSearchParams();
-  const row = useMemo(
-    () => rows.find((r) => String(r.id) === id),
-    [rows, id]
-  );
+  const row = useMemo(() => rows.find((r) => String(r.id) === id), [rows, id]);
 
   return (
-    <Dialog open={isActive} onClose={clearDetailsParams} fullWidth maxWidth="sm">
+    <Dialog
+      open={isActive}
+      onClose={clearDetailsParams}
+      fullWidth
+      maxWidth="sm"
+    >
       <DialogTitle onClose={clearDetailsParams}>تفاصيل الطلب</DialogTitle>
       <DialogContent>
         {!row ? (
@@ -101,8 +103,12 @@ const OrderDetailsDialog = ({ rows }: { rows: IAdminServiceRequest[] }) => {
             <Typography>الحالة: {statusLabel(row.status)}</Typography>
             <Typography>الأولوية: {urgencyLabel(row.urgency)}</Typography>
             <Typography>الوصف: {row.description || "_"}</Typography>
-            <Typography>موعد التنفيذ: {formatDateTime(row.scheduled_at)}</Typography>
-            <Typography>تاريخ الإنشاء: {formatDateTime(row.created_at)}</Typography>
+            <Typography>
+              موعد التنفيذ: {formatDateTime(row.scheduled_at)}
+            </Typography>
+            <Typography>
+              تاريخ الإنشاء: {formatDateTime(row.created_at)}
+            </Typography>
           </Stack>
         )}
       </DialogContent>
@@ -115,14 +121,14 @@ const Orders = () => {
   const { details } = useEventSearchParams();
 
   const ordersQuery = queries.GetAdminServiceRequests({
-    status: "",
-    urgency: "",
     page,
     per_page: PAGE_SIZE,
   });
 
-  const activeQuery =
-    ordersQuery as unknown as UseInfiniteQueryResult<APIList<unknown>, unknown>;
+  const activeQuery = ordersQuery as unknown as UseInfiniteQueryResult<
+    APIList<unknown>,
+    unknown
+  >;
   const { data } = activeQuery;
 
   useEffect(() => {
@@ -175,13 +181,11 @@ const Orders = () => {
                 <TableCell>{formatDateTime(row.created_at)}</TableCell>
                 <TableCell>
                   <ButtonsStack>
-                    <ShowIconButton
-                      onClick={() => details(String(row.id))}
-                    />
+                    <ShowIconButton onClick={() => details(String(row.id))} />
                   </ButtonsStack>
                 </TableCell>
               </TableRowStriped>
-            )
+            ),
           )}
         </TableBody>
       </PaginationTable>

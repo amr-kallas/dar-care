@@ -78,7 +78,7 @@ const Checkbox = ({
     <Controller
       name={name}
       control={control}
-      render={({ field }) => (
+      render={({ field: { value, onChange, ...field } }) => (
         <FormControlLabel
           label={label}
           sx={{ margin: "0px" }}
@@ -93,9 +93,10 @@ const Checkbox = ({
               icon={<BpIcon />}
               inputProps={{ "aria-label": "Checkbox demo" }}
               {...field}
+              checked={!!value}
               {...props}
-              onChange={(e, checked) => {
-                field.onChange(e);
+              onChange={(_, checked) => {
+                onChange(checked);
                 if (onChangeValue) {
                   onChangeValue(checked);
                 }

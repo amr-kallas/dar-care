@@ -23,7 +23,7 @@ function toFormValues(category: IAdminCategory): ICategoryForm {
   return {
     name: category.name,
     description: category.description ?? "",
-    is_active: category.is_active === 1,
+    is_active: category.is_active == 1,
   };
 }
 
@@ -42,9 +42,10 @@ export const CategoryActions: FC = () => {
 
   const { control, reset, handleSubmit } = useForm({
     defaultValues: categoryDefaultValue,
-    resolver: yupResolver(categoryValidation) as unknown as Resolver<ICategoryForm>,
+    resolver: yupResolver(
+      categoryValidation,
+    ) as unknown as Resolver<ICategoryForm>,
   });
-
   const queryClient = useQueryClient();
   const snackbar = useSnackbar();
   const successSnackbar = useSuccessSnackbar();
@@ -69,7 +70,6 @@ export const CategoryActions: FC = () => {
     const existing = isEditing
       ? categories?.find((c) => String(c.id) === id)
       : undefined;
-
     const body = {
       name: formData.name,
       slug: existing?.slug ?? slugifyName(formData.name),
@@ -83,11 +83,11 @@ export const CategoryActions: FC = () => {
       {
         onSuccess: () => {
           queryClient.invalidateQueries(
-            keys.getAdminCategories._def as InvalidateQueryFilters
+            keys.getAdminCategories._def as InvalidateQueryFilters,
           );
           handleClose();
           successSnackbar(
-            isEditing ? "تم تعديل التصنيف بنجاح" : "تم إضافة التصنيف بنجاح"
+            isEditing ? "تم تعديل التصنيف بنجاح" : "تم إضافة التصنيف بنجاح",
           );
         },
         onError: (error: { response?: { data?: { message?: string } } }) => {
@@ -97,7 +97,7 @@ export const CategoryActions: FC = () => {
             severity: "error",
           });
         },
-      }
+      },
     );
   };
 
