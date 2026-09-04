@@ -27,6 +27,7 @@ const columns = ["#", "العنوان", "الوصف", "النوع", "الحال�
 
 const typeLabelMap: Record<string, string> = {
   admin_bulk: "إشعار عام",
+  admin_direct: "إشعار مخصص",
 };
 
 function typeLabel(type: string) {
