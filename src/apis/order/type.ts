@@ -23,7 +23,7 @@ export type IServiceRequestAddress = {
 export type IAdminServiceRequest = {
   id: number;
   user_id: number;
-  provider_id: number;
+  provider_id: number | null;
   category_id: number;
   address_id: number | null;
   description: string;
@@ -37,9 +37,11 @@ export type IAdminServiceRequest = {
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
-  user: IServiceRequestUser;
-  provider: IServiceRequestProvider;
-  category: IServiceRequestCategory;
+  // Relations come back null when the row is unassigned or the record was
+  // soft-deleted, so every read of them has to be guarded.
+  user: IServiceRequestUser | null;
+  provider: IServiceRequestProvider | null;
+  category: IServiceRequestCategory | null;
   address: IServiceRequestAddress;
 };
 

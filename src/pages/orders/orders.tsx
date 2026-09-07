@@ -97,9 +97,9 @@ const OrderDetailsDialog = ({ rows }: { rows: IAdminServiceRequest[] }) => {
         ) : (
           <Stack gap={1}>
             <Typography>رقم الطلب: {row.id}</Typography>
-            <Typography>العميل: {row.user.name}</Typography>
-            <Typography>الحرفي: {row.provider.name}</Typography>
-            <Typography>التصنيف: {row.category.name}</Typography>
+            <Typography>العميل: {row.user?.name ?? "_"}</Typography>
+            <Typography>الحرفي: {row.provider?.name ?? "_"}</Typography>
+            <Typography>التصنيف: {row.category?.name ?? "_"}</Typography>
             <Typography>الحالة: {statusLabel(row.status)}</Typography>
             <Typography>الأولوية: {urgencyLabel(row.urgency)}</Typography>
             <Typography>الوصف: {row.description || "_"}</Typography>
@@ -166,9 +166,9 @@ const Orders = () => {
                     label={statusLabel(row.status)}
                   />
                 </TableCell>
-                <TableCell>{row.user.name}</TableCell>
-                <TableCell>{row.provider.name}</TableCell>
-                <TableCell>{row.category.name}</TableCell>
+                <TableCell>{row.user?.name ?? "_"}</TableCell>
+                <TableCell>{row.provider?.name ?? "_"}</TableCell>
+                <TableCell>{row.category?.name ?? "_"}</TableCell>
                 <TableCell>
                   <Chip
                     size="small"

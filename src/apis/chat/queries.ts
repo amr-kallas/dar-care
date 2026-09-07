@@ -58,7 +58,5 @@ export const queries = {
     }),
 
   SendMessage: () => useMutation({ mutationFn: API.sendMessage }),
-  CloseConversation: () => useMutation({ mutationFn: API.closeConversation }),
-  ReopenConversation: () => useMutation({ mutationFn: API.reopenConversation }),
   MarkRead: () => useMutation({ mutationFn: API.markRead }),
 };

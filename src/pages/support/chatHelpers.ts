@@ -10,12 +10,6 @@ export const CONVERSATION_TYPE_LABEL: Record<string, string> = {
   request: "محادثة طلب",
 };
 
-export const CONVERSATION_STATUS_LABEL: Record<string, string> = {
-  open: "مفتوحة",
-  closed: "مغلقة",
-  read_only: "للقراءة فقط",
-};
-
 export const DISPLAY_ROLE_LABEL: Record<string, string> = {
   customer: "عميل",
   artisan: "حرفي",
@@ -27,8 +21,9 @@ export const isSupport = (conversation?: IConversation) =>
   conversation?.type === "support_provider";
 
 /**
- * Admins may only send in support conversations while they are open — request
- * conversations are inspect-only, and closed/read_only reject sends with 403.
+ * Admins may only send in support conversations the backend still marks open —
+ * request conversations are inspect-only, and closed/read_only reject sends
+ * with 403.
  */
 export const canAdminSend = (conversation?: IConversation) =>
   !!conversation && isSupport(conversation) && conversation.status === "open";

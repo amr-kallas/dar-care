@@ -31,7 +31,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { SUPPORT_PATH } from "../../routes/path";
 import {
-  CONVERSATION_STATUS_LABEL,
   CONVERSATION_TYPE_LABEL,
   canAdminSend,
   counterpartName,
@@ -74,8 +73,6 @@ const Messages = () => {
   } = queries.GetMessages(conversationId);
 
   const sendMessage = queries.SendMessage();
-  const closeConversation = queries.CloseConversation();
-  const reopenConversation = queries.ReopenConversation();
   const markRead = queries.MarkRead();
 
   const serverMessages = useMemo(
@@ -279,11 +276,6 @@ const Messages = () => {
     }
   };
 
-  const refreshAfterStatusChange = () => {
-    conversationQuery.refetch();
-    queryClient.invalidateQueries({ queryKey: keys.conversations._def });
-  };
-
   if (conversationQuery.isError) {
     return (
       <Stack flex={1} alignItems="center" justifyContent="center" gap={2} p={3}>
@@ -337,14 +329,6 @@ const Messages = () => {
                       conversation.type
                     }
                   />
-                  <Chip
-                    size="small"
-                    color={conversation.status === "open" ? "success" : "default"}
-                    label={
-                      CONVERSATION_STATUS_LABEL[conversation.status] ??
-                      conversation.status
-                    }
-                  />
                   {conversation.service_request && (
                     <Chip
                       size="small"
@@ -356,47 +340,6 @@ const Messages = () => {
               )}
             </Stack>
           </Stack>
-
-          {isSupport(conversation) &&
-            (conversation?.status === "open" ? (
-              <Button
-                size="small"
-                color="error"
-                variant="outlined"
-                disabled={closeConversation.isPending}
-                onClick={() =>
-                  closeConversation.mutate(conversationId, {
-                    onSuccess: refreshAfterStatusChange,
-                    onError: () =>
-                      snackbar({
-                        severity: "error",
-                        message: "تعذر إغلاق المحادثة.",
-                      }),
-                  })
-                }
-              >
-                إغلاق
-              </Button>
-            ) : (
-              <Button
-                size="small"
-                color="primary"
-                variant="outlined"
-                disabled={reopenConversation.isPending}
-                onClick={() =>
-                  reopenConversation.mutate(conversationId, {
-                    onSuccess: refreshAfterStatusChange,
-                    onError: () =>
-                      snackbar({
-                        severity: "error",
-                        message: "تعذر إعادة فتح المحادثة.",
-                      }),
-                  })
-                }
-              >
-                إعادة فتح
-              </Button>
-            ))}
         </Toolbar>
       </AppBar>
 
@@ -510,7 +453,7 @@ const Messages = () => {
       ) : (
         <Alert severity="info" icon={<LockOutlinedIcon />} sx={{ borderRadius: 0 }}>
           {isSupport(conversation)
-            ? "هذه المحادثة مغلقة. أعد فتحها للرد."
+            ? "لا يمكن الإرسال في هذه المحادثة."
             : "محادثات الطلبات للاطلاع فقط — لا يمكن للمشرف الإرسال فيها."}
         </Alert>
       )}

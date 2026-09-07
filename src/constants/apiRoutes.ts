@@ -33,9 +33,6 @@ let API_ROUTES = {
     GET_CONVERSATION: (id: number) => `admin/chat/conversations/${id}`,
     GET_MESSAGES: (id: number) => `admin/chat/conversations/${id}/messages`,
     SEND_MESSAGE: (id: number) => `admin/chat/conversations/${id}/messages`,
-    CLOSE_CONVERSATION: (id: number) => `admin/chat/conversations/${id}/close`,
-    REOPEN_CONVERSATION: (id: number) =>
-      `admin/chat/conversations/${id}/reopen`,
     // Shared actor endpoints (not admin-prefixed).
     MARK_READ: (id: number) => `chat/conversations/${id}/read`,
   },

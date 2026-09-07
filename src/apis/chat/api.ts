@@ -51,20 +51,6 @@ const API = {
     return data.data;
   },
 
-  closeConversation: async (id: number) => {
-    const { data } = await axios.post<IApiEnvelope<IConversation>>(
-      API_ROUTES.CHAT.CLOSE_CONVERSATION(id)
-    );
-    return data.data;
-  },
-
-  reopenConversation: async (id: number) => {
-    const { data } = await axios.post<IApiEnvelope<IConversation>>(
-      API_ROUTES.CHAT.REOPEN_CONVERSATION(id)
-    );
-    return data.data;
-  },
-
   markRead: async ({
     id,
     lastMessageId,

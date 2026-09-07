@@ -26,7 +26,6 @@ import { Fragment, useMemo, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { SUPPORT_PATH } from "../../routes/path";
 import {
-  CONVERSATION_STATUS_LABEL,
   CONVERSATION_TYPE_LABEL,
   counterpartName,
   formatDay,
@@ -39,16 +38,6 @@ const TYPE_OPTIONS = [
   { value: "request", label: CONVERSATION_TYPE_LABEL.request },
 ];
 
-const STATUS_OPTIONS = [
-  { value: "", label: "كل الحالات" },
-  { value: "open", label: CONVERSATION_STATUS_LABEL.open },
-  { value: "closed", label: CONVERSATION_STATUS_LABEL.closed },
-  { value: "read_only", label: CONVERSATION_STATUS_LABEL.read_only },
-];
-
-const statusColor = (status: string) =>
-  status === "open" ? "success" : status === "closed" ? "default" : "warning";
-
 const Chats = () => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -57,7 +46,6 @@ const Chats = () => {
   const isMdDown = useMediaQuery(theme.breakpoints.down("md"));
   const search = useQuerySearchParam();
   const [type, setType] = useState("");
-  const [status, setStatus] = useState("");
 
   const {
     data,
@@ -66,7 +54,7 @@ const Chats = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = queries.GetConversations({ search, type, status });
+  } = queries.GetConversations({ search, type });
 
   const conversations = useMemo(
     () => (data?.pages ?? []).flatMap((page) => page.data),
@@ -93,36 +81,20 @@ const Chats = () => {
     >
       <Stack gap={1.5} p={1.5} position="sticky" top={0} bgcolor="white" zIndex={1}>
         <SearchFilter label="بحث في الرسائل" />
-        <Stack direction="row" gap={1}>
-          <TextField
-            select
-            size="small"
-            fullWidth
-            label="النوع"
-            value={type}
-            onChange={(event) => setType(event.target.value)}
-          >
-            {TYPE_OPTIONS.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-          <TextField
-            select
-            size="small"
-            fullWidth
-            label="الحالة"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-          >
-            {STATUS_OPTIONS.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Stack>
+        <TextField
+          select
+          size="small"
+          fullWidth
+          label="النوع"
+          value={type}
+          onChange={(event) => setType(event.target.value)}
+        >
+          {TYPE_OPTIONS.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </TextField>
       </Stack>
       <Divider />
 
@@ -206,14 +178,6 @@ const Chats = () => {
                         label={
                           CONVERSATION_TYPE_LABEL[conversation.type] ??
                           conversation.type
-                        }
-                      />
-                      <Chip
-                        size="small"
-                        color={statusColor(conversation.status)}
-                        label={
-                          CONVERSATION_STATUS_LABEL[conversation.status] ??
-                          conversation.status
                         }
                       />
                     </Stack>
