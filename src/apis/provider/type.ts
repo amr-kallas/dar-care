@@ -16,7 +16,10 @@ export type IAdminProvider = {
   years_of_experience: number;
   bio: string;
   profile_image: string | null;
+  identity_image: string | null;
   status: string;
+  verification_status: IProviderVerificationStatus;
+  rejection_reason: string | null;
   rating_avg: string;
   created_at: string;
   updated_at: string;
@@ -53,4 +56,11 @@ export type IGetAdminProvidersParams = {
 
 export type IUpdateProviderStatusBody = {
   status: string;
+};
+
+export type IProviderVerificationStatus = "pending" | "approved" | "rejected";
+
+export type IUpdateProviderVerificationBody = {
+  verification_status: IProviderVerificationStatus;
+  rejection_reason?: string;
 };

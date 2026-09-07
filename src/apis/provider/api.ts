@@ -6,6 +6,7 @@ import {
   IAdminProvidersResponse,
   IGetAdminProvidersParams,
   IUpdateProviderStatusBody,
+  IUpdateProviderVerificationBody,
 } from "./type";
 
 const API = {
@@ -43,6 +44,16 @@ const API = {
   ) => {
     const { data } = await axios.patch(
       API_ROUTES.ADMIN.UPDATE_PROVIDER_STATUS(id),
+      body
+    );
+    return data;
+  },
+  updateProviderVerification: async (
+    id: string,
+    body: IUpdateProviderVerificationBody
+  ) => {
+    const { data } = await axios.patch(
+      API_ROUTES.ADMIN.UPDATE_PROVIDER_VERIFICATION(id),
       body
     );
     return data;

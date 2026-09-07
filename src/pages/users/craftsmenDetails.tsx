@@ -2,14 +2,14 @@ import type { IAdminProvider } from "@apis/provider/type";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import LabelValue from "@components/typography/labelValue";
-import { Grid, Stack } from "@mui/material";
+import { Box, Grid, Link, Stack, Typography } from "@mui/material";
 import DialogTitle from "@components/forms/dialogTitle";
 import DividedStack, {
   DividedStackProps,
 } from "@components/layout/dividedStack";
 import useDetailsSearchParams from "@hooks/useDetailsSearchParams";
 import { FC, useMemo } from "react";
-import { toisoString } from "@utils/function-helper";
+import { storageUrl, toisoString } from "@utils/function-helper";
 
 const dividedStackProps: DividedStackProps = {
   gap: 2,
@@ -40,6 +40,13 @@ function statusLabel(status: string) {
   return status;
 }
 
+function verificationLabel(status: IAdminProvider["verification_status"]) {
+  if (status === "approved") return "مقبول";
+  if (status === "rejected") return "مرفوض";
+  if (status === "pending") return "قيد المراجعة";
+  return "_";
+}
+
 export const CraftsmenDetails: FC<Props> = ({ records }) => {
   const { id, isActive, clearDetailsParams } = useDetailsSearchParams();
 
@@ -47,6 +54,8 @@ export const CraftsmenDetails: FC<Props> = ({ records }) => {
     () => records.find((r) => String(r.id) === id),
     [records, id]
   );
+
+  const identityImage = storageUrl(row?.identity_image);
 
   const handleClose = () => {
     clearDetailsParams();
@@ -87,7 +96,44 @@ export const CraftsmenDetails: FC<Props> = ({ records }) => {
                 <LabelValue label={"الحالة"}>
                   {statusLabel(row.status)}
                 </LabelValue>
+                <LabelValue label={"حالة التوثيق"}>
+                  {verificationLabel(row.verification_status)}
+                </LabelValue>
+                {row.verification_status === "rejected" && (
+                  <LabelValue label={"سبب الرفض"}>
+                    {row.rejection_reason || "_"}
+                  </LabelValue>
+                )}
               </DividedStack>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography color="primary" fontWeight={600} mb={1}>
+                صورة الهوية
+              </Typography>
+              {identityImage ? (
+                // Opens the original file in a new tab so the admin can zoom in
+                // on details the thumbnail is too small to show.
+                <Link href={identityImage} target="_blank" rel="noopener">
+                  <Box
+                    component="img"
+                    src={identityImage}
+                    alt="صورة هوية الحرفي"
+                    sx={{
+                      width: "100%",
+                      maxHeight: 320,
+                      objectFit: "contain",
+                      borderRadius: 1,
+                      border: "1px solid",
+                      borderColor: "grey.300",
+                      bgcolor: "grey.50",
+                    }}
+                  />
+                </Link>
+              ) : (
+                <Typography color="text.secondary">
+                  لم يرفع الحرفي صورة هوية.
+                </Typography>
+              )}
             </Grid>
           </Grid>
         ) : (

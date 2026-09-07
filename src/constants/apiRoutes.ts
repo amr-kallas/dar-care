@@ -16,6 +16,8 @@ let API_ROUTES = {
     GET_PROVIDERS: "admin/providers",
     DELETE_PROVIDER: (id: string) => `admin/providers/${id}`,
     UPDATE_PROVIDER_STATUS: (id: string) => `admin/providers/${id}/status`,
+    UPDATE_PROVIDER_VERIFICATION: (id: string) =>
+      `admin/providers/${id}/verification-status`,
     GET_CATEGORIES: "admin/categories",
     UPDATE_CATEGORY: (id: string) => `admin/categories/${id}`,
     DELETE_CATEGORY: (id: string) => `admin/categories/${id}`,
