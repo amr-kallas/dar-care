@@ -247,6 +247,7 @@ const Craftsmen = () => {
                     onActivate={() => activate(String(row.id))}
                     onApprove={() => approve(String(row.id))}
                     onReject={() => reject(String(row.id))}
+                    onRemove={() => remove(String(row.id))}
                   />
                 </ButtonsStack>
               </TableCell>

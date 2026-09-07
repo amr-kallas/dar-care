@@ -4,6 +4,8 @@ import BlockIcon from "@mui/icons-material/Block";
 import CheckIcon from "@mui/icons-material/Check";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { Divider } from "@mui/material";
 import {
   IconButton,
   ListItemIcon,
@@ -22,6 +24,7 @@ type Props = {
   isActive: boolean;
   onApprove: () => void;
   onReject: () => void;
+  onRemove: () => void;
   /** Verification actions are hidden once they no longer apply. */
   showApprove?: boolean;
   showReject?: boolean;
@@ -34,6 +37,7 @@ const CraftsmanActionsMenu: FC<Props> = ({
   isActive,
   onApprove,
   onReject,
+  onRemove,
   showApprove = true,
   showReject = true,
 }) => {
@@ -114,6 +118,13 @@ const CraftsmanActionsMenu: FC<Props> = ({
             <ListItemText>رفض الحرفي</ListItemText>
           </MenuItem>
         )}
+        <Divider sx={{ my: 0.5 }} />
+        <MenuItem onClick={handleSelect(onRemove)}>
+          <ListItemIcon>
+            <DeleteOutlineIcon fontSize="small" sx={{ color: "error.main" }} />
+          </ListItemIcon>
+          <ListItemText sx={{ color: "error.main" }}>حذف الحرفي</ListItemText>
+        </MenuItem>
       </Menu>
     </>
   );
