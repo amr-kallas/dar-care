@@ -37,9 +37,11 @@ export type IAdminRating = {
   comment: string;
   created_at: string;
   updated_at: string;
-  user: IRatingUser;
-  provider: IRatingProvider;
-  service_request: IRatingServiceRequest;
+  // Relations come back null when the related record was soft-deleted, so
+  // every read of them has to be guarded.
+  user: IRatingUser | null;
+  provider: IRatingProvider | null;
+  service_request: IRatingServiceRequest | null;
 };
 
 export type IAdminRatingsPaginated = {

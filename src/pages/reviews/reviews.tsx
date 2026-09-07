@@ -51,8 +51,8 @@ const ReviewDetailsDialog = ({ rows }: { rows: IAdminRating[] }) => {
           <Typography>لا توجد بيانات.</Typography>
         ) : (
           <Stack gap={1}>
-            <Typography>المقيّم: {row.user.name}</Typography>
-            <Typography>الحرفي: {row.provider.name}</Typography>
+            <Typography>المقيّم: {row.user?.name ?? "_"}</Typography>
+            <Typography>الحرفي: {row.provider?.name ?? "_"}</Typography>
             <Typography>رقم الطلب: {row.service_request_id}</Typography>
             <Typography>
               التقييم: <Rating value={row.rating} readOnly size="small" />
@@ -113,8 +113,8 @@ const Reviews = () => {
           {(data?.data as IAdminRating[] | undefined)?.map((row, index) => (
             <TableRowStriped key={row.id}>
               <TableCell>{page * PAGE_SIZE + index + 1}</TableCell>
-              <TableCell>{row.user.name}</TableCell>
-              <TableCell>{row.provider.name}</TableCell>
+              <TableCell>{row.user?.name ?? "_"}</TableCell>
+              <TableCell>{row.provider?.name ?? "_"}</TableCell>
               <TableCell>{row.service_request_id}</TableCell>
               <TableCell>
                 <Rating size="small" value={row.rating} readOnly />
