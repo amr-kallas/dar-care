@@ -107,15 +107,6 @@ const CraftsmanActionsMenu: FC<Props> = ({
           },
         ]
       : []),
-    {
-      key: "remove",
-      label: "حذف الحرفي",
-      icon: (
-        <DeleteOutlineIcon fontSize="small" sx={{ color: "error.main" }} />
-      ),
-      onClick: onRemove,
-      color: "error.main",
-    },
   ] as {
     key: string;
     label: string;
@@ -146,7 +137,7 @@ const CraftsmanActionsMenu: FC<Props> = ({
         // overflow:hidden clips the row hover fill to the paper's rounded
         // corners, which otherwise leaves a gap under the last row.
         slotProps={{ paper: { sx: { minWidth: 210, overflow: "hidden" } } }}
-        MenuListProps={{ sx: { pt: 1, pb: 0 } }}
+        MenuListProps={{ sx: { pt: 1, pb: 1 } }}
       >
         {items.map((item, index) => [
           index > 0 && <Divider key={`${item.key}-divider`} sx={{ my: 0 }} />,
