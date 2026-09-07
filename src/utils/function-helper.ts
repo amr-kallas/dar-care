@@ -36,3 +36,22 @@ export function storageUrl(path?: string | null): string | undefined {
   if (/^https?:\/\//i.test(path)) return path;
   return `${BACKEND_BASE_URL}/storage/${path.replace(/^\/+/, "")}`;
 }
+
+/**
+ * Pulls the message the API sent with a failed request.
+ *
+ * Laravel answers a rejected action with `{ message, errors }`, and that
+ * message is the only place the reason is stated — e.g. why a craftsman
+ * cannot be stopped. Falls back to the generic text when the request never
+ * reached the server.
+ */
+export function apiErrorMessage(error: unknown, fallback: string): string {
+  const data = (error as { response?: { data?: unknown } })?.response?.data;
+
+  if (data && typeof data === "object") {
+    const message = (data as { message?: unknown }).message;
+    if (typeof message === "string" && message.trim()) return message;
+  }
+
+  return fallback;
+}

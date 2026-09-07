@@ -1,3 +1,4 @@
+import useErrorSnackbar from "@hooks/useErrorSnackbar";
 import useStopSearchParams from "@hooks/useStopSearchParams";
 import useSuccessSnackbar from "@hooks/useSuccessSnackbar";
 import { DialogContent } from "@mui/material";
@@ -11,6 +12,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { FC } from "react";
+import { apiErrorMessage } from "@utils/function-helper";
 import Loading from "../feedbacks/loading";
 import DialogTitle from "./dialogTitle";
 
@@ -25,6 +27,8 @@ type Props = {
   successMessage?: string;
   /** Palette key used for the confirm button (default: warning). */
   confirmColor?: "warning" | "success";
+  /** Shown when the request fails without a message from the API. */
+  errorMessage?: string;
 };
 
 const StopDialog: FC<Props> = ({
@@ -36,6 +40,7 @@ const StopDialog: FC<Props> = ({
   confirmLabel = "إيقاف",
   successMessage = "تم الإيقاف بنجاح",
   confirmColor = "warning",
+  errorMessage = "تعذر تنفيذ العملية، حاول مرة أخرى.",
 }) => {
   const queryClient = useQueryClient();
   const { id, isActive, clearStopParams } = useStopSearchParams(
@@ -43,6 +48,7 @@ const StopDialog: FC<Props> = ({
     stopModeKey
   );
   const successSnackbar = useSuccessSnackbar();
+  const errorSnackbar = useErrorSnackbar();
 
   const handleClose = () => {
     clearStopParams();
@@ -57,6 +63,13 @@ const StopDialog: FC<Props> = ({
           );
         }
         successSnackbar(successMessage);
+        handleClose();
+      },
+      // The API refuses some transitions — stopping a craftsman who still has
+      // an unfinished request, for one — and states the reason in the
+      // response. Without this the dialog sat there silently on a rejection.
+      onError: (error) => {
+        errorSnackbar(apiErrorMessage(error, errorMessage));
         handleClose();
       },
     });
