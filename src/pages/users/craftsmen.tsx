@@ -68,10 +68,15 @@ function canReject(verificationStatus: IProviderVerificationStatus) {
   return verificationStatus === "pending";
 }
 
+// `busy` is the craftsman switching himself off from the app; `suspended`
+// is an admin decision. Both hide him from customers, but only one of them
+// the admin can undo, so they must not read the same. Without the `busy`
+// case this fell through and printed the raw English word.
 function statusLabel(status: string) {
   if (status === "available") return "نشط";
+  if (status === "busy") return "غير متاح (أوقفه الحرفي)";
   if (status === "unavailable") return "متوقف";
-  if (status === "suspended") return "متوقف";
+  if (status === "suspended") return "متوقف (إيقاف إداري)";
   return status;
 }
 
